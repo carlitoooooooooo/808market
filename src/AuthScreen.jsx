@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useAuth, AVATAR_COLORS } from "./AuthContext.jsx";
-import Background from "./Background.jsx";
+import Logo from "./Logo.jsx";
 
 export default function AuthScreen() {
   const { login, signup } = useAuth();
@@ -28,11 +28,13 @@ export default function AuthScreen() {
 
   return (
     <div className="auth-screen">
-      <Background />
+      {/* Animated background */}
+      <div className="app-bg" />
+      <div className="auth-bg-splatter" />
 
       <div className="auth-logo">
-        <span className="logo-text">ThatShitHard</span>
-        <div className="logo-sub">swipe. rate. discover.</div>
+        <Logo />
+        <div className="logo-sub">The Beat Marketplace</div>
       </div>
 
       <div className="auth-card">
@@ -105,13 +107,13 @@ export default function AuthScreen() {
 
           {error && <div className="auth-error">{error}</div>}
 
-          <button className="auth-submit btn-bevel btn-pink" type="submit" disabled={loading}>
-            {loading ? "..." : mode === "login" ? "LET ME IN →" : "CREATE ACCOUNT →"}
+          <button className="auth-submit btn-primary" type="submit" disabled={loading}>
+            {loading ? "..." : mode === "login" ? "Enter 808market →" : "Create Account →"}
           </button>
         </form>
       </div>
 
-      <div className="auth-footer">🔥 rate the underground 🔥</div>
+      <div className="auth-footer">swipe. cop. sell. 🎵</div>
     </div>
   );
 }

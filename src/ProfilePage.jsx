@@ -16,7 +16,6 @@ function getTopReaction(counts) {
   return top;
 }
 
-// Pinned track storage (localStorage is fine for UI prefs)
 function getPinnedTrack(username) {
   try { return JSON.parse(localStorage.getItem(`ds_pinned_${username}`)); } catch { return null; }
 }
@@ -33,11 +32,8 @@ export default function ProfilePage({ userVotes, tracks }) {
   const [snippetConfirmed, setSnippetConfirmed] = useState(null);
   const [pinnedId, setPinnedId] = useState(() => getPinnedTrack(currentUser?.username));
 
-  // Supabase-loaded uploads
   const [myUploads, setMyUploads] = useState([]);
   const [uploadsLoading, setUploadsLoading] = useState(true);
-
-  // Reaction counts per upload track
   const [uploadReactions, setUploadReactions] = useState({});
 
   useEffect(() => {
@@ -57,19 +53,19 @@ export default function ProfilePage({ userVotes, tracks }) {
             artist: t.artist,
             genre: t.genre,
             coverUrl: t.cover_url || "",
-            hards: t.hards || 0,
-            trash: t.trash || 0,
+            cops: t.cops || t.hards || 0,
+            passes: t.passes || t.trash || 0,
+            price: t.price || 0,
+            licenseType: t.license_type || "lease",
             listedAt: t.listed_at,
           }));
           setMyUploads(mapped);
 
-          // Load reactions for each upload
           mapped.forEach(async (track) => {
             const { data: rxData } = await supabase
               .from('reactions')
               .select('emoji')
               .eq('track_id', track.id);
-
             if (rxData) {
               const counts = {};
               rxData.forEach(r => { counts[r.emoji] = (counts[r.emoji] || 0) + 1; });
@@ -83,35 +79,31 @@ export default function ProfilePage({ userVotes, tracks }) {
 
   if (!currentUser) return null;
 
-  // Compute stats from votes (passed from App.jsx / Supabase)
   const voteEntries = Object.entries(userVotes || {});
   const seen = voteEntries.length;
-  const hards = voteEntries.filter(([, v]) => v === "right").length;
-  const trashCount = voteEntries.filter(([, v]) => v === "left").length;
-  const hardPct = seen > 0 ? Math.round((hards / seen) * 100) : 0;
-  const tasteScore = hards * 10 + seen * 1;
+  const copsGiven = voteEntries.filter(([, v]) => v === "right").length;
+  const passCount = voteEntries.filter(([, v]) => v === "left").length;
+  const copPct = seen > 0 ? Math.round((copsGiven / seen) * 100) : 0;
+  const tasteScore = copsGiven * 10 + seen * 1;
 
-  // Hard'd genres
-  const hardedTrackIds = voteEntries.filter(([, v]) => v === "right").map(([id]) => String(id));
-  const hardedTracks = (tracks || []).filter(t => hardedTrackIds.includes(String(t.id)));
-  const hardedGenres = [...new Set(hardedTracks.map(t => t.genre))];
+  const coppedTrackIds = voteEntries.filter(([, v]) => v === "right").map(([id]) => String(id));
+  const coppedTracks = (tracks || []).filter(t => coppedTrackIds.includes(String(t.id)));
+  const coppedGenres = [...new Set(coppedTracks.map(t => t.genre))];
 
-  // Badge stats
   const badgeStats = {
-    totalHards: hards,
-    totalTrash: trashCount,
+    totalHards: copsGiven,
+    totalTrash: passCount,
     totalRated: seen,
-    uniqueGenres: hardedGenres.length,
+    uniqueGenres: coppedGenres.length,
   };
 
-  // Taste Match against mock users
   function calcMatch(otherVotes) {
-    const otherHardIds = Object.entries(otherVotes)
+    const otherCopIds = Object.entries(otherVotes)
       .filter(([, v]) => v === "right")
       .map(([id]) => String(id));
-    const otherHardTracks = (tracks || []).filter(t => otherHardIds.includes(String(t.id)));
-    const otherGenres = new Set(otherHardTracks.map(t => t.genre));
-    const myGenres = new Set(hardedGenres);
+    const otherCopTracks = (tracks || []).filter(t => otherCopIds.includes(String(t.id)));
+    const otherGenres = new Set(otherCopTracks.map(t => t.genre));
+    const myGenres = new Set(coppedGenres);
     const shared = [...myGenres].filter(g => otherGenres.has(g));
     const total = new Set([...myGenres, ...otherGenres]).size;
     const pct = total > 0 ? Math.round((shared.length / total) * 100) : 0;
@@ -143,6 +135,9 @@ export default function ProfilePage({ userVotes, tracks }) {
   const pinnedTrack = pinnedId
     ? (tracks || []).find(t => t.id === pinnedId) || myUploads.find(t => t.id === pinnedId)
     : null;
+
+  // Total cops received on all uploads
+  const totalCopsReceived = myUploads.reduce((sum, t) => sum + (t.cops || 0), 0);
 
   return (
     <div className="profile-page">
@@ -180,18 +175,18 @@ export default function ProfilePage({ userVotes, tracks }) {
                 ))}
               </div>
               <div style={{ display: "flex", gap: "8px", marginTop: "8px" }}>
-                <button className="btn-bevel btn-pink" onClick={saveEdit} style={{ fontSize: "10px", padding: "6px 12px" }}>
-                  SAVE
+                <button className="btn-primary" onClick={saveEdit} style={{ fontSize: "13px", padding: "8px 16px" }}>
+                  Save
                 </button>
-                <button className="btn-bevel" onClick={() => setEditing(false)} style={{ fontSize: "10px", padding: "6px 12px" }}>
-                  CANCEL
+                <button className="btn-secondary" onClick={() => setEditing(false)} style={{ fontSize: "13px", padding: "8px 16px" }}>
+                  Cancel
                 </button>
               </div>
             </div>
           )}
         </div>
         {!editing && (
-          <button className="profile-edit-btn btn-bevel" onClick={() => setEditing(true)}>
+          <button className="profile-edit-btn" onClick={() => setEditing(true)}>
             ✏️
           </button>
         )}
@@ -204,19 +199,23 @@ export default function ProfilePage({ userVotes, tracks }) {
           <div className="stat-label">rated</div>
         </div>
         <div className="stat-box">
-          <div className="stat-value" style={{ color: "var(--pink)" }}>{hardPct}%</div>
-          <div className="stat-label">hard %</div>
+          <div className="stat-value" style={{ color: "var(--cyan)" }}>{copPct}%</div>
+          <div className="stat-label">cop %</div>
         </div>
         <div className="stat-box">
-          <div className="stat-value" style={{ color: "var(--yellow)" }}>{tasteScore}</div>
-          <div className="stat-label">taste score</div>
+          <div className="stat-value" style={{ color: "var(--green)" }}>{totalCopsReceived}</div>
+          <div className="stat-label">cops recv'd</div>
+        </div>
+        <div className="stat-box">
+          <div className="stat-value" style={{ color: "var(--purple)" }}>{myUploads.length}</div>
+          <div className="stat-label">beats listed</div>
         </div>
       </div>
 
       {/* Pinned Track */}
       {pinnedTrack && (
         <div className="profile-section">
-          <div className="section-title">📌 PINNED TRACK</div>
+          <div className="section-title">📌 PINNED BEAT</div>
           <div className="pinned-track-card">
             <div
               className="pinned-track-thumb"
@@ -225,7 +224,7 @@ export default function ProfilePage({ userVotes, tracks }) {
             <div className="pinned-track-info">
               <div className="pinned-track-title">{pinnedTrack.title}</div>
               <div className="pinned-track-artist">{pinnedTrack.artist}</div>
-              <span className="genre-tag" style={{ fontSize: "7px", padding: "2px 6px" }}>{pinnedTrack.genre}</span>
+              <span className="genre-tag" style={{ fontSize: "10px", padding: "2px 8px" }}>{pinnedTrack.genre}</span>
             </div>
             <div className="pinned-indicator">📌</div>
           </div>
@@ -233,17 +232,17 @@ export default function ProfilePage({ userVotes, tracks }) {
       )}
 
       {/* Taste tags */}
-      {hards > 0 && (
+      {copsGiven > 0 && (
         <div className="profile-section">
           <div className="section-title">🎯 YOUR TASTE</div>
           <div className="taste-tags">
-            {hards > 0 && <span className="taste-tag">🔥 Trendsetter</span>}
-            {hardPct > 70 && <span className="taste-tag">💎 Picky AF</span>}
-            {hardPct < 30 && <span className="taste-tag">💀 Hard to Please</span>}
+            {copsGiven > 0 && <span className="taste-tag">🛒 Collector</span>}
+            {copPct > 70 && <span className="taste-tag">💎 Picky AF</span>}
+            {copPct < 30 && <span className="taste-tag">🎯 Discerning</span>}
             {seen > 10 && <span className="taste-tag">👀 Deep Diver</span>}
             {tasteScore > 100 && <span className="taste-tag">⚡ Taste God</span>}
-            {hardedGenres.map((g) => (
-              <span key={g} className="taste-tag" style={{ borderColor: "var(--blue)", color: "var(--blue)" }}>{g}</span>
+            {coppedGenres.map((g) => (
+              <span key={g} className="taste-tag" style={{ borderColor: "var(--purple)", color: "var(--purple)" }}>{g}</span>
             ))}
           </div>
         </div>
@@ -272,8 +271,8 @@ export default function ProfilePage({ userVotes, tracks }) {
       {/* Taste Match */}
       <div className="profile-section">
         <div className="section-title">💞 TASTE MATCH</div>
-        {hardedGenres.length === 0 ? (
-          <div className="taste-match-empty">Hard some tracks to see your matches!</div>
+        {coppedGenres.length === 0 ? (
+          <div className="taste-match-empty">Cop some beats to see your matches!</div>
         ) : (
           <div className="taste-match-list">
             {tasteMatches.map((u) => (
@@ -309,22 +308,24 @@ export default function ProfilePage({ userVotes, tracks }) {
         )}
       </div>
 
-      {/* Uploads */}
+      {/* My Beats */}
       <div className="profile-section">
-        <div className="section-title">📤 MY UPLOADS</div>
+        <div className="section-title">🎵 MY BEATS</div>
 
         {uploadsLoading ? (
-          <div style={{ color: "var(--pink)", fontSize: "12px", padding: "8px 0" }}>loading uploads...</div>
+          <div style={{ color: "var(--cyan)", fontSize: "13px", padding: "8px 0", fontFamily: "var(--font-body)" }}>loading beats...</div>
         ) : myUploads.length === 0 ? (
-          <div style={{ color: "#888", fontSize: "12px", padding: "8px 0" }}>no uploads yet. drop something!</div>
+          <div style={{ color: "var(--text-dim)", fontSize: "13px", padding: "8px 0", fontFamily: "var(--font-body)" }}>no beats listed yet. drop something!</div>
         ) : (
           <div className="uploads-list">
             {myUploads.map((track) => {
-              const total = (track.hards || 0) + (track.trash || 0);
-              const hp = total > 0 ? Math.round((track.hards / total) * 100) : 0;
+              const total = (track.cops || 0) + (track.passes || 0);
+              const hp = total > 0 ? Math.round(((track.cops || 0) / total) * 100) : 0;
               const reactions = uploadReactions[track.id] || {};
               const topRx = getTopReaction(reactions);
               const isPinned = pinnedId === track.id;
+              const price = track.price || 0;
+              const isFree = !price || price === 0;
 
               return (
                 <div key={track.id} className="upload-track-card">
@@ -335,14 +336,17 @@ export default function ProfilePage({ userVotes, tracks }) {
                     />
                     <div className="upload-track-meta">
                       <div className="upload-track-title">{track.title}</div>
-                      <div className="upload-track-genre">
-                        <span className="genre-tag" style={{ fontSize: "7px", padding: "2px 5px" }}>{track.genre}</span>
+                      <div className="upload-track-genre" style={{ display: "flex", gap: "6px", marginTop: "4px", alignItems: "center" }}>
+                        <span className="genre-tag">{track.genre}</span>
+                        <span style={{ fontSize: "12px", fontWeight: 700, fontFamily: "var(--font-head)", color: isFree ? "var(--cyan)" : "var(--green)" }}>
+                          {isFree ? "FREE" : `$${price}`}
+                        </span>
                       </div>
                     </div>
                     <button
                       className={`btn-bevel pin-btn ${isPinned ? "pin-btn--active" : ""}`}
                       onClick={() => handlePin(track.id)}
-                      title={isPinned ? "Unpin" : "Pin this track"}
+                      title={isPinned ? "Unpin" : "Pin this beat"}
                     >
                       {isPinned ? "📌" : "PIN"}
                     </button>
@@ -356,8 +360,12 @@ export default function ProfilePage({ userVotes, tracks }) {
                         <span className="analytics-value">{total}</span>
                       </div>
                       <div className="analytics-item">
-                        <span className="analytics-label">hard %</span>
+                        <span className="analytics-label">cop %</span>
                         <span className="analytics-value" style={{ color: "var(--green)" }}>{hp}%</span>
+                      </div>
+                      <div className="analytics-item">
+                        <span className="analytics-label">cops</span>
+                        <span className="analytics-value" style={{ color: "var(--cyan)" }}>{track.cops || 0}</span>
                       </div>
                       {topRx && (
                         <div className="analytics-item">
@@ -373,8 +381,8 @@ export default function ProfilePage({ userVotes, tracks }) {
                       />
                     </div>
                     <div className="analytics-ratio-labels">
-                      <span style={{ color: "var(--green)" }}>🔥 {track.hards || 0}</span>
-                      <span style={{ color: "#ff4444" }}>💀 {track.trash || 0}</span>
+                      <span style={{ color: "var(--green)" }}>🛒 {track.cops || 0} cops</span>
+                      <span style={{ color: "var(--red)" }}>💨 {track.passes || 0} passes</span>
                     </div>
                   </div>
                 </div>
@@ -384,11 +392,11 @@ export default function ProfilePage({ userVotes, tracks }) {
         )}
 
         <button
-          className="btn-bevel btn-yellow"
-          style={{ marginTop: "12px", fontSize: "10px", padding: "8px 16px", display: "block", width: "100%" }}
+          className="btn-primary"
+          style={{ marginTop: "14px", fontSize: "14px", padding: "12px 24px", display: "block", width: "100%" }}
           onClick={() => setShowSnippetPicker(true)}
         >
-          + UPLOAD TRACK
+          + Upload Beat
         </button>
 
         {snippetConfirmed && (
@@ -400,8 +408,8 @@ export default function ProfilePage({ userVotes, tracks }) {
 
       {/* Logout */}
       <div style={{ padding: "16px", textAlign: "center" }}>
-        <button className="btn-bevel btn-trash" onClick={logout} style={{ fontSize: "10px", padding: "8px 16px" }}>
-          LOGOUT
+        <button className="btn-secondary" onClick={logout} style={{ fontSize: "14px", padding: "10px 24px", color: "var(--red)", borderColor: "rgba(255,51,102,0.3)" }}>
+          Log Out
         </button>
       </div>
 

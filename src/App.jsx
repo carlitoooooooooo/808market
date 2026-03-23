@@ -5,11 +5,9 @@ import AuthScreen from "./AuthScreen.jsx";
 import SwipeCard from "./SwipeCard.jsx";
 import LeaderboardPage from "./LeaderboardPage.jsx";
 import ProfilePage from "./ProfilePage.jsx";
-import ChartsPage from "./ChartsPage.jsx";
 import TrackModal from "./TrackModal.jsx";
-import Background from "./Background.jsx";
 import ReactionPicker from "./ReactionPicker.jsx";
-import GraffitiLogo from "./GraffitiLogo.jsx";
+import Logo from "./Logo.jsx";
 import TrackUpload from "./TrackUpload.jsx";
 import NotificationsPage from "./NotificationsPage.jsx";
 import UserProfilePage from "./UserProfilePage.jsx";
@@ -20,9 +18,8 @@ import { dbUpsert, dbSelect, dbUpdate, dbInsert } from "./dbHelper.js";
 
 const TABS = [
   { id: "discover", label: "🎵 Discover" },
-  { id: "leaderboard", label: "🔥 Board" },
-  { id: "charts", label: "📊 Charts" },
-  { id: "notifications", label: "🔔" },
+  { id: "leaderboard", label: "🔥 Top Beats" },
+  { id: "notifications", label: "🔔 Notifs" },
   { id: "profile", label: "👤 Profile" },
 ];
 
@@ -52,37 +49,21 @@ function mapTrack(t) {
     uploadedBy: t.uploaded_by_username || t.uploaded_by || "unknown",
     uploadedById: t.uploaded_by || null,
     listedAt: t.listed_at || new Date().toISOString(),
-    hards: t.hards || 0,
-    trash: t.trash || 0,
+    cops: t.cops || t.hards || 0,
+    passes: t.passes || t.trash || 0,
+    price: t.price || 0,
+    licenseType: t.license_type || "lease",
+    beatKey: t.beat_key || "",
+    paymentLink: t.payment_link || "",
     soundcloudUrl: t.soundcloud_url || null,
     embedUrl: t.embed_url || null,
     isSoundCloud: !!(t.soundcloud_url),
   };
 }
 
-// Map tracks.js camelCase to DB snake_case for seeding
-function mapTrackToDb(t) {
-  return {
-    id: t.id,
-    title: t.title,
-    artist: t.artist,
-    genre: t.genre,
-    bpm: t.bpm || 0,
-    cover_url: t.coverUrl || "",
-    audio_url: t.audioUrl || "",
-    snippet_start: t.snippetStart || 0,
-    tags: t.tags || [],
-    uploaded_by: null,
-    uploaded_by_username: "tsh_admin",
-    hards: t.hards || 0,
-    trash: t.trash || 0,
-    listed_at: t.listedAt || new Date().toISOString(),
-  };
-}
-
 function Toast({ message, visible }) {
   return (
-    <div className={`toast ${visible ? "toast--visible" : ""} ${message?.includes("HARD") ? "toast--hard" : "toast--trash"}`}>
+    <div className={`toast ${visible ? "toast--visible" : ""} ${message?.includes("COP") ? "toast--hard" : "toast--trash"}`}>
       {message}
     </div>
   );
@@ -106,54 +87,43 @@ export default function App() {
   const toastTimer = useRef(null);
   const notifTimer = useRef(null);
 
-  // Load tracks — always fetch fresh from DB, no cache
+  // Load tracks
   useEffect(() => {
     async function loadTracks() {
       setTracksLoading(true);
-      // Clear any stale cache
       localStorage.removeItem('tsh_tracks_cache');
       try {
-        // Fetch fresh tracks — no seeding, only real uploads
         const { data, error } = await supabase.from('tracks').select('*').order('listed_at', { ascending: false });
         if (error) throw error;
-
         const mapped = (data || []).map(mapTrack);
         setTracks(mapped);
       } catch (err) {
         console.error('Load tracks error:', err);
-        // Fall back to static data
-        setTracks(tracksData.map(t => ({ ...t, coverUrl: t.coverUrl, audioUrl: t.audioUrl, listedAt: t.listedAt, uploadedBy: t.uploadedBy })));
+        setTracks(tracksData.map(t => ({ ...t, cops: t.hards || 0, passes: t.trash || 0, coverUrl: t.coverUrl, audioUrl: t.audioUrl, listedAt: t.listedAt, uploadedBy: t.uploadedBy })));
       } finally {
         setTracksLoading(false);
       }
     }
-
     loadTracks();
   }, []);
 
   // Load user votes from Supabase when user logs in
   useEffect(() => {
     if (!currentUser) return;
-
     async function loadUserVotes() {
       try {
         const { data, error } = await supabase
           .from('votes')
           .select('track_id, vote')
           .eq('user_id', currentUser.id);
-
         if (error) throw error;
-
         const votesMap = {};
-        (data || []).forEach(v => {
-          votesMap[v.track_id] = v.vote;
-        });
+        (data || []).forEach(v => { votesMap[v.track_id] = v.vote; });
         setUserVotes(votesMap);
       } catch (err) {
         console.error('Load votes error:', err);
       }
     }
-
     loadUserVotes();
   }, [currentUser?.id]);
 
@@ -186,12 +156,9 @@ export default function App() {
     }
   }, [tracks]);
 
-  // Build queue once tracks and votes are loaded
+  // Build queue
   useEffect(() => {
     if (!currentUser || tracksLoading || tracks.length === 0) return;
-
-    // Only filter out tracks the user has voted on — not just "seen"
-    // This ensures uploaded tracks always show up
     const votedIds = new Set(Object.keys(userVotes).map(String));
     const unvoted = tracks.filter(t => !votedIds.has(String(t.id)));
     const shuffled = [...unvoted].sort(() => Math.random() - 0.5);
@@ -216,23 +183,22 @@ export default function App() {
         if (t.id !== track.id) return t;
         return {
           ...t,
-          hards: t.hards + (dir === "right" ? 1 : 0),
-          trash: t.trash + (dir === "left" ? 1 : 0),
+          cops: (t.cops || 0) + (dir === "right" ? 1 : 0),
+          passes: (t.passes || 0) + (dir === "left" ? 1 : 0),
         };
       })
     );
     setQueue(prev => prev.filter(t => t.id !== track.id));
 
-    // Save seen to localStorage
     const seen = loadSeen(currentUser.username);
     if (!seen.includes(track.id)) {
       saveSeen(currentUser.username, [...seen, track.id]);
     }
 
-    showToast(dir === "right" ? "🔥 HARD!" : "💀 TRASH");
+    showToast(dir === "right" ? "🛒 COP IT!" : "💨 PASSED");
     setReactionTarget({ trackId: track.id });
 
-    // Persist vote — use direct REST (dbHelper) to bypass RLS auth issue
+    // Persist vote
     try {
       await dbUpsert('votes', {
         user_id: currentUser.id,
@@ -241,14 +207,15 @@ export default function App() {
       }, 'user_id,track_id');
 
       // Increment the relevant counter on the track
-      const field = dir === "right" ? "hards" : "trash";
+      const field = dir === "right" ? "cops" : "passes";
       const trackRows = await dbSelect('tracks', { id: track.id });
       const trackData = Array.isArray(trackRows) ? trackRows[0] : trackRows;
       if (trackData) {
-        await dbUpdate('tracks', { id: track.id }, { [field]: (trackData[field] || 0) + 1 });
+        const currentVal = trackData[field] || trackData['hards'] || trackData['trash'] || 0;
+        await dbUpdate('tracks', { id: track.id }, { [field]: currentVal + 1 });
       }
 
-      // Send "hard" notification to uploader (not to yourself)
+      // Send "cop" notification to uploader
       if (dir === "right" && track.uploadedBy && track.uploadedBy !== currentUser.username) {
         try {
           await dbInsert('notifications', {
@@ -257,7 +224,7 @@ export default function App() {
             from_username: currentUser.username,
             track_id: track.id,
             track_title: track.title,
-            message: `${currentUser.username} hard'd your track "${track.title}"`,
+            message: `${currentUser.username} copped your beat "${track.title}" 🛒`,
           });
         } catch (err) {
           console.error('Notification insert error:', err);
@@ -265,7 +232,6 @@ export default function App() {
       }
     } catch (err) {
       console.error('Vote save error (DB down, localStorage only):', err);
-      // Optimistic update already applied above — no crash
     }
   }, [currentUser, showToast]);
 
@@ -274,24 +240,22 @@ export default function App() {
   }, [handleSwipe]);
 
   const handleSoundCloudSubmit = useCallback((track) => {
-    // Add to tracks + force it into queue regardless of seen status
     setTracks(prev => [track, ...prev]);
-    setQueue(prev => [track, ...prev]); // always prepend to queue so it shows up first
+    setQueue(prev => [track, ...prev]);
     setShowUpload(false);
-    showToast("🔥 TRACK DROPPED!");
+    showToast("🔥 BEAT LISTED!");
   }, [showToast]);
 
   const handleReactionDismiss = useCallback(() => {
     setReactionTarget(null);
   }, []);
 
-  // Show loading while auth initializes
   if (authLoading) {
     return (
       <div className="app">
-        <Background />
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", color: "var(--pink)", fontSize: "18px", fontFamily: "monospace" }}>
-          LOADING...
+        <div className="app-bg" />
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", color: "var(--cyan)", fontSize: "16px", fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600 }}>
+          Loading...
         </div>
       </div>
     );
@@ -301,7 +265,6 @@ export default function App() {
     return <AuthScreen />;
   }
 
-  // Filter queue by genre
   const filteredQueue = activeGenre === "ALL"
     ? queue
     : queue.filter((t) => t.genre === activeGenre);
@@ -310,16 +273,15 @@ export default function App() {
 
   return (
     <div className="app">
-      <Background />
-      <div className="spray-bg" />
+      <div className="app-bg" />
 
       <header className="app-header">
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <GraffitiLogo />
+          <Logo />
           <span className="beta-tag">BETA</span>
         </div>
         <button className="btn-upload" onClick={() => setShowUpload(true)}>
-          + DROP
+          + LIST BEAT
         </button>
       </header>
 
@@ -342,7 +304,7 @@ export default function App() {
             {tracksLoading ? (
               <div className="empty-queue">
                 <div className="empty-queue__icon">⏳</div>
-                <div className="empty-queue__text">LOADING TRACKS...</div>
+                <div className="empty-queue__text">Loading beats...</div>
               </div>
             ) : tracksError ? (
               <div className="empty-queue">
@@ -357,12 +319,12 @@ export default function App() {
                   {activeGenre === "ALL" ? "You've heard it all!" : `No more ${activeGenre}`}
                 </div>
                 <div className="empty-queue__sub">
-                  {activeGenre === "ALL" ? "Check the leaderboard 🔥" : "Try another genre 👆"}
+                  {activeGenre === "ALL" ? "Check the top beats 🔥" : "Try another genre 👆"}
                 </div>
                 {activeGenre === "ALL" && (
                   <button
-                    className="btn-bevel btn-pink"
-                    style={{ marginTop: "16px" }}
+                    className="btn-primary"
+                    style={{ marginTop: "20px" }}
                     onClick={() => {
                       const shuffled = [...tracks].sort(() => Math.random() - 0.5);
                       setQueue(shuffled);
@@ -370,16 +332,16 @@ export default function App() {
                       setUserVotes({});
                     }}
                   >
-                    🔄 START OVER
+                    🔄 Start Over
                   </button>
                 )}
                 {activeGenre !== "ALL" && (
                   <button
-                    className="btn-bevel btn-yellow"
-                    style={{ marginTop: "16px" }}
+                    className="btn-primary"
+                    style={{ marginTop: "20px" }}
                     onClick={() => setActiveGenre("ALL")}
                   >
-                    SHOW ALL
+                    Show All
                   </button>
                 )}
               </div>
@@ -399,9 +361,9 @@ export default function App() {
 
             {!tracksLoading && !tracksError && filteredQueue.length > 0 && (
               <div className="discover-swipe-hint">
-                <span>← TRASH</span>
-                <span className="hint-count">{filteredQueue.length} left</span>
-                <span>HARD →</span>
+                <span>← Pass</span>
+                <span className="hint-count">{filteredQueue.length} beats</span>
+                <span>Cop It →</span>
               </div>
             )}
           </div>
@@ -409,15 +371,6 @@ export default function App() {
 
         {activeTab === "leaderboard" && (
           <LeaderboardPage
-            tracks={tracks}
-            onVote={handleVoteFromModal}
-            userVotes={userVotes}
-            onViewUser={setViewingUser}
-          />
-        )}
-
-        {activeTab === "charts" && (
-          <ChartsPage
             tracks={tracks}
             onVote={handleVoteFromModal}
             userVotes={userVotes}
@@ -454,7 +407,6 @@ export default function App() {
 
       <Toast message={toast.message} visible={toast.visible} />
 
-      {/* Reaction Picker */}
       {reactionTarget && (
         <ReactionPicker
           trackId={reactionTarget.trackId}
@@ -463,7 +415,6 @@ export default function App() {
         />
       )}
 
-      {/* SoundCloud Upload Modal */}
       {showUpload && (
         <div className="modal-overlay" onClick={() => setShowUpload(false)}>
           <div className="modal-sheet" onClick={e => e.stopPropagation()}>
@@ -475,7 +426,6 @@ export default function App() {
         </div>
       )}
 
-      {/* Deep link: track modal */}
       {deepLinkTrack && (
         <TrackModal
           track={deepLinkTrack}
@@ -486,7 +436,6 @@ export default function App() {
         />
       )}
 
-      {/* User profile overlay */}
       {viewingUser && (
         <UserProfilePage
           username={viewingUser}

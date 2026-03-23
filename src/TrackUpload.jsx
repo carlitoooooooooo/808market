@@ -3,11 +3,17 @@ import { useAuth } from "./AuthContext";
 import { supabase } from "./supabase.js";
 
 const GENRES = ["Hip-Hop", "R&B", "Drill", "Trap", "Afrobeats", "Jersey Club", "Hyperpop", "Indie", "Electronic", "Soul"];
+const LICENSE_TYPES = [
+  { value: "free", label: "Free Download" },
+  { value: "lease", label: "Non-Exclusive Lease" },
+  { value: "exclusive", label: "Exclusive" },
+];
+const KEYS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+const KEY_OPTIONS = ["", ...KEYS.map(k => `${k} Major`), ...KEYS.map(k => `${k} Minor`)];
 const MAX_FILE_MB = 20;
 const SUPABASE_URL = 'https://bkapxykeryzxbqpgjgab.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
 
-// Upload with progress tracking using XMLHttpRequest
 function uploadWithProgress(bucket, path, file, onProgress) {
   return new Promise((resolve, reject) => {
     const url = `${SUPABASE_URL}/storage/v1/object/${bucket}/${path}`;
@@ -34,7 +40,7 @@ function uploadWithProgress(bucket, path, file, onProgress) {
 }
 
 function buildSCEmbedUrl(trackUrl) {
-  return `https://w.soundcloud.com/player/?url=${encodeURIComponent(trackUrl)}&color=%23ff2d78&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=true`;
+  return `https://w.soundcloud.com/player/?url=${encodeURIComponent(trackUrl)}&color=%2300f5ff&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=true`;
 }
 
 function isValidSCUrl(url) {
@@ -50,12 +56,70 @@ function guessFromSCUrl(url) {
   } catch { return { artist: "Unknown", title: "Untitled" }; }
 }
 
+// Shared beat info fields
+function BeatInfoFields({ title, setTitle, artist, setArtist, genre, setGenre, bpm, setBpm, beatKey, setBeatKey, licenseType, setLicenseType, price, setPrice, paymentLink, setPaymentLink, disabled }) {
+  return (
+    <>
+      <div className="sc-upload__field">
+        <label className="sc-upload__label">BEAT TITLE</label>
+        <input className="sc-upload__input" type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="Beat name..." disabled={disabled} />
+      </div>
+      <div className="sc-upload__field">
+        <label className="sc-upload__label">PRODUCER NAME</label>
+        <input className="sc-upload__input" type="text" value={artist} onChange={e => setArtist(e.target.value)} placeholder="Producer..." disabled={disabled} />
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+        <div className="sc-upload__field">
+          <label className="sc-upload__label">GENRE</label>
+          <select className="sc-upload__select" value={genre} onChange={e => setGenre(e.target.value)} disabled={disabled}>
+            {GENRES.map(g => <option key={g} value={g}>{g}</option>)}
+          </select>
+        </div>
+        <div className="sc-upload__field">
+          <label className="sc-upload__label">BPM</label>
+          <input className="sc-upload__input" type="number" value={bpm} onChange={e => setBpm(e.target.value)} placeholder="140" min="40" max="300" disabled={disabled} style={{ width: "100%" }} />
+        </div>
+      </div>
+      <div className="sc-upload__field">
+        <label className="sc-upload__label">KEY</label>
+        <select className="sc-upload__select" value={beatKey} onChange={e => setBeatKey(e.target.value)} disabled={disabled}>
+          <option value="">Unknown</option>
+          {KEY_OPTIONS.filter(k => k).map(k => <option key={k} value={k}>{k}</option>)}
+        </select>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+        <div className="sc-upload__field">
+          <label className="sc-upload__label">PRICE ($)</label>
+          <input className="sc-upload__input" type="number" value={price} onChange={e => setPrice(e.target.value)} placeholder="0 = Free" min="0" step="0.01" disabled={disabled} style={{ width: "100%" }} />
+        </div>
+        <div className="sc-upload__field">
+          <label className="sc-upload__label">LICENSE</label>
+          <select className="sc-upload__select" value={licenseType} onChange={e => setLicenseType(e.target.value)} disabled={disabled}>
+            {LICENSE_TYPES.map(l => <option key={l.value} value={l.value}>{l.label}</option>)}
+          </select>
+        </div>
+      </div>
+      {price > 0 && (
+        <div className="sc-upload__field">
+          <label className="sc-upload__label">PAYMENT LINK</label>
+          <input className="sc-upload__input" type="text" value={paymentLink} onChange={e => setPaymentLink(e.target.value)} placeholder="Cashapp/PayPal/Beatstars link..." disabled={disabled} />
+        </div>
+      )}
+    </>
+  );
+}
+
 // ─── MP3 Upload Tab ───────────────────────────────────────────────
 function MP3Tab({ onSubmit, onCancel }) {
   const { currentUser } = useAuth();
   const [title, setTitle] = useState("");
   const [artist, setArtist] = useState(currentUser?.username || "");
   const [genre, setGenre] = useState("Hip-Hop");
+  const [bpm, setBpm] = useState("");
+  const [beatKey, setBeatKey] = useState("");
+  const [licenseType, setLicenseType] = useState("lease");
+  const [price, setPrice] = useState("");
+  const [paymentLink, setPaymentLink] = useState("");
   const [audioFile, setAudioFile] = useState(null);
   const [coverFile, setCoverFile] = useState(null);
   const [coverPreview, setCoverPreview] = useState(null);
@@ -103,16 +167,28 @@ function MP3Tab({ onSubmit, onCancel }) {
         const coverPath = `${currentUser.id}/cover_${Date.now()}.${coverExt}`;
         try {
           coverUrl = await uploadWithProgress("covers", coverPath, coverFile, (pct) => setUploadPct(pct));
-        } catch {} // cover is optional
+        } catch {}
       }
 
-      setProgress("Saving...");
+      setProgress("Saving beat...");
+      const priceNum = parseFloat(price) || 0;
       const trackPayload = {
-        title: title.trim(), artist: artist.trim() || currentUser.username,
-        genre, bpm: 0, cover_url: coverUrl, audio_url: audioUrl,
-        snippet_start: 0, tags: [genre.toLowerCase()],
+        title: title.trim(),
+        artist: artist.trim() || currentUser.username,
+        genre,
+        bpm: parseInt(bpm) || 0,
+        cover_url: coverUrl,
+        audio_url: audioUrl,
+        snippet_start: 0,
+        tags: [genre.toLowerCase()],
         uploaded_by_username: currentUser.username,
-        hards: 0, trash: 0, listed_at: new Date().toISOString(),
+        cops: 0,
+        passes: 0,
+        listed_at: new Date().toISOString(),
+        price: priceNum,
+        license_type: licenseType,
+        beat_key: beatKey,
+        payment_link: paymentLink.trim(),
       };
       const trackRes = await fetch(`${SUPABASE_URL}/rest/v1/tracks`, {
         method: 'POST',
@@ -125,13 +201,16 @@ function MP3Tab({ onSubmit, onCancel }) {
         body: JSON.stringify(trackPayload),
       });
       const trackJson = await trackRes.json();
-      if (!trackRes.ok) throw new Error(trackJson?.message || trackJson?.error || "Failed to save track");
+      if (!trackRes.ok) throw new Error(trackJson?.message || trackJson?.error || "Failed to save beat");
       const track = Array.isArray(trackJson) ? trackJson[0] : trackJson;
 
-      onSubmit({ id: track.id, title: track.title, artist: track.artist, genre: track.genre,
-        bpm: 0, coverUrl: track.cover_url, audioUrl: track.audio_url, snippetStart: 0,
+      onSubmit({
+        id: track.id, title: track.title, artist: track.artist, genre: track.genre,
+        bpm: track.bpm || 0, coverUrl: track.cover_url, audioUrl: track.audio_url, snippetStart: 0,
         tags: track.tags || [], uploadedBy: track.uploaded_by_username,
-        listedAt: track.listed_at, hards: 0, trash: 0 });
+        listedAt: track.listed_at, cops: 0, passes: 0,
+        price: priceNum, licenseType, beatKey, paymentLink: paymentLink.trim(),
+      });
     } catch (err) {
       setError(err.message);
     } finally { setUploading(false); setProgress(""); }
@@ -156,11 +235,11 @@ function MP3Tab({ onSubmit, onCancel }) {
         <div className="upload-meta">
           <div className="sc-upload__field">
             <label className="sc-upload__label">TITLE</label>
-            <input className="sc-upload__input" type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="Track name..." disabled={uploading} />
+            <input className="sc-upload__input" type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="Beat name..." disabled={uploading} />
           </div>
           <div className="sc-upload__field">
-            <label className="sc-upload__label">ARTIST</label>
-            <input className="sc-upload__input" type="text" value={artist} onChange={e => setArtist(e.target.value)} placeholder="Artist..." disabled={uploading} />
+            <label className="sc-upload__label">PRODUCER</label>
+            <input className="sc-upload__input" type="text" value={artist} onChange={e => setArtist(e.target.value)} placeholder="Producer..." disabled={uploading} />
           </div>
         </div>
       </div>
@@ -171,6 +250,40 @@ function MP3Tab({ onSubmit, onCancel }) {
           {GENRES.map(g => <option key={g} value={g}>{g}</option>)}
         </select>
       </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+        <div className="sc-upload__field">
+          <label className="sc-upload__label">BPM</label>
+          <input className="sc-upload__input" type="number" value={bpm} onChange={e => setBpm(e.target.value)} placeholder="140" min="40" max="300" disabled={uploading} style={{ width: "100%" }} />
+        </div>
+        <div className="sc-upload__field">
+          <label className="sc-upload__label">KEY</label>
+          <select className="sc-upload__select" value={beatKey} onChange={e => setBeatKey(e.target.value)} disabled={uploading}>
+            <option value="">Unknown</option>
+            {KEY_OPTIONS.filter(k => k).map(k => <option key={k} value={k}>{k}</option>)}
+          </select>
+        </div>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+        <div className="sc-upload__field">
+          <label className="sc-upload__label">PRICE ($)</label>
+          <input className="sc-upload__input" type="number" value={price} onChange={e => setPrice(e.target.value)} placeholder="0 = Free" min="0" step="0.01" disabled={uploading} style={{ width: "100%" }} />
+        </div>
+        <div className="sc-upload__field">
+          <label className="sc-upload__label">LICENSE</label>
+          <select className="sc-upload__select" value={licenseType} onChange={e => setLicenseType(e.target.value)} disabled={uploading}>
+            {LICENSE_TYPES.map(l => <option key={l.value} value={l.value}>{l.label}</option>)}
+          </select>
+        </div>
+      </div>
+
+      {parseFloat(price) > 0 && (
+        <div className="sc-upload__field">
+          <label className="sc-upload__label">PAYMENT LINK</label>
+          <input className="sc-upload__input" type="text" value={paymentLink} onChange={e => setPaymentLink(e.target.value)} placeholder="Cashapp/PayPal/Beatstars link..." disabled={uploading} />
+        </div>
+      )}
 
       {error && <div className="sc-upload__error">{error}</div>}
 
@@ -183,8 +296,8 @@ function MP3Tab({ onSubmit, onCancel }) {
         </div>
       )}
 
-      <button className="btn-bevel btn-pink sc-upload__submit" onClick={handleSubmit} disabled={uploading || !audioFile || !title.trim()}>
-        {uploading ? "UPLOADING..." : "🔥 PUT IT ON THE BLOCK"}
+      <button className="sc-upload__submit" onClick={handleSubmit} disabled={uploading || !audioFile || !title.trim()}>
+        {uploading ? "UPLOADING..." : "🛒 LIST THIS BEAT"}
       </button>
     </div>
   );
@@ -197,6 +310,11 @@ function SoundCloudTab({ onSubmit, onCancel }) {
   const [title, setTitle] = useState("");
   const [artist, setArtist] = useState(currentUser?.username || "");
   const [genre, setGenre] = useState("Hip-Hop");
+  const [bpm, setBpm] = useState("");
+  const [beatKey, setBeatKey] = useState("");
+  const [licenseType, setLicenseType] = useState("lease");
+  const [price, setPrice] = useState("");
+  const [paymentLink, setPaymentLink] = useState("");
   const [preview, setPreview] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -215,15 +333,26 @@ function SoundCloudTab({ onSubmit, onCancel }) {
     setSaving(true); setError("");
     try {
       const embedUrl = buildSCEmbedUrl(url);
+      const priceNum = parseFloat(price) || 0;
       const scPayload = {
-        title: title.trim(), artist: artist.trim() || currentUser.username,
-        genre, bpm: 0,
+        title: title.trim(),
+        artist: artist.trim() || currentUser.username,
+        genre,
+        bpm: parseInt(bpm) || 0,
         cover_url: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&q=80",
         audio_url: url,
-        snippet_start: 0, tags: [genre.toLowerCase()],
+        snippet_start: 0,
+        tags: [genre.toLowerCase()],
         uploaded_by_username: currentUser.username,
-        hards: 0, trash: 0, listed_at: new Date().toISOString(),
-        soundcloud_url: url, embed_url: embedUrl,
+        cops: 0,
+        passes: 0,
+        listed_at: new Date().toISOString(),
+        soundcloud_url: url,
+        embed_url: embedUrl,
+        price: priceNum,
+        license_type: licenseType,
+        beat_key: beatKey,
+        payment_link: paymentLink.trim(),
       };
       const scRes = await fetch(`${SUPABASE_URL}/rest/v1/tracks`, {
         method: 'POST',
@@ -236,14 +365,17 @@ function SoundCloudTab({ onSubmit, onCancel }) {
         body: JSON.stringify(scPayload),
       });
       const scJson = await scRes.json();
-      if (!scRes.ok) throw new Error(scJson?.message || scJson?.error || "Failed to save track");
+      if (!scRes.ok) throw new Error(scJson?.message || scJson?.error || "Failed to save beat");
       const track = Array.isArray(scJson) ? scJson[0] : scJson;
 
-      onSubmit({ id: track.id, title: track.title, artist: track.artist, genre: track.genre,
-        bpm: 0, coverUrl: track.cover_url, audioUrl: track.audio_url,
+      onSubmit({
+        id: track.id, title: track.title, artist: track.artist, genre: track.genre,
+        bpm: track.bpm || 0, coverUrl: track.cover_url, audioUrl: track.audio_url,
         soundcloudUrl: url, embedUrl, isSoundCloud: true,
         snippetStart: 0, tags: track.tags || [],
-        uploadedBy: track.uploaded_by_username, listedAt: track.listed_at, hards: 0, trash: 0 });
+        uploadedBy: track.uploaded_by_username, listedAt: track.listed_at, cops: 0, passes: 0,
+        price: priceNum, licenseType, beatKey, paymentLink: paymentLink.trim(),
+      });
     } catch (err) {
       setError(err.message);
     } finally { setSaving(false); }
@@ -255,7 +387,7 @@ function SoundCloudTab({ onSubmit, onCancel }) {
         <input className="sc-upload__input" type="url" placeholder="https://soundcloud.com/artist/track"
           value={url} onChange={e => { setUrl(e.target.value); setPreview(false); setError(""); }}
           onKeyDown={e => e.key === "Enter" && handleLoad()} />
-        <button className="btn-bevel btn-yellow sc-upload__fetch" onClick={handleLoad}>LOAD</button>
+        <button className="sc-upload__fetch" onClick={handleLoad}>LOAD</button>
       </div>
 
       {error && <div className="sc-upload__error">{error}</div>}
@@ -265,24 +397,57 @@ function SoundCloudTab({ onSubmit, onCancel }) {
           <iframe className="sc-embed-iframe" scrolling="no" frameBorder="no" allow="autoplay"
             src={buildSCEmbedUrl(url)} title="SoundCloud preview" style={{ height: "300px" }} />
 
-          <div className="sc-upload__field" style={{ marginTop: "12px" }}>
-            <label className="sc-upload__label">TITLE</label>
-            <input className="sc-upload__input" type="text" value={title} onChange={e => setTitle(e.target.value)} />
-          </div>
-          <div className="sc-upload__field">
-            <label className="sc-upload__label">ARTIST</label>
-            <input className="sc-upload__input" type="text" value={artist} onChange={e => setArtist(e.target.value)} />
-          </div>
-          <div className="sc-upload__field">
-            <label className="sc-upload__label">GENRE</label>
-            <select className="sc-upload__select" value={genre} onChange={e => setGenre(e.target.value)}>
-              {GENRES.map(g => <option key={g} value={g}>{g}</option>)}
-            </select>
+          <div style={{ marginTop: "14px" }}>
+            <div className="sc-upload__field">
+              <label className="sc-upload__label">TITLE</label>
+              <input className="sc-upload__input" type="text" value={title} onChange={e => setTitle(e.target.value)} />
+            </div>
+            <div className="sc-upload__field">
+              <label className="sc-upload__label">PRODUCER</label>
+              <input className="sc-upload__input" type="text" value={artist} onChange={e => setArtist(e.target.value)} />
+            </div>
+            <div className="sc-upload__field">
+              <label className="sc-upload__label">GENRE</label>
+              <select className="sc-upload__select" value={genre} onChange={e => setGenre(e.target.value)}>
+                {GENRES.map(g => <option key={g} value={g}>{g}</option>)}
+              </select>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+              <div className="sc-upload__field">
+                <label className="sc-upload__label">BPM</label>
+                <input className="sc-upload__input" type="number" value={bpm} onChange={e => setBpm(e.target.value)} placeholder="140" style={{ width: "100%" }} />
+              </div>
+              <div className="sc-upload__field">
+                <label className="sc-upload__label">KEY</label>
+                <select className="sc-upload__select" value={beatKey} onChange={e => setBeatKey(e.target.value)}>
+                  <option value="">Unknown</option>
+                  {KEY_OPTIONS.filter(k => k).map(k => <option key={k} value={k}>{k}</option>)}
+                </select>
+              </div>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+              <div className="sc-upload__field">
+                <label className="sc-upload__label">PRICE ($)</label>
+                <input className="sc-upload__input" type="number" value={price} onChange={e => setPrice(e.target.value)} placeholder="0 = Free" min="0" step="0.01" style={{ width: "100%" }} />
+              </div>
+              <div className="sc-upload__field">
+                <label className="sc-upload__label">LICENSE</label>
+                <select className="sc-upload__select" value={licenseType} onChange={e => setLicenseType(e.target.value)}>
+                  {LICENSE_TYPES.map(l => <option key={l.value} value={l.value}>{l.label}</option>)}
+                </select>
+              </div>
+            </div>
+            {parseFloat(price) > 0 && (
+              <div className="sc-upload__field">
+                <label className="sc-upload__label">PAYMENT LINK</label>
+                <input className="sc-upload__input" type="text" value={paymentLink} onChange={e => setPaymentLink(e.target.value)} placeholder="Cashapp/PayPal/Beatstars link..." />
+              </div>
+            )}
           </div>
 
           {error && <div className="sc-upload__error">{error}</div>}
-          <button className="btn-bevel btn-pink sc-upload__submit" onClick={handleSubmit} disabled={saving}>
-            {saving ? "SAVING..." : "🔥 PUT IT ON THE BLOCK"}
+          <button className="sc-upload__submit" onClick={handleSubmit} disabled={saving}>
+            {saving ? "SAVING..." : "🛒 LIST THIS BEAT"}
           </button>
         </div>
       )}
@@ -297,7 +462,8 @@ export default function TrackUpload({ onSubmit, onCancel }) {
   return (
     <div className="sc-upload">
       <div className="sc-upload__header">
-        <h2 className="sc-upload__title">DROP YOUR TRACK</h2>
+        <h2 className="sc-upload__title">List Your Beat</h2>
+        <p className="sc-upload__sub">Upload your beat to the marketplace</p>
       </div>
 
       <div className="upload-tabs">

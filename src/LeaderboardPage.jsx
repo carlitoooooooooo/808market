@@ -2,27 +2,30 @@ import React, { useState } from "react";
 import TrackModal from "./TrackModal.jsx";
 
 const RANK_STYLE = {
-  1: { label: "🥇", color: "#ffd700", border: "2px solid #ffd700" },
-  2: { label: "🥈", color: "#c0c0c0", border: "2px solid #c0c0c0" },
-  3: { label: "🥉", color: "#cd7f32", border: "2px solid #cd7f32" },
+  1: { label: "🥇", color: "#ffd700", border: "1px solid rgba(255,215,0,0.5)" },
+  2: { label: "🥈", color: "#c0c0c0", border: "1px solid rgba(192,192,192,0.5)" },
+  3: { label: "🥉", color: "#cd7f32", border: "1px solid rgba(205,127,50,0.5)" },
 };
 
 export default function LeaderboardPage({ tracks, onVote, userVotes, onViewUser }) {
   const [selectedTrack, setSelectedTrack] = useState(null);
 
-  const sorted = [...tracks].sort((a, b) => b.hards - a.hards);
+  const sorted = [...tracks].sort((a, b) => (b.cops || b.hards || 0) - (a.cops || a.hards || 0));
 
   return (
     <div className="leaderboard-page">
       <div className="page-header">
-        <h1 className="page-title">🔥 LEADERBOARD</h1>
-        <p className="page-subtitle">hardest tracks right now</p>
+        <h1 className="page-title">🔥 Top Beats</h1>
+        <p className="page-subtitle">most copped right now</p>
       </div>
 
       <div className="leaderboard-list">
         {sorted.map((track, idx) => {
           const rank = idx + 1;
           const rankStyle = RANK_STYLE[rank] || {};
+          const cops = track.cops || track.hards || 0;
+          const price = track.price || 0;
+          const isFree = !price || price === 0;
 
           return (
             <div
@@ -49,8 +52,11 @@ export default function LeaderboardPage({ tracks, onVote, userVotes, onViewUser 
                 <div className="leaderboard-genre">{track.genre}</div>
               </div>
 
-              <div className="leaderboard-hards">
-                <span className="hards-count">🔥 {track.hards.toLocaleString()}</span>
+              <div className="leaderboard-hards" style={{ textAlign: "right" }}>
+                <div className="hards-count">🛒 {cops.toLocaleString()}</div>
+                <div style={{ fontSize: "12px", marginTop: "3px", color: isFree ? "var(--cyan)" : "var(--green)", fontWeight: 600, fontFamily: "var(--font-head)" }}>
+                  {isFree ? "FREE" : `$${price}`}
+                </div>
               </div>
             </div>
           );

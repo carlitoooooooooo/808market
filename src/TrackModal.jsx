@@ -38,37 +38,31 @@ export default function TrackModal({ track, onClose, onVote, userVotes, onViewUs
   const commentsEndRef = useRef(null);
   const channelRef = useRef(null);
 
-  // Load comments — use direct REST to bypass RLS auth issue
   useEffect(() => {
     setCommentsLoading(true);
-
     const LS_KEY = `tsh_comments_${track.id}`;
 
     dbSelect('comments', { track_id: track.id })
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
           setComments(data);
-          // Keep localStorage in sync
           localStorage.setItem(LS_KEY, JSON.stringify(data));
         } else {
-          // Fall back to localStorage if DB returns empty or error
           try {
             const cached = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
             if (cached.length > 0) setComments(cached);
-          } catch { /* ignore */ }
+          } catch { }
         }
         setCommentsLoading(false);
       })
       .catch(() => {
-        // DB unreachable — load from localStorage
         try {
           const cached = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
           setComments(cached);
-        } catch { /* ignore */ }
+        } catch { }
         setCommentsLoading(false);
       });
 
-    // Real-time comment subscription (still useful when JS client works)
     channelRef.current = supabase
       .channel(`comments:${track.id}`)
       .on('postgres_changes', {
@@ -99,15 +93,12 @@ export default function TrackModal({ track, onClose, onVote, userVotes, onViewUs
     };
   }, [track.id]);
 
-  // Load reaction counts — use direct REST to bypass RLS auth issue
   useEffect(() => {
     dbSelect('reactions', { track_id: track.id })
       .then((data) => {
         if (Array.isArray(data)) {
           const counts = {};
-          data.forEach(r => {
-            counts[r.emoji] = (counts[r.emoji] || 0) + 1;
-          });
+          data.forEach(r => { counts[r.emoji] = (counts[r.emoji] || 0) + 1; });
           setReactionCounts(counts);
         }
       })
@@ -120,13 +111,12 @@ export default function TrackModal({ track, onClose, onVote, userVotes, onViewUs
 
     setCommentSubmitting(true);
 
-    // Optimistic local comment (no id yet)
     const optimistic = {
       id: `local_${Date.now()}`,
       track_id: track.id,
       user_id: currentUser.id,
       username: currentUser.username,
-      avatar_color: currentUser.avatarColor || "#ff2d78",
+      avatar_color: currentUser.avatarColor || "#00f5ff",
       text,
       created_at: new Date().toISOString(),
     };
@@ -141,20 +131,16 @@ export default function TrackModal({ track, onClose, onVote, userVotes, onViewUs
         track_id: track.id,
         user_id: currentUser.id,
         username: currentUser.username,
-        avatar_color: currentUser.avatarColor || "#ff2d78",
+        avatar_color: currentUser.avatarColor || "#00f5ff",
         text,
       });
       if (data) {
-        // Replace optimistic entry with real DB record
-        setComments(prev => prev.map(c => c.id === optimistic.id ? data : c));
-        // Update localStorage cache
         setComments(prev => {
           const updated = prev.map(c => c.id === optimistic.id ? data : c);
-          try { localStorage.setItem(LS_KEY, JSON.stringify(updated)); } catch { /* ignore */ }
+          try { localStorage.setItem(LS_KEY, JSON.stringify(updated)); } catch { }
           return updated;
         });
       }
-      // Send notification to track uploader (not to yourself)
       if (track.uploadedBy && track.uploadedBy !== currentUser.username) {
         insertNotification({
           user_username: track.uploadedBy,
@@ -167,9 +153,8 @@ export default function TrackModal({ track, onClose, onVote, userVotes, onViewUs
       }
     } catch (err) {
       console.error('Comment save error (stored locally):', err);
-      // Keep optimistic entry; persist to localStorage so it survives refresh
       setComments(prev => {
-        try { localStorage.setItem(LS_KEY, JSON.stringify(prev)); } catch { /* ignore */ }
+        try { localStorage.setItem(LS_KEY, JSON.stringify(prev)); } catch { }
         return prev;
       });
     }
@@ -196,9 +181,15 @@ export default function TrackModal({ track, onClose, onVote, userVotes, onViewUs
     }
   }
 
-  const total = track.hards + track.trash;
-  const hardPct = total > 0 ? Math.round((track.hards / total) * 100) : 50;
+  const cops = track.cops || track.hards || 0;
+  const passes = track.passes || track.trash || 0;
+  const total = cops + passes;
+  const copPct = total > 0 ? Math.round((cops / total) * 100) : 50;
   const userVote = userVotes?.[track.id];
+
+  const price = track.price || 0;
+  const isFree = !price || price === 0;
+  const priceLabel = isFree ? "FREE" : `$${price}`;
 
   function handleVote(dir) {
     if (playerRef.current) { playerRef.current.destroy(); playerRef.current = null; }
@@ -207,13 +198,20 @@ export default function TrackModal({ track, onClose, onVote, userVotes, onViewUs
     onClose();
   }
 
+  function handleCopIt() {
+    if (!isFree && track.paymentLink) {
+      window.open(track.paymentLink, '_blank');
+    }
+    handleVote("right");
+  }
+
   const hasReactions = Object.keys(reactionCounts).length > 0;
 
   async function handleShare() {
-    const url = `https://thatshithard.vercel.app/track/${track.id}`;
+    const url = `https://808market.vercel.app/track/${track.id}`;
     const shareData = {
       title: track.title,
-      text: `Check out "${track.title}" by ${track.artist} on ThatShitHard`,
+      text: `Check out "${track.title}" by ${track.artist} on 808market`,
       url,
     };
     let msg = "🔗 Link copied!";
@@ -243,36 +241,54 @@ export default function TrackModal({ track, onClose, onVote, userVotes, onViewUs
       <div className="track-modal" onClick={(e) => e.stopPropagation()}>
         <button className="modal-close" onClick={onClose}>✕</button>
 
+        {/* Cover */}
         <div
           className="track-modal__cover"
           style={{ backgroundImage: `url(${track.coverUrl})` }}
         />
 
         <div className="track-modal__body">
-          <div className="track-modal__genre-tag">{track.genre}</div>
-          <div className="track-modal__title">{track.title}</div>
-          <div className="track-modal__artist">{track.artist}</div>
-
-          <div className="track-modal__meta">
-            <span>{track.bpm} BPM</span>
-            <span>
-              by{" "}
-              <span
-                className="track-modal__uploader-link"
-                onClick={() => onViewUser && onViewUser(track.uploadedBy)}
-              >
-                @{track.uploadedBy}
+          {/* Badges */}
+          <div className="beat-badges">
+            <span className="beat-badge beat-badge--genre">{track.genre}</span>
+            {track.bpm > 0 && <span className="beat-badge beat-badge--bpm">{track.bpm} BPM</span>}
+            {track.beatKey && <span className="beat-badge beat-badge--key">{track.beatKey}</span>}
+            {track.licenseType && (
+              <span className="beat-badge beat-badge--license">
+                {track.licenseType === 'free' ? 'Free Download' :
+                 track.licenseType === 'lease' ? 'Non-Exclusive Lease' :
+                 track.licenseType === 'exclusive' ? 'Exclusive' : track.licenseType}
               </span>
+            )}
+          </div>
+
+          {/* Title & artist */}
+          <div className="track-modal__title">{track.title}</div>
+          <div className="track-modal__artist">
+            by{" "}
+            <span
+              className="track-modal__uploader-link"
+              onClick={() => onViewUser && onViewUser(track.uploadedBy)}
+            >
+              @{track.uploadedBy}
             </span>
           </div>
 
-          <div className="track-modal__tags">
-            {(track.tags || []).map((tag) => (
-              <span key={tag} className="track-tag">#{tag}</span>
-            ))}
+          {/* Price */}
+          <div className={`beat-price ${isFree ? "beat-price--free" : ""}`}>
+            {priceLabel}
           </div>
 
-          {/* Waveform + play */}
+          {/* Tags */}
+          {(track.tags || []).length > 0 && (
+            <div className="track-modal__tags">
+              {(track.tags || []).map((tag) => (
+                <span key={tag} className="track-tag">#{tag}</span>
+              ))}
+            </div>
+          )}
+
+          {/* Waveform player */}
           <div className="track-modal__player">
             <WaveformVisualizer isPlaying={isPlaying} progress={progress} />
             <button className="swipe-card__play-btn" onClick={togglePlay}>
@@ -295,41 +311,35 @@ export default function TrackModal({ track, onClose, onVote, userVotes, onViewUs
             </div>
           )}
 
-          {/* Ratio bar */}
+          {/* Cops/Passes ratio bar */}
           <div className="track-modal__ratio">
             <div className="ratio-label">
-              <span className="ratio-hard">🔥 {track.hards}</span>
-              <span className="ratio-trash">💀 {track.trash}</span>
+              <span className="ratio-hard">🛒 {cops} cops</span>
+              <span className="ratio-trash">💨 {passes} passes</span>
             </div>
             <div className="ratio-bar">
-              <div className="ratio-bar__fill" style={{ width: `${hardPct}%` }} />
+              <div className="ratio-bar__fill" style={{ width: `${copPct}%` }} />
             </div>
           </div>
 
-          {/* Vote buttons */}
+          {/* COP IT / PASS buttons */}
           {!userVote ? (
-            <div className="track-modal__votes">
-              <button
-                className="btn-bevel btn-vote btn-trash"
-                onClick={() => handleVote("left")}
-              >
-                💀 TRASH IT
+            <div>
+              <button className="btn-cop-it" onClick={handleCopIt}>
+                {isFree ? "🎁 FREE DOWNLOAD" : `🛒 COP IT — ${priceLabel}`}
               </button>
-              <button
-                className="btn-bevel btn-vote btn-hard"
-                onClick={() => handleVote("right")}
-              >
-                🔥 HARD IT
+              <button className="btn-pass-it" onClick={() => handleVote("left")}>
+                💨 Pass
               </button>
             </div>
           ) : (
             <div className="track-modal__voted">
-              {userVote === "right" ? "🔥 You said HARD" : "💀 You said TRASH"}
+              {userVote === "right" ? "🛒 You copped this" : "💨 You passed"}
             </div>
           )}
 
           {/* Share button */}
-          <div style={{ marginTop: "10px", position: "relative" }}>
+          <div style={{ marginTop: "12px", position: "relative" }}>
             <button
               className="btn-bevel track-modal__share-btn"
               onClick={handleShare}

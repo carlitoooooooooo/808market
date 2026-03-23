@@ -21,7 +21,6 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
   const dragStartedRef = useRef(false);
   const cardRef = useRef(null);
 
-  // Stop when no longer top card (don't auto-start — wait for user tap)
   useEffect(() => {
     if (track.isSoundCloud) return;
     if (!isTop) {
@@ -70,7 +69,7 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
   }
 
   const triggerSwipe = useCallback((dir) => {
-    const label = dir === "right" ? "HARD 🔥" : "TRASH 💀";
+    const label = dir === "right" ? "COP IT 🛒" : "PASS 💨";
     setStamp(label);
     setFlyDir(dir);
     setIsFlying(true);
@@ -101,8 +100,8 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
       setIsDragging(true);
       setDragX(dx);
       setDragY(dy);
-      if (dx > 30) setStamp("HARD 🔥");
-      else if (dx < -30) setStamp("TRASH 💀");
+      if (dx > 30) setStamp("COP IT 🛒");
+      else if (dx < -30) setStamp("PASS 💨");
       else setStamp(null);
     }
   }, [isFlying]);
@@ -112,7 +111,6 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
     pointerDownRef.current = false;
 
     if (!dragStartedRef.current) {
-      // Tap on card body (not on play button) — do nothing, let button handle it
       setDragX(0);
       setDragY(0);
       setIsDragging(false);
@@ -155,6 +153,10 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
     };
   }
 
+  // Price display
+  const priceLabel = (!track.price || track.price === 0) ? "FREE" : `$${track.price}`;
+  const isFree = !track.price || track.price === 0;
+
   return (
     <div
       ref={cardRef}
@@ -179,6 +181,11 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
 
       {/* Gradient overlay */}
       <div className="swipe-card__overlay" />
+
+      {/* Price badge */}
+      <div className={`price-badge ${isFree ? "price-badge--free" : ""}`}>
+        {priceLabel}
+      </div>
 
       {/* Center: SC embed OR custom waveform */}
       {track.isSoundCloud ? (
@@ -213,7 +220,8 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
         <div className="swipe-card__title">{track.title}</div>
         <div className="swipe-card__meta">
           <span className="genre-tag">{track.genre}</span>
-          <span className="bpm-tag">{track.bpm} BPM</span>
+          {track.bpm > 0 && <span className="bpm-tag">{track.bpm} BPM</span>}
+          {track.beatKey && <span className="bpm-tag" style={{ color: "var(--purple)" }}>{track.beatKey}</span>}
         </div>
       </div>
 
@@ -231,7 +239,6 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
       <div className="swipe-card__progress-bar">
         <div className="swipe-card__progress-fill" style={{ width: `${progress * 100}%` }} />
       </div>
-
     </div>
   );
 }

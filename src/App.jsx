@@ -62,6 +62,7 @@ function mapTrack(t) {
     soundcloudUrl: t.soundcloud_url || null,
     embedUrl: t.embed_url || null,
     isSoundCloud: !!(t.soundcloud_url),
+    producerNotes: t.producer_notes || "",
   };
 }
 
@@ -94,6 +95,8 @@ export default function App() {
   const [viewingUser, setViewingUser] = useState(null);
   const [deepLinkTrack, setDeepLinkTrack] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [discoverFeed, setDiscoverFeed] = useState("foryou"); // "foryou" | "following"
+  const [followingList, setFollowingList] = useState([]); // usernames current user follows
   const toastTimer = useRef(null);
   const notifTimer = useRef(null);
 
@@ -122,9 +125,30 @@ export default function App() {
     loadTracks();
   }, []);
 
-  // Load user votes via direct REST
+  // Load following list for current user
   useEffect(() => {
-    if (!currentUser?.id) return;
+    if (!currentUser?.username) return;
+    async function loadFollowing() {
+      try {
+        const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
+        const res = await fetch(`https://bkapxykeryzxbqpgjgab.supabase.co/rest/v1/follows?follower_username=eq.${encodeURIComponent(currentUser.username)}&select=following_username`, {
+          headers: { 'apikey': ANON, 'Authorization': `Bearer ${ANON}` }
+        });
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          setFollowingList(data.map(r => r.following_username));
+        }
+      } catch (err) {
+        console.error('Load following list error:', err);
+      }
+    }
+    loadFollowing();
+  }, [currentUser?.username]);
+
+  // Load user votes via direct REST
+  const [votesLoading, setVotesLoading] = useState(true);
+  useEffect(() => {
+    if (!currentUser?.id) { setVotesLoading(false); return; }
     async function loadUserVotes() {
       try {
         const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
@@ -137,6 +161,8 @@ export default function App() {
         setUserVotes(votesMap);
       } catch (err) {
         console.error('Load votes error:', err);
+      } finally {
+        setVotesLoading(false);
       }
     }
     loadUserVotes();
@@ -173,12 +199,12 @@ export default function App() {
 
   // Build queue
   useEffect(() => {
-    if (!currentUser || tracksLoading || tracks.length === 0) return;
+    if (!currentUser || tracksLoading || votesLoading || tracks.length === 0) return;
     const votedIds = new Set(Object.keys(userVotes).map(String));
     const unvoted = tracks.filter(t => !votedIds.has(String(t.id)));
     const shuffled = [...unvoted].sort(() => Math.random() - 0.5);
     setQueue(shuffled);
-  }, [currentUser?.id, tracksLoading, tracks.length > 0, Object.keys(userVotes).length]);
+  }, [currentUser?.id, tracksLoading, votesLoading, tracks.length, JSON.stringify(userVotes)]);
 
   const showToast = useCallback((msg) => {
     setToast({ message: msg, visible: true });
@@ -299,9 +325,13 @@ export default function App() {
     return <AuthScreen />;
   }
 
+  const followingQueue = discoverFeed === "following" && currentUser
+    ? queue.filter(t => followingList.includes(t.uploadedBy))
+    : queue;
+
   const filteredQueue = activeGenre === "ALL"
-    ? queue
-    : queue.filter((t) => t.genre === activeGenre);
+    ? followingQueue
+    : followingQueue.filter((t) => t.genre === activeGenre);
 
   const stackedCards = filteredQueue.slice(0, 4);
 
@@ -352,6 +382,24 @@ export default function App() {
       <main className="app-main">
         {activeTab === "discover" && (
           <div className="discover-view">
+            {/* For You / Following toggle */}
+            {currentUser && (
+              <div className="feed-toggle">
+                <button
+                  className={`feed-toggle-btn ${discoverFeed === "foryou" ? "feed-toggle-btn--active" : ""}`}
+                  onClick={() => setDiscoverFeed("foryou")}
+                >
+                  For You
+                </button>
+                <button
+                  className={`feed-toggle-btn ${discoverFeed === "following" ? "feed-toggle-btn--active" : ""}`}
+                  onClick={() => setDiscoverFeed("following")}
+                >
+                  Following
+                </button>
+              </div>
+            )}
+
             {/* Genre Filter Bar */}
             <div className="genre-filter-bar">
               {GENRES.map((genre) => (
@@ -376,16 +424,22 @@ export default function App() {
                 <div className="empty-queue__text">Failed to load</div>
                 <div className="empty-queue__sub">{tracksError}</div>
               </div>
+            ) : discoverFeed === "following" && followingList.length === 0 ? (
+              <div className="empty-queue">
+                <div className="empty-queue__icon">👥</div>
+                <div className="empty-queue__text">No one followed yet</div>
+                <div className="empty-queue__sub">Follow some producers to see their beats here</div>
+              </div>
             ) : filteredQueue.length === 0 ? (
               <div className="empty-queue">
                 <div className="empty-queue__icon">🎧</div>
                 <div className="empty-queue__text">
-                  {activeGenre === "ALL" ? "You've heard it all!" : `No more ${activeGenre}`}
+                  {discoverFeed === "following" ? "No new beats from who you follow" : activeGenre === "ALL" ? "You've heard it all!" : `No more ${activeGenre}`}
                 </div>
                 <div className="empty-queue__sub">
-                  {activeGenre === "ALL" ? "Check the top beats 🔥" : "Try another genre 👆"}
+                  {discoverFeed === "following" ? "Check back later or explore more producers" : activeGenre === "ALL" ? "Check the top beats 🔥" : "Try another genre 👆"}
                 </div>
-                {activeGenre === "ALL" && (
+                {discoverFeed === "foryou" && activeGenre === "ALL" && (
                   <button
                     className="btn-primary"
                     style={{ marginTop: "20px" }}
@@ -399,7 +453,7 @@ export default function App() {
                     🔄 Start Over
                   </button>
                 )}
-                {activeGenre !== "ALL" && (
+                {discoverFeed === "foryou" && activeGenre !== "ALL" && (
                   <button
                     className="btn-primary"
                     style={{ marginTop: "20px" }}

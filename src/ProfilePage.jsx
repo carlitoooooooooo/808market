@@ -53,13 +53,18 @@ export default function ProfilePage({ userVotes, tracks }) {
     if (!currentUser?.username) return;
 
     setUploadsLoading(true);
-    supabase
-      .from('tracks')
-      .select('*')
-      .eq('uploaded_by_username', currentUser.username)
-      .order('listed_at', { ascending: false })
-      .then(({ data, error }) => {
-        if (!error && data) {
+
+    // Use direct REST to bypass Supabase JS client auth issues
+    const url = `${SUPABASE_URL}/rest/v1/tracks?uploaded_by_username=eq.${encodeURIComponent(currentUser.username)}&order=listed_at.desc`;
+    fetch(url, {
+      headers: {
+        'apikey': ANON_KEY,
+        'Authorization': `Bearer ${ANON_KEY}`,
+      }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (Array.isArray(data)) {
           const mapped = data.map(t => ({
             id: t.id,
             title: t.title,
@@ -87,8 +92,12 @@ export default function ProfilePage({ userVotes, tracks }) {
           });
         }
         setUploadsLoading(false);
+      })
+      .catch(err => {
+        console.error('Failed to load uploads:', err);
+        setUploadsLoading(false);
       });
-  }, [currentUser?.id]);
+  }, [currentUser?.username]);
 
   if (!currentUser) return null;
 

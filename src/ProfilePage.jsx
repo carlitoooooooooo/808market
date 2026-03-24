@@ -169,11 +169,19 @@ export default function ProfilePage({ userVotes, tracks }) {
 
   async function handleDeleteTrack(trackId) {
     if (!window.confirm("Delete this beat? This can't be undone.")) return;
-    await supabase.from('tracks').delete().eq('id', trackId).eq('uploaded_by_username', currentUser.username);
-    setMyUploads(prev => prev.filter(t => t.id !== trackId));
-    if (pinnedId === trackId) {
-      setPinnedId(null);
-      setPinnedTrack(currentUser.username, null);
+    try {
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/tracks?id=eq.${trackId}&uploaded_by_username=eq.${encodeURIComponent(currentUser.username)}`,
+        { method: 'DELETE', headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}` } }
+      );
+      if (res.ok || res.status === 204) {
+        setMyUploads(prev => prev.filter(t => t.id !== trackId));
+        if (pinnedId === trackId) { setPinnedId(null); setPinnedTrack(currentUser.username, null); }
+      } else {
+        alert('Failed to delete. Try again.');
+      }
+    } catch (err) {
+      console.error('Delete error:', err);
     }
   }
 

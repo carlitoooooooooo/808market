@@ -79,17 +79,15 @@ function ChatThread({ otherUsername, onBack, currentUser }) {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 50, background: 'var(--bg)' }}>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 16px', borderBottom: '1px solid var(--border)', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(20px)', flexShrink: 0 }}>
-        <button onClick={onBack} style={{ background: 'none', border: 'none', color: 'var(--text-dim)', fontSize: '20px', cursor: 'pointer', padding: '0 4px' }}>←</button>
-        <div>
-          <div style={{ fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '15px' }}>@{otherUsername}</div>
-        </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 16px', paddingTop: 'max(14px, env(safe-area-inset-top, 14px))', borderBottom: '1px solid var(--border)', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(20px)', flexShrink: 0, zIndex: 10 }}>
+        <button onClick={onBack} style={{ background: 'none', border: 'none', color: 'var(--text-dim)', fontSize: '22px', cursor: 'pointer', padding: '0 4px', lineHeight: 1 }}>←</button>
+        <div style={{ fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '15px' }}>@{otherUsername}</div>
       </div>
 
-      {/* Messages */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px', scrollbarWidth: 'none' }}>
+      {/* Messages — fills remaining space, scrollable */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}>
         {loading ? (
           <div style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: '13px', paddingTop: '40px' }}>Loading...</div>
         ) : messages.length === 0 ? (
@@ -105,10 +103,8 @@ function ChatThread({ otherUsername, onBack, currentUser }) {
                 background: isMe ? 'linear-gradient(135deg, var(--cyan), var(--purple))' : 'rgba(255,255,255,0.08)',
                 color: isMe ? '#000' : '#fff',
                 borderRadius: isMe ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
-                padding: '10px 14px',
-                fontSize: '14px',
-                fontFamily: 'var(--font-body)',
-                lineHeight: 1.4,
+                padding: '10px 14px', fontSize: '14px',
+                fontFamily: 'var(--font-body)', lineHeight: 1.4,
               }}>
                 {msg.body}
                 <div style={{ fontSize: '10px', opacity: 0.6, marginTop: '4px', textAlign: isMe ? 'right' : 'left' }}>
@@ -121,19 +117,40 @@ function ChatThread({ otherUsername, onBack, currentUser }) {
         <div ref={bottomRef} />
       </div>
 
-      {/* Input */}
-      <div style={{ padding: '12px 16px', borderTop: '1px solid var(--border)', display: 'flex', gap: '10px', alignItems: 'center', flexShrink: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(20px)', paddingBottom: 'max(12px, env(safe-area-inset-bottom, 12px))' }}>
+      {/* Input — always at bottom, above keyboard */}
+      <div style={{
+        padding: '10px 12px',
+        paddingBottom: 'max(10px, env(safe-area-inset-bottom, 10px))',
+        borderTop: '1px solid var(--border)',
+        display: 'flex', gap: '8px', alignItems: 'center',
+        flexShrink: 0,
+        background: 'rgba(0,0,0,0.9)',
+        backdropFilter: 'blur(20px)',
+      }}>
         <input
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && !e.shiftKey && sendMessage()}
+          onFocus={() => setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 400)}
           placeholder="Message..."
-          style={{ flex: 1, background: 'rgba(255,255,255,0.07)', border: '1px solid var(--border)', borderRadius: '22px', padding: '10px 16px', color: '#fff', fontSize: '15px', fontFamily: 'var(--font-body)', outline: 'none' }}
+          style={{
+            flex: 1, background: 'rgba(255,255,255,0.08)',
+            border: '1px solid rgba(255,255,255,0.15)',
+            borderRadius: '22px', padding: '11px 16px',
+            color: '#fff', fontSize: '16px',
+            fontFamily: 'var(--font-body)', outline: 'none',
+          }}
         />
         <button
           onClick={sendMessage}
           disabled={!input.trim() || sending}
-          style={{ background: 'linear-gradient(135deg, var(--cyan), var(--purple))', border: 'none', borderRadius: '50%', width: '40px', height: '40px', cursor: 'pointer', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, opacity: !input.trim() || sending ? 0.4 : 1 }}>
+          style={{
+            background: 'linear-gradient(135deg, var(--cyan), var(--purple))',
+            border: 'none', borderRadius: '50%',
+            width: '42px', height: '42px', cursor: 'pointer',
+            fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            flexShrink: 0, opacity: !input.trim() || sending ? 0.4 : 1,
+          }}>
           ➤
         </button>
       </div>

@@ -29,6 +29,14 @@ const TABS = [
 
 const GENRES = ["ALL", "Hip-Hop", "Drill", "Trap", "R&B", "Electronic", "Other"];
 
+// Normalize old license_type values to new display format
+function normalizeLicense(val) {
+  if (!val || val === 'lease') return 'Non-Exclusive Lease';
+  if (val === 'exclusive') return 'Exclusive';
+  if (val === 'free') return 'Free Download';
+  return val;
+}
+
 const SEEN_KEY = (username) => `tsh_seen_${username}`;
 
 function loadSeen(username) {
@@ -56,7 +64,7 @@ function mapTrack(t) {
     cops: t.cops || t.hards || 0,
     passes: t.passes || t.trash || 0,
     price: t.price || 0,
-    licenseType: t.license_type || "lease",
+    licenseType: normalizeLicense(t.license_type),
     beatKey: t.beat_key || "",
     paymentLink: t.payment_link || "",
     soundcloudUrl: t.soundcloud_url || null,

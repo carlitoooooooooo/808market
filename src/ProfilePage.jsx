@@ -255,7 +255,7 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload })
             cops: t.cops || 0,
             passes: t.passes || 0,
             price: t.price || 0,
-            licenseType: t.license_type || "lease",
+            licenseType: t.license_type === 'lease' ? 'Non-Exclusive Lease' : t.license_type === 'exclusive' ? 'Exclusive' : t.license_type === 'free' ? 'Free Download' : (t.license_type || 'Non-Exclusive Lease'),
             listedAt: t.listed_at,
           }));
           setMyUploads(mapped);

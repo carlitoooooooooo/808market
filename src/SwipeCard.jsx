@@ -89,7 +89,8 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
   }, [track, onSwipe]);
 
   const onPointerDown = useCallback((e) => {
-    if (isFlying || isFlipped) return; // don't capture when flipped — let buttons work
+    if (isFlying) return;
+    if (isFlipped) return; // back face buttons handle their own events
     pointerDownRef.current = true;
     dragStartedRef.current = false;
     startXRef.current = e.clientX;
@@ -98,7 +99,7 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
   }, [isFlying, isFlipped]);
 
   const onPointerMove = useCallback((e) => {
-    if (!pointerDownRef.current || isFlying || isFlipped) return;
+    if (!pointerDownRef.current || isFlying) return;
     const dx = e.clientX - startXRef.current;
     const dy = e.clientY - startYRef.current;
     if (Math.abs(dx) > 8 || Math.abs(dy) > 8) {
@@ -119,10 +120,12 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
     pointerDownRef.current = false;
 
     if (!dragStartedRef.current) {
+      // Tap on front face — flip
       setDragX(0);
       setDragY(0);
       setIsDragging(false);
       setStamp(null);
+      setIsFlipped(true);
       return;
     }
 
@@ -139,7 +142,7 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
       setDragY(0);
       setStamp(null);
     }
-  }, [togglePlay, triggerSwipe]);
+  }, [triggerSwipe]);
 
   async function handleCopIt(e) {
     e.stopPropagation();
@@ -232,10 +235,10 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
         cursor: isTop ? (isFlipped ? "pointer" : "grab") : "default",
         position: "relative",
       }}
-      onPointerDown={isTop && !isFlipped ? onPointerDown : undefined}
-      onPointerMove={isTop && !isFlipped ? onPointerMove : undefined}
-      onPointerUp={isTop && !isFlipped ? onPointerUp : undefined}
-      onPointerCancel={isTop && !isFlipped ? onPointerUp : undefined}
+      onPointerDown={isTop ? onPointerDown : undefined}
+      onPointerMove={isTop ? onPointerMove : undefined}
+      onPointerUp={isTop ? onPointerUp : undefined}
+      onPointerCancel={isTop ? onPointerUp : undefined}
     >
       {/* Flip container */}
       <div className="swipe-card__flipper" style={{
@@ -247,10 +250,7 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
       }}>
 
         {/* ── FRONT FACE ── */}
-        <div className="swipe-card__face swipe-card__face--front"
-          onClick={isTop ? () => setIsFlipped(true) : undefined}
-          style={{ cursor: isTop ? 'pointer' : 'default' }}
-        >
+        <div className="swipe-card__face swipe-card__face--front">
           <div className="swipe-card__cover" style={{ backgroundImage: `url(${track.coverUrl})` }} />
           <div className="swipe-card__overlay" />
           <div className={`price-badge ${isFree ? "price-badge--free" : ""}`}>{priceLabel}</div>

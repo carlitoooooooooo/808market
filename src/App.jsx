@@ -207,12 +207,34 @@ export default function App() {
     } catch {}
   }, [currentUser?.username]);
 
+  // Poll unread DM count in background
+  const loadUnreadMessages = useCallback(async () => {
+    if (!currentUser?.username) return;
+    try {
+      const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
+      const res = await fetch(
+        `https://bkapxykeryzxbqpgjgab.supabase.co/rest/v1/messages?recipient=eq.${encodeURIComponent(currentUser.username)}&read=eq.false&select=id`,
+        { headers: { apikey: ANON, Authorization: `Bearer ${ANON}` } }
+      );
+      const data = await res.json();
+      if (Array.isArray(data)) setUnreadMessages(data.length);
+    } catch {}
+  }, [currentUser?.username]);
+
   useEffect(() => {
     loadUnreadCount();
     if (notifTimer.current) clearInterval(notifTimer.current);
     notifTimer.current = setInterval(loadUnreadCount, 30000);
     return () => { if (notifTimer.current) clearInterval(notifTimer.current); };
   }, [loadUnreadCount]);
+
+  const msgPollTimer = useRef(null);
+  useEffect(() => {
+    loadUnreadMessages();
+    if (msgPollTimer.current) clearInterval(msgPollTimer.current);
+    msgPollTimer.current = setInterval(loadUnreadMessages, 15000);
+    return () => { if (msgPollTimer.current) clearInterval(msgPollTimer.current); };
+  }, [loadUnreadMessages]);
 
   // Deep link: /track/:id
   useEffect(() => {

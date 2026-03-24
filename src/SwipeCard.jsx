@@ -226,14 +226,15 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
         ...flyStyle,
       }}
     >
-    {/* Inner: captures pointer events, cursor */}
+    {/* Inner: captures pointer events when not flipped, transparent when flipped */}
     <div
       ref={cardRef}
       className={`swipe-card ${isTop ? "swipe-card--top" : ""}`}
       style={{
         width: "100%", height: "100%",
-        cursor: isTop ? (isFlipped ? "pointer" : "grab") : "default",
+        cursor: isTop ? (isFlipped ? "default" : "grab") : "default",
         position: "relative",
+        pointerEvents: isFlipped ? "none" : "auto",
       }}
       onPointerDown={isTop ? onPointerDown : undefined}
       onPointerMove={isTop ? onPointerMove : undefined}

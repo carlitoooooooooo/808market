@@ -565,7 +565,7 @@ export default function App() {
                     isTop={idx === 0}
                     stackIndex={idx}
                     onSwipe={handleSwipe}
-                    nameGlow={producerProfiles[track.uploadedBy]?.name_glow}
+
                   />
                 ))}
               </div>

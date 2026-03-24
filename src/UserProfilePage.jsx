@@ -52,9 +52,14 @@ export default function UserProfilePage({ username, onClose, onOpenModal, userVo
     async function load() {
       setLoading(true);
       try {
-        // Load profile
-        const profileData = await dbSelect('profiles', { username });
-        const prof = Array.isArray(profileData) ? profileData[0] : profileData;
+        // Load full profile with all custom fields
+        const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
+        const profRes = await fetch(
+          `https://bkapxykeryzxbqpgjgab.supabase.co/rest/v1/profiles?username=eq.${encodeURIComponent(username)}&select=*`,
+          { headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` } }
+        );
+        const profData = await profRes.json();
+        const prof = Array.isArray(profData) ? profData[0] : profData;
         setProfile(prof || null);
         setFollowerCount(prof?.follower_count || 0);
         setFollowingCount(prof?.following_count || 0);
@@ -202,11 +207,14 @@ export default function UserProfilePage({ username, onClose, onOpenModal, userVo
           <>
             {/* Profile header */}
             <div className="user-profile-header">
-              <div className="user-profile-avatar" style={{ background: avatarColor }}>
-                {initial}
+              <div className="user-profile-avatar" style={{ background: profile?.avatar_url ? 'transparent' : avatarColor, overflow: 'hidden' }}>
+                {profile?.avatar_url
+                  ? <img src={profile.avatar_url} alt={username} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                  : initial
+                }
               </div>
               <div className="user-profile-info">
-                <div className="user-profile-username" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <div className={`user-profile-username ${profile?.name_glow && profile.name_glow !== 'none' ? `name-glow-${profile.name_glow}` : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                   @{username}
                   {profile?.role === 'admin' && (
                     <span style={{
@@ -232,6 +240,17 @@ export default function UserProfilePage({ username, onClose, onOpenModal, userVo
                   <span style={{ color: 'rgba(255,255,255,0.8)', fontWeight: 600 }}>{followingCount}</span> following
                 </div>
                 {bio && <div className="user-profile-bio">{bio}</div>}
+                {profile?.tagline && <div style={{ fontSize: '12px', color: 'var(--cyan)', fontFamily: "'Inter', sans-serif", marginTop: '2px', fontStyle: 'italic' }}>{profile.tagline}</div>}
+                {profile?.location && <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', fontFamily: "'Inter', sans-serif", marginTop: '2px' }}>📍 {profile.location}</div>}
+                {profile?.influenced_by && <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', fontFamily: "'Inter', sans-serif", marginTop: '2px' }}>🎵 Influenced by: <span style={{ color: 'rgba(255,255,255,0.6)' }}>{profile.influenced_by}</span></div>}
+                {(profile?.instagram || profile?.twitter || profile?.soundcloud || profile?.youtube) && (
+                  <div style={{ display: 'flex', gap: '10px', marginTop: '6px', flexWrap: 'wrap' }}>
+                    {profile.instagram && <a href={`https://instagram.com/${profile.instagram}`} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', textDecoration: 'none' }}>📸 Instagram</a>}
+                    {profile.twitter && <a href={`https://x.com/${profile.twitter}`} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', textDecoration: 'none' }}>🐦 Twitter</a>}
+                    {profile.soundcloud && <a href={`https://soundcloud.com/${profile.soundcloud}`} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', textDecoration: 'none' }}>☁️ SoundCloud</a>}
+                    {profile.youtube && <a href={`https://youtube.com/@${profile.youtube}`} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', textDecoration: 'none' }}>▶️ YouTube</a>}
+                  </div>
+                )}
               </div>
             </div>
 

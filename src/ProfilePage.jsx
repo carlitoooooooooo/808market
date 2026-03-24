@@ -127,6 +127,21 @@ export default function ProfilePage({ userVotes, tracks }) {
     setPinnedTrack(currentUser.username, newId);
   }
 
+  async function handleDeleteTrack(trackId) {
+    if (!window.confirm("Delete this beat? This can't be undone.")) return;
+    const { createClient } = await import('@supabase/supabase-js');
+    const sb = createClient(
+      'https://bkapxykeryzxbqpgjgab.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA'
+    );
+    await sb.from('tracks').delete().eq('id', trackId).eq('uploaded_by_username', currentUser.username);
+    setMyUploads(prev => prev.filter(t => t.id !== trackId));
+    if (pinnedId === trackId) {
+      setPinnedId(null);
+      setPinnedTrack(currentUser.username, null);
+    }
+  }
+
   function handleSnippetConfirm(result) {
     setSnippetConfirmed(result);
     setShowSnippetPicker(false);
@@ -343,13 +358,23 @@ export default function ProfilePage({ userVotes, tracks }) {
                         </span>
                       </div>
                     </div>
-                    <button
-                      className={`btn-bevel pin-btn ${isPinned ? "pin-btn--active" : ""}`}
-                      onClick={() => handlePin(track.id)}
-                      title={isPinned ? "Unpin" : "Pin this beat"}
-                    >
-                      {isPinned ? "📌" : "PIN"}
-                    </button>
+                    <div style={{ display: "flex", gap: "6px" }}>
+                      <button
+                        className={`btn-bevel pin-btn ${isPinned ? "pin-btn--active" : ""}`}
+                        onClick={() => handlePin(track.id)}
+                        title={isPinned ? "Unpin" : "Pin this beat"}
+                      >
+                        {isPinned ? "📌" : "PIN"}
+                      </button>
+                      <button
+                        className="btn-bevel"
+                        onClick={() => handleDeleteTrack(track.id)}
+                        title="Delete beat"
+                        style={{ color: "var(--red)", borderColor: "var(--red)", fontSize: "12px", padding: "4px 8px" }}
+                      >
+                        🗑
+                      </button>
+                    </div>
                   </div>
 
                   {/* Analytics */}

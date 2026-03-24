@@ -2343,6 +2343,18 @@ body {
 /* ===== DESKTOP NAV (hidden on mobile) ===== */
 .desktop-nav { display: none; }
 
+/* ===== EDIT PROFILE MODAL (mobile = full screen) ===== */
+.profile-edit-overlay {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.profile-edit-modal {
+  width: 100%;
+  min-height: 100%;
+  background: #000;
+  padding-bottom: 80px;
+}
+
 /* ===== LEADERBOARD MOBILE/DESKTOP VISIBILITY ===== */
 /* On mobile: hide the inactive column wrapper */
 .leaderboard-mobile-hidden { display: none; }
@@ -2493,28 +2505,20 @@ body {
   }
 
   /* ── Edit profile: compact centered modal on desktop ── */
-  /* The outer overlay stays fixed/full-screen but centers a constrained box */
   .profile-edit-overlay {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 40px;
   }
-  .profile-edit-overlay > div:first-child {
-    /* The inner scroll container — cap it to a modal size */
-    position: relative !important;
-    inset: unset !important;
+  .profile-edit-modal {
     width: 560px;
     max-height: 80vh;
+    background: #0a0a0a;
     border-radius: 20px;
-    border: 1px solid rgba(255,255,255,0.1);
-    padding: 0 0 24px !important;
+    border: 1px solid rgba(255,255,255,0.12);
     overflow-y: auto;
-  }
-  /* Sticky header inside the modal */
-  .profile-edit-overlay > div:first-child > div:first-child {
-    padding-top: 20px !important;
-    border-radius: 20px 20px 0 0;
+    display: flex;
+    flex-direction: column;
   }
 
   /* Un-absolute the edit/share buttons in the narrower left column */

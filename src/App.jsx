@@ -112,18 +112,18 @@ export default function App() {
     loadTracks();
   }, []);
 
-  // Load user votes from Supabase when user logs in
+  // Load user votes via direct REST
   useEffect(() => {
-    if (!currentUser) return;
+    if (!currentUser?.id) return;
     async function loadUserVotes() {
       try {
-        const { data, error } = await supabase
-          .from('votes')
-          .select('track_id, vote')
-          .eq('user_id', currentUser.id);
-        if (error) throw error;
+        const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
+        const res = await fetch(`https://bkapxykeryzxbqpgjgab.supabase.co/rest/v1/votes?user_id=eq.${currentUser.id}&select=track_id,vote`, {
+          headers: { 'apikey': ANON, 'Authorization': `Bearer ${ANON}` }
+        });
+        const data = await res.json();
         const votesMap = {};
-        (data || []).forEach(v => { votesMap[v.track_id] = v.vote; });
+        if (Array.isArray(data)) data.forEach(v => { votesMap[v.track_id] = v.vote; });
         setUserVotes(votesMap);
       } catch (err) {
         console.error('Load votes error:', err);

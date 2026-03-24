@@ -518,7 +518,6 @@ function SoundCloudTab({ onSubmit, onCancel }) {
 
 // ─── Main Modal ───────────────────────────────────────────────────
 export default function TrackUpload({ onSubmit, onCancel }) {
-  const [tab, setTab] = useState("mp3");
 
   return (
     <div className="sc-upload">
@@ -527,12 +526,7 @@ export default function TrackUpload({ onSubmit, onCancel }) {
         <p className="sc-upload__sub">Upload your beat to the marketplace</p>
       </div>
 
-      <div className="upload-tabs">
-        <button className={`upload-tab ${tab === "mp3" ? "active" : ""}`} onClick={() => setTab("mp3")}>🎵 Upload MP3</button>
-        <button className={`upload-tab ${tab === "sc" ? "active" : ""}`} onClick={() => setTab("sc")}>☁️ SoundCloud</button>
-      </div>
-
-      {tab === "mp3" ? <MP3Tab onSubmit={onSubmit} onCancel={onCancel} /> : <SoundCloudTab onSubmit={onSubmit} onCancel={onCancel} />}
+      <MP3Tab onSubmit={onSubmit} onCancel={onCancel} />
 
       <button className="sc-upload__cancel" onClick={onCancel}>cancel</button>
     </div>

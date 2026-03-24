@@ -3,7 +3,7 @@ import { useAuth } from "./AuthContext";
 import { supabase } from "./supabase.js";
 import SnippetSelector from "./SnippetSelector.jsx";
 
-const GENRES = ["Hip-Hop", "Drill", "Trap", "R&B", "Afrobeats", "Electronic", "Other"];
+const GENRES = ["Hip-Hop", "Drill", "Trap", "R&B", "Electronic", "Other"];
 const LICENSE_TYPES = [
   { value: "free", label: "Free Download" },
   { value: "lease", label: "Non-Exclusive Lease" },

@@ -3,7 +3,7 @@ import { useState } from "react";
 const SUPABASE_URL = 'https://bkapxykeryzxbqpgjgab.supabase.co';
 const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
 
-const GENRES = ["Hip-Hop", "Drill", "Trap", "R&B", "Afrobeats", "Electronic", "Other"];
+const GENRES = ["Hip-Hop", "Drill", "Trap", "R&B", "Electronic", "Other"];
 const LICENSES = ["Free Download", "Non-Exclusive Lease", "Exclusive"];
 
 export default function EditBeatModal({ track, onClose, onSave }) {

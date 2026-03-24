@@ -48,7 +48,7 @@ export default function AboutPage({ onClose }) {
           color: 'rgba(255,255,255,0.85)',
         }}>
           <p style={{ marginBottom: '16px' }}>
-            Hey guys, my name is Carlito. Most of you probably know me as the producer <span style={{ color: '#00f5ff', fontWeight: 600 }}>Mastercard</span>.
+            Hey guys, my name is CJ. Most of you probably know me as the producer <span style={{ color: '#00f5ff', fontWeight: 600 }}>Mastercard</span>.
           </p>
           <p style={{ marginBottom: '16px' }}>
             All the other platforms to buy and sell beats online are clunky and generally pretty shitty, so I felt like I should take matters into my own hands.

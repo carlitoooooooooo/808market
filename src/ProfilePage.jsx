@@ -44,6 +44,8 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload })
 
   const [myUploads, setMyUploads] = useState([]);
   const [uploadsLoading, setUploadsLoading] = useState(true);
+  const [savedBeats, setSavedBeats] = useState([]);
+  const [savedLoading, setSavedLoading] = useState(true);
   const [uploadReactions, setUploadReactions] = useState({});
   const [tasteMatches, setTasteMatches] = useState([]);
   const [confirmDelete, setConfirmDelete] = useState(null);
@@ -152,6 +154,22 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload })
         setFollowingCount(prof.following_count || 0);
       }
     }).catch(() => {});
+  }, [currentUser?.username]);
+
+  // Load saved beats
+  useEffect(() => {
+    if (!currentUser?.username) { setSavedLoading(false); return; }
+    fetch(`${SUPABASE_URL}/rest/v1/saved_beats?user_username=eq.${encodeURIComponent(currentUser.username)}&select=track_id,created_at&order=created_at.desc`, {
+      headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` }
+    }).then(r => r.json()).then(async data => {
+      if (!Array.isArray(data) || data.length === 0) { setSavedBeats([]); setSavedLoading(false); return; }
+      const ids = data.map(d => d.track_id).join(',');
+      const tracksRes = await fetch(`${SUPABASE_URL}/rest/v1/tracks?id=in.(${ids})&select=id,title,artist,cover_url,price,audio_url,uploaded_by_username`, {
+        headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` }
+      });
+      const tracks = await tracksRes.json();
+      setSavedBeats(Array.isArray(tracks) ? tracks : []);
+    }).catch(() => setSavedBeats([])).finally(() => setSavedLoading(false));
   }, [currentUser?.username]);
 
   // Load extra profile fields
@@ -508,6 +526,32 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload })
             );
           })}
         </div>
+      </div>
+
+      {/* Saved Beats */}
+      <div className="profile-section">
+        <div className="section-title">🔖 SAVED BEATS</div>
+        {savedLoading ? (
+          <div style={{ color: 'var(--cyan)', fontSize: '13px', fontFamily: 'var(--font-body)' }}>loading...</div>
+        ) : savedBeats.length === 0 ? (
+          <div style={{ color: 'var(--text-dim)', fontSize: '13px', fontFamily: 'var(--font-body)' }}>No saved beats yet. Tap 🔖 on any beat to save it for later.</div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {savedBeats.map(beat => {
+              const isFree = !beat.price || beat.price === 0;
+              return (
+                <div key={beat.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--glass-bg)', border: '1px solid var(--border)', borderRadius: '12px', padding: '10px', cursor: 'pointer' }}>
+                  <div style={{ width: 48, height: 48, borderRadius: '8px', background: beat.cover_url ? `url(${beat.cover_url}) center/cover` : 'rgba(255,255,255,0.08)', flexShrink: 0 }} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontFamily: 'var(--font-head)', fontWeight: 600, fontSize: '14px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{beat.title}</div>
+                    <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', fontFamily: 'var(--font-body)' }}>by {beat.artist || beat.uploaded_by_username}</div>
+                  </div>
+                  <span style={{ fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '13px', color: isFree ? 'var(--cyan)' : 'var(--green)', flexShrink: 0 }}>{isFree ? 'FREE' : `$${beat.price}`}</span>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* My Beats */}

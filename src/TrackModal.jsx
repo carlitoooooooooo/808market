@@ -58,11 +58,42 @@ export default function TrackModal({ track, onClose, onVote, userVotes, onViewUs
   const [isPlaying, setIsPlaying] = useState(false);
   const [shareToast, setShareToast] = useState("");
   const shareToastTimer = useRef(null);
+  const [isSaved, setIsSaved] = useState(false);
+  const [saveLoading, setSaveLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const playerRef = useRef(null);
   const [reactionCounts, setReactionCounts] = useState({});
   const [comments, setComments] = useState([]);
   const [commentsLoading, setCommentsLoading] = useState(true);
+
+  // Check if beat is saved
+  useEffect(() => {
+    if (!currentUser?.username || !track?.id) return;
+    fetch(`${SUPABASE_URL}/rest/v1/saved_beats?user_username=eq.${encodeURIComponent(currentUser.username)}&track_id=eq.${track.id}&select=id`, {
+      headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` }
+    }).then(r => r.json()).then(d => setIsSaved(Array.isArray(d) && d.length > 0)).catch(() => {});
+  }, [track?.id, currentUser?.username]);
+
+  async function toggleSave() {
+    if (!currentUser?.username) return;
+    setSaveLoading(true);
+    try {
+      if (isSaved) {
+        await fetch(`${SUPABASE_URL}/rest/v1/saved_beats?user_username=eq.${encodeURIComponent(currentUser.username)}&track_id=eq.${track.id}`, {
+          method: 'DELETE', headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` }
+        });
+        setIsSaved(false);
+      } else {
+        await fetch(`${SUPABASE_URL}/rest/v1/saved_beats`, {
+          method: 'POST',
+          headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+          body: JSON.stringify({ user_username: currentUser.username, track_id: track.id }),
+        });
+        setIsSaved(true);
+      }
+    } catch (err) { console.error(err); }
+    setSaveLoading(false);
+  }
   const [commentText, setCommentText] = useState("");
   const [commentSubmitting, setCommentSubmitting] = useState(false);
   const commentsEndRef = useRef(null);
@@ -463,6 +494,16 @@ export default function TrackModal({ track, onClose, onVote, userVotes, onViewUs
             >
               📤 SHARE
             </button>
+            {currentUser && (
+              <button
+                className="btn-bevel track-modal__share-btn"
+                onClick={toggleSave}
+                disabled={saveLoading}
+                style={{ color: isSaved ? '#ffd700' : undefined, borderColor: isSaved ? '#ffd700' : undefined }}
+              >
+                {isSaved ? '🔖 SAVED' : '🔖 SAVE'}
+              </button>
+            )}
             {shareToast && (
               <div className="share-toast">{shareToast}</div>
             )}

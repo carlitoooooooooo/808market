@@ -1549,7 +1549,8 @@ body {
   display: flex;
   gap: 6px;
   overflow-x: auto;
-  padding: 10px 12px 8px;
+  padding: 10px 12px 8px 12px;
+  padding-right: 24px;
   scrollbar-width: none;
   flex-shrink: 0;
   width: 100%;

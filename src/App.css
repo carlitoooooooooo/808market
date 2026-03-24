@@ -77,6 +77,14 @@ body {
   pointer-events: none;
 }
 
+/* ===== LANDING PAGE ===== */
+.landing-page {
+  position: relative;
+  z-index: 2;
+  min-height: 100vh;
+  overflow-y: auto;
+}
+
 /* ===== APP LAYOUT ===== */
 .app {
   position: relative;

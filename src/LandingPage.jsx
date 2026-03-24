@@ -55,7 +55,7 @@ export default function LandingPage({ onGetStarted, onBrowseAsGuest }) {
 
   return (
     <div className="landing-page">
-      <div className="app-bg" />
+      <div className="app-bg" style={{ zIndex: -1 }} />
 
       {/* === HERO === */}
       <section className="landing-hero">

@@ -19,7 +19,7 @@ export default function UserSearch({ onSelectUser, onClose }) {
     setLoading(true);
     try {
       const res = await fetch(
-        `${URL}/rest/v1/profiles?username=ilike.*${encodeURIComponent(q.trim())}*&select=username,avatar_color,bio,role,is_beta_tester&limit=20`,
+        `${URL}/rest/v1/profiles?username=ilike.*${encodeURIComponent(q.trim())}*&select=username,avatar_color,avatar_url,bio,role,is_beta_tester&limit=20`,
         { headers: { apikey: ANON, Authorization: `Bearer ${ANON}` } }
       );
       const data = await res.json();
@@ -92,9 +92,12 @@ export default function UserSearch({ onSelectUser, onClose }) {
               background: user.avatar_color || '#00f5ff',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: '16px', color: '#000',
-              flexShrink: 0,
+              flexShrink: 0, overflow: 'hidden',
             }}>
-              {user.username[0].toUpperCase()}
+              {user.avatar_url
+                ? <img src={user.avatar_url} alt={user.username} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                : user.username[0].toUpperCase()
+              }
             </div>
 
             {/* Info */}

@@ -1041,6 +1041,7 @@ body {
   top: 14px;
   right: 14px;
   z-index: 200;
+  /* taken out of flex flow so it doesn't push track-modal down */
   background: rgba(10,10,15,0.85);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -1055,6 +1056,7 @@ body {
   align-items: center;
   justify-content: center;
   transition: background 0.15s;
+  pointer-events: all;
 }
 .modal-close:hover { background: rgba(255,255,255,0.18); }
 

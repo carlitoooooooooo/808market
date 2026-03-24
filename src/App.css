@@ -2101,17 +2101,17 @@ body {
 
 /* ===== USER PROFILE PAGE ===== */
 .user-profile-page {
-  position: relative;
+  position: fixed;
+  inset: 0;
+  z-index: 200;
   width: 100%;
   max-width: 480px;
-  background: rgba(10,10,15,0.96);
-  backdrop-filter: blur(30px);
-  -webkit-backdrop-filter: blur(30px);
-  border: 1px solid var(--border);
-  border-radius: 24px 24px 0 0;
-  max-height: 90vh;
-  overflow-y: auto;
+  margin: 0 auto;
+  background: #000;
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
+  padding-bottom: 80px;
 }
 .user-profile-page::-webkit-scrollbar { display: none; }
 

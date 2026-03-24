@@ -183,12 +183,14 @@ export default function UserProfilePage({ username, onClose, onOpenModal, userVo
   const isOwnProfile = currentUser?.username === username;
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div
-        className="user-profile-page"
-        onClick={e => e.stopPropagation()}
-      >
-        <button className="modal-close" onClick={onClose} style={{ zIndex: 10 }}>✕</button>
+    <div className="user-profile-page">
+        <button onClick={onClose} style={{
+          position: 'fixed', top: '16px', left: '16px', zIndex: 300,
+          background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(255,255,255,0.15)', borderRadius: '50%',
+          width: '36px', height: '36px', color: '#fff', fontSize: '16px',
+          cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>←</button>
 
         {loading ? (
           <div className="user-profile-loading">
@@ -324,8 +326,6 @@ export default function UserProfilePage({ username, onClose, onOpenModal, userVo
             </div>
           </>
         )}
-      </div>
-
       {/* Inline TrackModal if no onOpenModal prop */}
       {selectedTrack && (
         <TrackModal

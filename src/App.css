@@ -903,6 +903,9 @@ body {
   flex-shrink: 0;
   white-space: nowrap;
   word-break: normal;
+  color: #000 !important;
+  -webkit-text-fill-color: #000 !important;
+  text-shadow: none !important;
 }
 .profile-bio {
   font-family: var(--font-body);

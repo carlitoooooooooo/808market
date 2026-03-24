@@ -885,19 +885,18 @@ body {
   0%   { box-shadow: 0 0 0 2px #ffd700, 0 0 10px rgba(255,215,0,0.4); }
   100% { box-shadow: 0 0 0 2px #ffd700, 0 0 24px rgba(255,215,0,0.8); }
 }
-.profile-info { flex: 1; min-width: 0; overflow: hidden; }
+.profile-info { flex: 1; min-width: 0; }
 .profile-username {
   font-family: var(--font-head);
   font-size: 18px;
   font-weight: 700;
   color: var(--text);
   margin-bottom: 6px;
-  word-break: normal;
-  overflow-wrap: anywhere;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 6px;
+  padding-right: 80px; /* clear the absolute buttons */
 }
 /* Prevent role/beta pills from being squeezed or text-broken */
 .profile-username > span {
@@ -924,11 +923,11 @@ body {
 }
 .profile-edit-btn:hover { background: var(--bg3); }
 .profile-header > div:last-child {
-  position: static;
+  position: absolute;
+  top: 0;
+  right: 0;
   display: flex;
-  gap: 8px;
-  margin-top: 10px;
-  padding-left: 78px; /* align under bio, past avatar */
+  gap: 6px;
 }
 
 .profile-stats {

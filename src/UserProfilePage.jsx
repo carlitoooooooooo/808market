@@ -108,6 +108,14 @@ export default function UserProfilePage({ username, onClose, onOpenModal, userVo
                       letterSpacing: '1px', textTransform: 'uppercase',
                     }}>ADMIN</span>
                   )}
+                  {profile?.is_beta_tester && profile?.role !== 'admin' && (
+                    <span style={{
+                      background: 'linear-gradient(135deg, #ff9900, #ff3366)',
+                      color: '#fff', fontSize: '9px', fontFamily: "'Space Grotesk', sans-serif",
+                      fontWeight: 700, padding: '2px 8px', borderRadius: '20px',
+                      letterSpacing: '1px', textTransform: 'uppercase',
+                    }}>BETA TESTER</span>
+                  )}
                 </div>
                 {bio && <div className="user-profile-bio">{bio}</div>}
               </div>

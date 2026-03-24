@@ -94,6 +94,7 @@ export function AuthProvider({ children }) {
       avatarColor: data.avatar_color,
       bio: data.bio || "",
       role: data.role || "user",
+      isBetaTester: data.is_beta_tester || false,
     };
     localStorage.setItem(SESSION_KEY, JSON.stringify(user));
     setCurrentUser(user);

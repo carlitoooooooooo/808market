@@ -266,15 +266,18 @@ export default function ProfilePage({ userVotes, tracks }) {
             {currentUser.role === 'admin' && (
               <span style={{
                 background: 'linear-gradient(135deg, #00f5ff, #bf5fff)',
-                color: '#000',
-                fontSize: '9px',
-                fontFamily: 'var(--font-head)',
-                fontWeight: 700,
-                padding: '2px 8px',
-                borderRadius: '20px',
-                letterSpacing: '1px',
-                textTransform: 'uppercase',
+                color: '#000', fontSize: '9px', fontFamily: 'var(--font-head)',
+                fontWeight: 700, padding: '2px 8px', borderRadius: '20px',
+                letterSpacing: '1px', textTransform: 'uppercase',
               }}>ADMIN</span>
+            )}
+            {currentUser.isBetaTester && currentUser.role !== 'admin' && (
+              <span style={{
+                background: 'linear-gradient(135deg, #ff9900, #ff3366)',
+                color: '#fff', fontSize: '9px', fontFamily: 'var(--font-head)',
+                fontWeight: 700, padding: '2px 8px', borderRadius: '20px',
+                letterSpacing: '1px', textTransform: 'uppercase',
+              }}>BETA TESTER</span>
             )}
           </div>
           {!editing && (

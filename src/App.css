@@ -815,6 +815,26 @@ body {
   box-shadow: 0 0 20px rgba(0,245,255,0.15);
 }
 
+/* ===== NAME GLOW STYLES ===== */
+.name-glow-cyan    { text-shadow: 0 0 8px #00f5ff, 0 0 20px rgba(0,245,255,0.5); color: #00f5ff !important; }
+.name-glow-purple  { text-shadow: 0 0 8px #bf5fff, 0 0 20px rgba(191,95,255,0.5); color: #bf5fff !important; }
+.name-glow-green   { text-shadow: 0 0 8px #00ff88, 0 0 20px rgba(0,255,136,0.5); color: #00ff88 !important; }
+.name-glow-gold    { text-shadow: 0 0 8px #ffd700, 0 0 20px rgba(255,215,0,0.5); color: #ffd700 !important; }
+.name-glow-red     { text-shadow: 0 0 8px #ff3366, 0 0 20px rgba(255,51,102,0.5); color: #ff3366 !important; }
+.name-glow-rainbow {
+  background: linear-gradient(90deg, #ff3366, #ff9900, #00f5ff, #bf5fff, #ff3366);
+  background-size: 300% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: nameGlowRainbow 3s linear infinite;
+  filter: drop-shadow(0 0 6px rgba(0,245,255,0.4));
+}
+@keyframes nameGlowRainbow {
+  0%   { background-position: 0% center; }
+  100% { background-position: 300% center; }
+}
+
 /* ===== AVATAR BORDER ANIMATIONS ===== */
 .avatar-border-cyan {
   border: 2px solid transparent !important;

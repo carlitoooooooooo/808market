@@ -33,7 +33,7 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload })
   const [editing, setEditing] = useState(false);
   const [editBio, setEditBio] = useState(currentUser?.bio || "");
   const [editColor, setEditColor] = useState(currentUser?.avatarColor || AVATAR_COLORS[0]);
-  const [profileExtra, setProfileExtra] = useState({ location: '', tagline: '', instagram: '', twitter: '', soundcloud: '', youtube: '', influenced_by: '', avatar_border: 'none' });
+  const [profileExtra, setProfileExtra] = useState({ location: '', tagline: '', instagram: '', twitter: '', soundcloud: '', youtube: '', influenced_by: '', avatar_border: 'none', name_glow: 'none' });
   const [totalPlays, setTotalPlays] = useState(0);
   const [avatarUrl, setAvatarUrl] = useState(currentUser?.avatarUrl || null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -175,11 +175,11 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload })
   // Load extra profile fields
   useEffect(() => {
     if (!currentUser?.username) return;
-    fetch(`${SUPABASE_URL}/rest/v1/profiles?username=eq.${encodeURIComponent(currentUser.username)}&select=location,tagline,instagram,twitter,soundcloud,youtube,influenced_by,avatar_border`, {
+    fetch(`${SUPABASE_URL}/rest/v1/profiles?username=eq.${encodeURIComponent(currentUser.username)}&select=location,tagline,instagram,twitter,soundcloud,youtube,influenced_by,avatar_border,name_glow`, {
       headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` }
     }).then(r => r.json()).then(data => {
       const p = Array.isArray(data) ? data[0] : data;
-      if (p) setProfileExtra({ location: p.location||'', tagline: p.tagline||'', instagram: p.instagram||'', twitter: p.twitter||'', soundcloud: p.soundcloud||'', youtube: p.youtube||'', influenced_by: p.influenced_by||'', avatar_border: p.avatar_border||'none' });
+      if (p) setProfileExtra({ location: p.location||'', tagline: p.tagline||'', instagram: p.instagram||'', twitter: p.twitter||'', soundcloud: p.soundcloud||'', youtube: p.youtube||'', influenced_by: p.influenced_by||'', avatar_border: p.avatar_border||'none', name_glow: p.name_glow||'none' });
     }).catch(() => {});
 
     // Load total plays from tracks
@@ -394,7 +394,7 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload })
           <input ref={avatarInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatarChange} />
         </div>
         <div className="profile-info">
-          <div className="profile-username" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div className={`profile-username ${profileExtra.name_glow !== 'none' ? `name-glow-${profileExtra.name_glow}` : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             {currentUser.username}
             {currentUser.role === 'admin' && (
               <span style={{
@@ -724,6 +724,36 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload })
             <button onClick={saveEdit} style={{ background: 'linear-gradient(135deg, #00f5ff, #bf5fff)', border: 'none', color: '#000', borderRadius: '20px', padding: '6px 16px', fontSize: '14px', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-head)' }}>Save</button>
           </div>
           <div style={{ padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            {/* Name glow picker */}
+            <div>
+              <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>
+                Name Glow {myUploads.length < 5 && <span style={{ color: '#ff3366', fontSize: '10px' }}>🔒 Upload 5 beats to unlock ({myUploads.length}/5)</span>}
+              </label>
+              {myUploads.length >= 5 ? (
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  {[
+                    { value: 'none', label: 'Off', style: { background: 'rgba(255,255,255,0.1)', color: '#fff' } },
+                    { value: 'cyan', label: 'Cyan', style: { background: '#00f5ff', color: '#000' } },
+                    { value: 'purple', label: 'Purple', style: { background: '#bf5fff', color: '#000' } },
+                    { value: 'green', label: 'Green', style: { background: '#00ff88', color: '#000' } },
+                    { value: 'gold', label: 'Gold', style: { background: '#ffd700', color: '#000' } },
+                    { value: 'red', label: 'Red', style: { background: '#ff3366', color: '#fff' } },
+                    { value: 'rainbow', label: '🌈', style: { background: 'linear-gradient(135deg, #ff3366, #ff9900, #00f5ff, #bf5fff)', color: '#000' } },
+                  ].map(g => (
+                    <button key={g.value} type="button"
+                      onClick={() => setProfileExtra(prev => ({ ...prev, name_glow: g.value }))}
+                      style={{ ...g.style, border: `2px solid ${profileExtra.name_glow === g.value ? '#fff' : 'transparent'}`, borderRadius: '20px', padding: '4px 12px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-head)' }}>
+                      {g.label}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '10px 14px', fontSize: '13px', color: 'rgba(255,255,255,0.3)', fontFamily: 'var(--font-body)' }}>
+                  🔒 Upload {5 - myUploads.length} more beat{5 - myUploads.length !== 1 ? 's' : ''} to unlock name glow
+                </div>
+              )}
+            </div>
+
             {/* Avatar border picker */}
             <div>
               <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '10px', textTransform: 'uppercase' }}>Avatar Border</label>

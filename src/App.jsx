@@ -421,7 +421,7 @@ export default function App() {
       )}
 
       {showUpload && (
-        <div className="modal-overlay" onClick={() => setShowUpload(false)}>
+        <div className="modal-overlay">
           <div className="modal-sheet" onClick={e => e.stopPropagation()}>
             <TrackUpload
               onSubmit={handleSoundCloudSubmit}

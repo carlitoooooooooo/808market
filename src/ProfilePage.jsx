@@ -50,20 +50,22 @@ export default function ProfilePage({ userVotes, tracks }) {
   }, [currentUser?.username]);
 
   useEffect(() => {
-    if (!currentUser?.username) return;
+    if (!currentUser?.username) {
+      setUploadsLoading(false);
+      return;
+    }
 
+    let cancelled = false;
     setUploadsLoading(true);
 
-    // Use direct REST to bypass Supabase JS client auth issues
-    const url = `${SUPABASE_URL}/rest/v1/tracks?uploaded_by_username=eq.${encodeURIComponent(currentUser.username)}&order=listed_at.desc`;
-    fetch(url, {
-      headers: {
-        'apikey': ANON_KEY,
-        'Authorization': `Bearer ${ANON_KEY}`,
-      }
-    })
-    .then(r => r.json())
-    .then(data => {
+    async function loadUploads() {
+      try {
+        const url = `${SUPABASE_URL}/rest/v1/tracks?uploaded_by_username=eq.${encodeURIComponent(currentUser.username)}&order=listed_at.desc`;
+        const res = await fetch(url, {
+          headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}` }
+        });
+        const data = await res.json();
+        if (cancelled) return;
         if (Array.isArray(data)) {
           const mapped = data.map(t => ({
             id: t.id,
@@ -71,32 +73,26 @@ export default function ProfilePage({ userVotes, tracks }) {
             artist: t.artist,
             genre: t.genre,
             coverUrl: t.cover_url || "",
-            cops: t.cops || t.hards || 0,
-            passes: t.passes || t.trash || 0,
+            cops: t.cops || 0,
+            passes: t.passes || 0,
             price: t.price || 0,
             licenseType: t.license_type || "lease",
             listedAt: t.listed_at,
           }));
           setMyUploads(mapped);
-
-          mapped.forEach(async (track) => {
-            const { data: rxData } = await supabase
-              .from('reactions')
-              .select('emoji')
-              .eq('track_id', track.id);
-            if (rxData) {
-              const counts = {};
-              rxData.forEach(r => { counts[r.emoji] = (counts[r.emoji] || 0) + 1; });
-              setUploadReactions(prev => ({ ...prev, [track.id]: counts }));
-            }
-          });
+        } else {
+          setMyUploads([]);
         }
-        setUploadsLoading(false);
-      })
-      .catch(err => {
+      } catch (err) {
         console.error('Failed to load uploads:', err);
-        setUploadsLoading(false);
-      });
+        if (!cancelled) setMyUploads([]);
+      } finally {
+        if (!cancelled) setUploadsLoading(false);
+      }
+    }
+
+    loadUploads();
+    return () => { cancelled = true; };
   }, [currentUser?.username]);
 
   if (!currentUser) return null;

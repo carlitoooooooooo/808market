@@ -87,19 +87,24 @@ export default function App() {
   const toastTimer = useRef(null);
   const notifTimer = useRef(null);
 
-  // Load tracks
+  // Load tracks via direct REST (bypasses Supabase JS client auth)
   useEffect(() => {
     async function loadTracks() {
       setTracksLoading(true);
-      localStorage.removeItem('tsh_tracks_cache');
       try {
-        const { data, error } = await supabase.from('tracks').select('*').order('listed_at', { ascending: false });
-        if (error) throw error;
-        const mapped = (data || []).map(mapTrack);
-        setTracks(mapped);
+        const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
+        const res = await fetch('https://bkapxykeryzxbqpgjgab.supabase.co/rest/v1/tracks?order=listed_at.desc', {
+          headers: { 'apikey': ANON, 'Authorization': `Bearer ${ANON}` }
+        });
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          setTracks(data.map(mapTrack));
+        } else {
+          setTracks([]);
+        }
       } catch (err) {
         console.error('Load tracks error:', err);
-        setTracks(tracksData.map(t => ({ ...t, cops: t.hards || 0, passes: t.trash || 0, coverUrl: t.coverUrl, audioUrl: t.audioUrl, listedAt: t.listedAt, uploadedBy: t.uploadedBy })));
+        setTracks([]);
       } finally {
         setTracksLoading(false);
       }

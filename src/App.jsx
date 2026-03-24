@@ -615,6 +615,11 @@ export default function App() {
         {activeTab === "notifications" && (
           <NotificationsPage
             onNotificationsRead={loadUnreadCount}
+            onOpenTrack={(trackId) => {
+              const found = tracks.find(t => String(t.id) === String(trackId));
+              if (found) setDeepLinkTrack(found);
+            }}
+            onOpenUser={(username) => setViewingUser(username)}
           />
         )}
 

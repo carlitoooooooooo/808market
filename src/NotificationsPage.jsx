@@ -19,7 +19,7 @@ const TYPE_ICONS = {
   unlock: "🎨",
 };
 
-export default function NotificationsPage({ onNotificationsRead }) {
+export default function NotificationsPage({ onNotificationsRead, onOpenTrack, onOpenUser }) {
   const { currentUser } = useAuth();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -43,16 +43,23 @@ export default function NotificationsPage({ onNotificationsRead }) {
   }, [loadNotifications]);
 
   async function markAsRead(notif) {
-    if (notif.read) return;
-    try {
-      await dbUpdate('notifications', { id: notif.id }, { read: true });
-      setNotifications(prev =>
-        prev.map(n => n.id === notif.id ? { ...n, read: true } : n)
-      );
-      // Tell parent to refresh unread count
-      if (onNotificationsRead) onNotificationsRead();
-    } catch (err) {
-      console.error('Mark read error:', err);
+    // Mark read
+    if (!notif.read) {
+      try {
+        await dbUpdate('notifications', { id: notif.id }, { read: true });
+        setNotifications(prev => prev.map(n => n.id === notif.id ? { ...n, read: true } : n));
+        if (onNotificationsRead) onNotificationsRead();
+      } catch (err) {
+        console.error('Mark read error:', err);
+      }
+    }
+    // Navigate to the relevant content
+    if (notif.type === 'follow' && notif.from_username && onOpenUser) {
+      onOpenUser(notif.from_username);
+    } else if (['like', 'hard', 'comment', 'reaction'].includes(notif.type) && notif.track_id && onOpenTrack) {
+      onOpenTrack(notif.track_id);
+    } else if (notif.from_username && onOpenUser) {
+      onOpenUser(notif.from_username);
     }
   }
 
@@ -114,6 +121,7 @@ export default function NotificationsPage({ onNotificationsRead }) {
               key={notif.id}
               className={`notification-row ${!notif.read ? "notification-row--unread" : ""}`}
               onClick={() => markAsRead(notif)}
+              style={{ cursor: 'pointer' }}
             >
               <div className="notification-icon">
                 {TYPE_ICONS[notif.type] || "🔔"}

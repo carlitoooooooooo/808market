@@ -46,6 +46,7 @@ export default function ProfilePage({ userVotes, tracks }) {
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [editingBeat, setEditingBeat] = useState(null);
   const [cropFile, setCropFile] = useState(null);
+  const [followList, setFollowList] = useState(null); // { type: 'followers'|'following', users: [] }
   const [followerCount, setFollowerCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
 
@@ -296,11 +297,22 @@ export default function ProfilePage({ userVotes, tracks }) {
               }}>BETA TESTER</span>
             )}
           </div>
-          {/* Follower/Following counts */}
-          <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', fontFamily: 'var(--font-body)', marginTop: '2px', marginBottom: '2px' }}>
-            <span style={{ color: 'rgba(255,255,255,0.8)', fontWeight: 600 }}>{followerCount}</span> followers
-            {' · '}
-            <span style={{ color: 'rgba(255,255,255,0.8)', fontWeight: 600 }}>{followingCount}</span> following
+          {/* Follower/Following counts - clickable */}
+          <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', fontFamily: 'var(--font-body)', marginTop: '2px', marginBottom: '2px', display: 'flex', gap: '12px' }}>
+            <span style={{ cursor: 'pointer' }} onClick={async () => {
+              const data = await fetch(`${SUPABASE_URL}/rest/v1/follows?following_username=eq.${encodeURIComponent(currentUser.username)}&select=follower_username`, { headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` } }).then(r => r.json());
+              setFollowList({ type: 'followers', users: Array.isArray(data) ? data.map(d => d.follower_username) : [] });
+            }}>
+              <span style={{ color: 'rgba(255,255,255,0.9)', fontWeight: 700 }}>{followerCount}</span>
+              <span style={{ marginLeft: '3px' }}>followers</span>
+            </span>
+            <span style={{ cursor: 'pointer' }} onClick={async () => {
+              const data = await fetch(`${SUPABASE_URL}/rest/v1/follows?follower_username=eq.${encodeURIComponent(currentUser.username)}&select=following_username`, { headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` } }).then(r => r.json());
+              setFollowList({ type: 'following', users: Array.isArray(data) ? data.map(d => d.following_username) : [] });
+            }}>
+              <span style={{ color: 'rgba(255,255,255,0.9)', fontWeight: 700 }}>{followingCount}</span>
+              <span style={{ marginLeft: '3px' }}>following</span>
+            </span>
           </div>
           {!editing && (
             <div className="profile-bio">{currentUser.bio || "no bio yet..."}</div>
@@ -583,6 +595,35 @@ export default function ProfilePage({ userVotes, tracks }) {
           onClose={() => setShowSnippetPicker(false)}
           onConfirm={handleSnippetConfirm}
         />
+      )}
+
+      {/* Followers/Following modal */}
+      {followList && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.88)', zIndex: 300, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+          <div style={{ background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px 20px 0 0', width: '100%', maxWidth: '480px', maxHeight: '70vh', overflowY: 'auto', padding: '20px', animation: 'slideUp 0.25s ease' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <h3 style={{ fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '18px', textTransform: 'capitalize' }}>
+                {followList.type}
+              </h3>
+              <button onClick={() => setFollowList(null)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '20px', cursor: 'pointer' }}>✕</button>
+            </div>
+            {followList.users.length === 0 ? (
+              <div style={{ color: 'rgba(255,255,255,0.3)', fontFamily: 'var(--font-body)', fontSize: '14px', padding: '20px 0', textAlign: 'center' }}>
+                {followList.type === 'followers' ? 'No followers yet.' : 'Not following anyone yet.'}
+              </div>
+            ) : (
+              followList.users.map(username => (
+                <div key={username} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.06)', cursor: 'pointer' }}
+                  onClick={() => { setFollowList(null); /* onViewUser would need to be passed here */ }}>
+                  <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--cyan)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '16px', color: '#000', flexShrink: 0 }}>
+                    {username[0].toUpperCase()}
+                  </div>
+                  <span style={{ fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: '15px' }}>@{username}</span>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
       )}
 
       {/* Image cropper */}

@@ -12,6 +12,7 @@ import TrackUpload from "./TrackUpload.jsx";
 import NotificationsPage from "./NotificationsPage.jsx";
 import UserProfilePage from "./UserProfilePage.jsx";
 import { FireAnimation, TrashAnimation } from "./SwipeAnimations.jsx";
+import AboutPage from "./AboutPage.jsx";
 import tracksData from "./tracks.js";
 import { supabase } from "./supabase.js";
 import { dbUpsert, dbSelect, dbUpdate, dbInsert } from "./dbHelper.js";
@@ -81,6 +82,7 @@ export default function App() {
   const [activeGenre, setActiveGenre] = useState("ALL");
   const [reactionTarget, setReactionTarget] = useState(null);
   const [showUpload, setShowUpload] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
   const [viewingUser, setViewingUser] = useState(null);
   const [deepLinkTrack, setDeepLinkTrack] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -285,9 +287,17 @@ export default function App() {
           <Logo />
           <span className="beta-tag">BETA</span>
         </div>
-        <button className="btn-upload" onClick={() => setShowUpload(true)}>
-          + LIST BEAT
-        </button>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <button onClick={() => setShowAbout(true)} style={{
+            background: 'none', border: '1px solid rgba(255,255,255,0.15)',
+            color: 'rgba(255,255,255,0.5)', borderRadius: '20px',
+            padding: '5px 12px', fontSize: '12px', cursor: 'pointer',
+            fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500,
+          }}>About</button>
+          <button className="btn-upload" onClick={() => setShowUpload(true)}>
+            + LIST BEAT
+          </button>
+        </div>
       </header>
 
       <main className="app-main">
@@ -430,6 +440,8 @@ export default function App() {
           </div>
         </div>
       )}
+
+      {showAbout && <AboutPage onClose={() => setShowAbout(false)} />}
 
       {deepLinkTrack && (
         <TrackModal

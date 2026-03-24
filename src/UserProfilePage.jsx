@@ -45,6 +45,7 @@ function mapTrack(t) {
     embedUrl: t.embed_url || null,
     isSoundCloud: !!(t.soundcloud_url),
     producerNotes: t.producer_notes || "",
+    playCount: t.play_count || 0,
   };
 }
 
@@ -105,6 +106,7 @@ export default function UserProfilePage({ username, onClose, onOpenModal, userVo
   }, [username, currentUser?.username]);
 
   const totalLikes = tracks.reduce((s, t) => s + (t.cops || 0), 0);
+  const totalPlays = tracks.reduce((s, t) => s + (t.playCount || 0), 0);
 
   const avatarColor = profile?.avatar_color || "#ff2d78";
   const bio = profile?.bio || "";
@@ -318,7 +320,7 @@ export default function UserProfilePage({ username, onClose, onOpenModal, userVo
                 <div className="stat-label">🎵 beats</div>
               </div>
               <div className="stat-box">
-                <div className="stat-value" style={{ color: "var(--cyan)" }}>0</div>
+                <div className="stat-value" style={{ color: "var(--cyan)" }}>{totalPlays}</div>
                 <div className="stat-label">🎧 plays</div>
               </div>
             </div>

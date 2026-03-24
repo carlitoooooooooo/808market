@@ -437,7 +437,7 @@ export default function App() {
                 <button
                   className={`feed-toggle-btn ${discoverFeed === "browse" ? "feed-toggle-btn--active" : ""}`}
                   onClick={() => setDiscoverFeed("browse")}
-                >Browse</button>
+                >Grid</button>
               </div>
             )}
 

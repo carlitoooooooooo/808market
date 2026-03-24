@@ -51,10 +51,9 @@ export default function LandingPage({ onGetStarted, onBrowseAsGuest }) {
 
         {/* Hero */}
         <div style={{ padding: '48px 0 40px' }}>
-          <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 'clamp(42px, 12vw, 56px)', lineHeight: 1.1, marginBottom: '20px', letterSpacing: '-2px' }}>
-            Swipe.<br />
-            <span style={{ background: 'linear-gradient(135deg, #00f5ff, #bf5fff)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Discover.</span><br />
-            Cop.
+          <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 'clamp(36px, 10vw, 52px)', lineHeight: 1.15, marginBottom: '20px', letterSpacing: '-1.5px' }}>
+            The Beat Marketplace<br />
+            <span style={{ background: 'linear-gradient(135deg, #00f5ff, #bf5fff)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Built Different.</span>
           </h1>
           <p style={{ fontSize: '16px', color: 'rgba(255,255,255,0.55)', lineHeight: 1.6, marginBottom: '32px', maxWidth: '340px' }}>
             The beat marketplace built for producers and artists who move different.

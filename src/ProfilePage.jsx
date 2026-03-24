@@ -28,7 +28,7 @@ function setPinnedTrack(username, trackId) {
 const SUPABASE_URL = 'https://bkapxykeryzxbqpgjgab.supabase.co';
 const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
 
-export default function ProfilePage({ userVotes, tracks }) {
+export default function ProfilePage({ userVotes, tracks, onViewUser }) {
   const { currentUser, setUserData, logout } = useAuth();
   const [editing, setEditing] = useState(false);
   const [editBio, setEditBio] = useState(currentUser?.bio || "");
@@ -686,7 +686,7 @@ export default function ProfilePage({ userVotes, tracks }) {
             ) : (
               followList.users.map(username => (
                 <div key={username} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.06)', cursor: 'pointer' }}
-                  onClick={() => { setFollowList(null); /* onViewUser would need to be passed here */ }}>
+                  onClick={() => { setFollowList(null); onViewUser?.(username); }}>
                   <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--cyan)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '16px', color: '#000', flexShrink: 0 }}>
                     {username[0].toUpperCase()}
                   </div>

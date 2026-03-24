@@ -30,15 +30,15 @@ export function AuthProvider({ children }) {
         const cached = JSON.parse(saved);
         setCurrentUser(cached);
         setAuthLoading(false);
-        // If cached session is missing role/isBetaTester, refresh from DB in background
-        if (!cached.role || cached.isBetaTester === undefined) {
+        // Always re-fetch role/avatar from DB in background to stay fresh
+        {
           const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
-          fetch(`https://bkapxykeryzxbqpgjgab.supabase.co/rest/v1/profiles?username=eq.${encodeURIComponent(cached.username)}&select=id,username,avatar_color,bio,role,is_beta_tester`, {
+          fetch(`https://bkapxykeryzxbqpgjgab.supabase.co/rest/v1/profiles?username=eq.${encodeURIComponent(cached.username)}&select=id,username,avatar_color,bio,role,is_beta_tester,avatar_url`, {
             headers: { apikey: ANON, Authorization: `Bearer ${ANON}` }
           }).then(r => r.json()).then(data => {
             const p = Array.isArray(data) ? data[0] : data;
             if (p) {
-              const updated = { ...cached, role: p.role || 'user', isBetaTester: p.is_beta_tester || false };
+              const updated = { ...cached, role: p.role || 'user', isBetaTester: p.is_beta_tester || false, avatarUrl: p.avatar_url || cached.avatarUrl || null };
               localStorage.setItem(SESSION_KEY, JSON.stringify(updated));
               setCurrentUser(updated);
             }

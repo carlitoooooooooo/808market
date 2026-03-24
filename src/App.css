@@ -900,9 +900,6 @@ body {
   flex-shrink: 0;
   white-space: nowrap;
   word-break: normal;
-  min-width: max-content;
-  display: inline-flex;
-  align-items: center;
 }
 .profile-bio {
   font-family: var(--font-body);

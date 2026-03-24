@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { useAuth } from "./AuthContext";
 import { supabase } from "./supabase.js";
 
-const GENRES = ["Hip-Hop", "R&B", "Drill", "Trap", "Afrobeats", "Jersey Club", "Hyperpop", "Indie", "Electronic", "Soul"];
+const GENRES = ["Hip-Hop", "Drill", "Trap", "R&B", "Afrobeats", "Electronic", "Other"];
 const LICENSE_TYPES = [
   { value: "free", label: "Free Download" },
   { value: "lease", label: "Non-Exclusive Lease" },

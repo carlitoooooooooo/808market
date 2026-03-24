@@ -24,7 +24,7 @@ const TABS = [
   { id: "profile", label: "👤 Profile" },
 ];
 
-const GENRES = ["ALL", "Hip-Hop", "R&B", "Drill", "Trap", "Afrobeats", "Jersey Club", "Hyperpop", "Indie", "Electronic", "Soul"];
+const GENRES = ["ALL", "Hip-Hop", "Drill", "Trap", "R&B", "Afrobeats", "Electronic", "Other"];
 
 const SEEN_KEY = (username) => `tsh_seen_${username}`;
 

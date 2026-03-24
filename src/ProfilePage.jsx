@@ -507,7 +507,7 @@ export default function ProfilePage({ userVotes, tracks, onViewUser }) {
         ) : (
           <div className="taste-match-list">
             {tasteMatches.map((u) => (
-              <div key={u.username} className="taste-match-card">
+              <div key={u.username} className="taste-match-card" style={{ cursor: 'pointer' }} onClick={() => onViewUser?.(u.username)}>
                 <div
                   className="taste-match-avatar"
                   style={{ background: u.avatarColor }}

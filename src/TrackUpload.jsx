@@ -57,6 +57,47 @@ function guessFromSCUrl(url) {
   } catch { return { artist: "Unknown", title: "Untitled" }; }
 }
 
+// Tag input component
+function TagInput({ tags, setTags, disabled }) {
+  const [input, setInput] = useState("");
+  function addTag(raw) {
+    const tag = raw.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
+    if (!tag || tags.includes(tag) || tags.length >= 10) return;
+    setTags([...tags, tag]);
+    setInput("");
+  }
+  function handleKey(e) {
+    if (e.key === "Enter" || e.key === ",") { e.preventDefault(); addTag(input); }
+    if (e.key === "Backspace" && !input && tags.length) setTags(tags.slice(0, -1));
+  }
+  return (
+    <div className="sc-upload__field">
+      <label className="sc-upload__label">TAGS <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '10px', fontWeight: 400 }}>press Enter to add · max 10</span></label>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '10px', padding: '8px 10px', minHeight: '42px', alignItems: 'center', cursor: 'text' }}
+        onClick={() => document.getElementById('tag-input-field')?.focus()}>
+        {tags.map(t => (
+          <span key={t} style={{ background: 'rgba(0,245,255,0.12)', border: '1px solid rgba(0,245,255,0.3)', color: 'var(--cyan)', borderRadius: '20px', padding: '2px 10px', fontSize: '12px', fontFamily: 'var(--font-head)', display: 'flex', alignItems: 'center', gap: '5px' }}>
+            #{t}
+            {!disabled && <button type="button" onClick={(e) => { e.stopPropagation(); setTags(tags.filter(x => x !== t)); }}
+              style={{ background: 'none', border: 'none', color: 'rgba(0,245,255,0.6)', cursor: 'pointer', fontSize: '12px', lineHeight: 1, padding: 0 }}>✕</button>}
+          </span>
+        ))}
+        {!disabled && tags.length < 10 && (
+          <input
+            id="tag-input-field"
+            value={input}
+            onChange={e => setInput(e.target.value.replace(",", ""))}
+            onKeyDown={handleKey}
+            onBlur={() => input && addTag(input)}
+            placeholder={tags.length === 0 ? "dark, melodic, hard..." : ""}
+            style={{ background: 'none', border: 'none', outline: 'none', color: '#fff', fontSize: '13px', fontFamily: 'var(--font-body)', minWidth: '80px', flex: 1 }}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
 // Shared beat info fields
 function BeatInfoFields({ title, setTitle, artist, setArtist, genre, setGenre, bpm, setBpm, beatKey, setBeatKey, licenseType, setLicenseType, price, setPrice, paymentLink, setPaymentLink, disabled }) {
   return (
@@ -122,6 +163,7 @@ function MP3Tab({ onSubmit, onCancel }) {
   const [price, setPrice] = useState("");
   const [paymentLink, setPaymentLink] = useState("");
   const [producerNotes, setProducerNotes] = useState("");
+  const [tags, setTags] = useState([]);
   const [audioFile, setAudioFile] = useState(null);
   const [coverFile, setCoverFile] = useState(null);
   const [coverPreview, setCoverPreview] = useState(null);
@@ -184,7 +226,7 @@ function MP3Tab({ onSubmit, onCancel }) {
         cover_url: coverUrl,
         audio_url: audioUrl,
         snippet_start: snippetStart,
-        tags: [genre.toLowerCase()],
+        tags: [...new Set([genre.toLowerCase(), ...tags])],
         uploaded_by_username: currentUser.username,
         cops: 0,
         passes: 0,
@@ -332,6 +374,8 @@ function MP3Tab({ onSubmit, onCancel }) {
         <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.35)', textAlign: 'right', marginTop: '3px' }}>{producerNotes.length}/300</div>
       </div>
 
+      <TagInput tags={tags} setTags={setTags} disabled={uploading} />
+
       {error && <div className="sc-upload__error">{error}</div>}
 
       {uploading && (
@@ -363,6 +407,7 @@ function SoundCloudTab({ onSubmit, onCancel }) {
   const [price, setPrice] = useState("");
   const [paymentLink, setPaymentLink] = useState("");
   const [producerNotes, setProducerNotes] = useState("");
+  const [tags, setTags] = useState([]);
   const [preview, setPreview] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -390,7 +435,7 @@ function SoundCloudTab({ onSubmit, onCancel }) {
         cover_url: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&q=80",
         audio_url: url,
         snippet_start: 0,
-        tags: [genre.toLowerCase()],
+        tags: [...new Set([genre.toLowerCase(), ...tags])],
         uploaded_by_username: currentUser.username,
         cops: 0,
         passes: 0,
@@ -504,6 +549,7 @@ function SoundCloudTab({ onSubmit, onCancel }) {
               />
               <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.35)', textAlign: 'right', marginTop: '3px' }}>{producerNotes.length}/300</div>
             </div>
+            <TagInput tags={tags} setTags={setTags} disabled={saving} />
           </div>
 
           {error && <div className="sc-upload__error">{error}</div>}

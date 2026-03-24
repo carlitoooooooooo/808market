@@ -594,6 +594,10 @@ export default function App() {
         <UserSearch
           onSelectUser={(username) => { setViewingUser(username); }}
           onClose={() => setShowUserSearch(false)}
+          onSelectTrack={(trackId) => {
+            const found = tracks.find(t => String(t.id) === String(trackId));
+            if (found) setDeepLinkTrack(found);
+          }}
         />
       )}
 

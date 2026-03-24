@@ -716,6 +716,8 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
       </div>
 
 
+      <DrumkitSection username={currentUser.username} isOwnProfile={true} />
+
       {/* Saved Beats */}
       <div className="profile-section">
         <div className="section-title">🔖 SAVED BEATS</div>
@@ -784,8 +786,6 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
           );
         })()}
       </div>
-
-      <DrumkitSection username={currentUser.username} isOwnProfile={true} />
 
       </div> {/* end profile-right-col */}
 

@@ -50,7 +50,7 @@ export default function ProfilePage({ userVotes, tracks }) {
   }, [currentUser?.username]);
 
   useEffect(() => {
-    if (!currentUser?.id) return;
+    if (!currentUser?.username) return;
 
     setUploadsLoading(true);
     supabase

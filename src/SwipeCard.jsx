@@ -5,7 +5,7 @@ import { useAuth } from "./AuthContext.jsx";
 
 const SWIPE_THRESHOLD = 80;
 
-export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
+export default function SwipeCard({ track, onSwipe, isTop, stackIndex, nameGlow }) {
   const { currentUser } = useAuth();
   const [dragX, setDragX] = useState(0);
   const [dragY, setDragY] = useState(0);
@@ -275,7 +275,7 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
           )}
 
           <div className="swipe-card__info">
-            <div className="swipe-card__artist">{track.artist}</div>
+            <div className={`swipe-card__artist${nameGlow && nameGlow !== 'none' ? ` name-glow-${nameGlow}` : ''}`}>{track.artist}</div>
             <div className="swipe-card__title">{track.title}</div>
             <div className="swipe-card__meta">
               <span className="genre-tag">{track.genre}</span>
@@ -305,7 +305,7 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
             <div>
               <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '4px' }}>BEAT DETAILS</div>
               <div style={{ fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '20px', color: '#fff', marginBottom: '2px' }}>{track.title}</div>
-              <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', fontFamily: 'var(--font-body)' }}>by {track.artist}</div>
+              <div className={nameGlow && nameGlow !== 'none' ? `name-glow-${nameGlow}` : ''} style={{ fontSize: '14px', fontFamily: 'var(--font-body)', color: nameGlow && nameGlow !== 'none' ? undefined : 'rgba(255,255,255,0.6)' }}>by {track.artist}</div>
             </div>
 
             {/* Details */}

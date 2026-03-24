@@ -111,6 +111,7 @@ export default function App() {
   const [discoverFeed, setDiscoverFeed] = useState("foryou"); // "foryou" | "following" | "browse"
   const [browseTrack, setBrowseTrack] = useState(null);
   const [followingList, setFollowingList] = useState([]); // usernames current user follows
+  const [producerProfiles, setProducerProfiles] = useState({}); // username -> { name_glow, avatar_url, ... }
   const toastTimer = useRef(null);
   const notifTimer = useRef(null);
 
@@ -125,7 +126,22 @@ export default function App() {
         });
         const data = await res.json();
         if (Array.isArray(data) && data.length > 0) {
-          setTracks(data.map(mapTrack));
+          const mapped = data.map(mapTrack);
+          setTracks(mapped);
+          // Load producer profiles for name glows
+          const usernames = [...new Set(mapped.map(t => t.uploadedBy).filter(Boolean))];
+          if (usernames.length > 0) {
+            const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
+            fetch(`https://bkapxykeryzxbqpgjgab.supabase.co/rest/v1/profiles?username=in.(${usernames.join(',')})&select=username,name_glow,avatar_url,avatar_color`, {
+              headers: { apikey: ANON, Authorization: `Bearer ${ANON}` }
+            }).then(r => r.json()).then(profiles => {
+              if (Array.isArray(profiles)) {
+                const map = {};
+                profiles.forEach(p => { map[p.username] = p; });
+                setProducerProfiles(map);
+              }
+            }).catch(() => {});
+          }
         } else {
           setTracks([]);
         }
@@ -468,7 +484,7 @@ export default function App() {
                       <div className="browse-card__cover" style={{ backgroundImage: `url(${track.coverUrl})` }} />
                       <div className="browse-card__info">
                         <div className="browse-card__title">{track.title}</div>
-                        <div className="browse-card__artist">@{track.artist}</div>
+                        <div className={`browse-card__artist${producerProfiles[track.uploadedBy]?.name_glow && producerProfiles[track.uploadedBy].name_glow !== 'none' ? ` name-glow-${producerProfiles[track.uploadedBy].name_glow}` : ''}`}>@{track.artist}</div>
                         <div className="browse-card__meta">
                           <span className="genre-tag" style={{ fontSize: '9px', padding: '1px 6px' }}>{track.genre}</span>
                           <span style={{ fontSize: '11px', fontWeight: 700, fontFamily: 'var(--font-head)', color: isFree ? 'var(--cyan)' : 'var(--green)' }}>{isFree ? 'FREE' : `$${track.price}`}</span>
@@ -549,6 +565,7 @@ export default function App() {
                     isTop={idx === 0}
                     stackIndex={idx}
                     onSwipe={handleSwipe}
+                    nameGlow={producerProfiles[track.uploadedBy]?.name_glow}
                   />
                 ))}
               </div>

@@ -229,7 +229,7 @@ function MP3Tab({ onSubmit, onCancel }) {
         ) : (
           <div><div className="upload-file-icon">🎵</div><div>Tap to select audio file</div><div className="upload-file-hint">MP3, WAV, AAC — max {MAX_FILE_MB}MB</div></div>
         )}
-        <input ref={audioRef} type="file" accept="audio/*" style={{ display:"none" }} onChange={handleAudioChange} />
+        <input ref={audioRef} type="file" accept="audio/mpeg,audio/mp3,audio/wav,audio/x-wav,audio/aac,audio/ogg,audio/flac,audio/m4a,audio/x-m4a,.mp3,.wav,.aac,.ogg,.flac,.m4a" style={{ display:"none" }} onChange={handleAudioChange} />
       </div>
 
       {/* Snippet picker button */}

@@ -10,20 +10,20 @@ const RANK_STYLE = {
 export default function LeaderboardPage({ tracks, onVote, userVotes, onViewUser }) {
   const [selectedTrack, setSelectedTrack] = useState(null);
 
-  const sorted = [...tracks].sort((a, b) => (b.cops || b.hards || 0) - (a.cops || a.hards || 0));
+  const sorted = [...tracks].sort((a, b) => (b.cops || 0) - (a.cops || 0));
 
   return (
     <div className="leaderboard-page">
       <div className="page-header">
         <h1 className="page-title">🔥 Top Beats</h1>
-        <p className="page-subtitle">most copped right now</p>
+        <p className="page-subtitle">Heating Up 🔥</p>
       </div>
 
       <div className="leaderboard-list">
         {sorted.map((track, idx) => {
           const rank = idx + 1;
           const rankStyle = RANK_STYLE[rank] || {};
-          const cops = track.cops || track.hards || 0;
+          const cops = track.cops || 0;
           const price = track.price || 0;
           const isFree = !price || price === 0;
 
@@ -53,7 +53,7 @@ export default function LeaderboardPage({ tracks, onVote, userVotes, onViewUser 
               </div>
 
               <div className="leaderboard-hards" style={{ textAlign: "right" }}>
-                <div className="hards-count">🛒 {cops.toLocaleString()}</div>
+                <div className="hards-count">❤️ {cops.toLocaleString()}</div>
                 <div style={{ fontSize: "12px", marginTop: "3px", color: isFree ? "var(--cyan)" : "var(--green)", fontWeight: 600, fontFamily: "var(--font-head)" }}>
                   {isFree ? "FREE" : `$${price}`}
                 </div>

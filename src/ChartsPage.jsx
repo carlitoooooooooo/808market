@@ -21,14 +21,14 @@ export default function ChartsPage({ tracks, onVote, userVotes, onViewUser }) {
 
   // Use recent tracks if 10+, otherwise fall back to all sorted by hards
   const pool = recent.length >= 10 ? recent : tracks;
-  const sorted = [...pool].sort((a, b) => b.hards - a.hards).slice(0, 10);
+  const sorted = [...pool].sort((a, b) => (b.cops || 0) - (a.cops || 0)).slice(0, 10);
 
   return (
     <div className="charts-page">
       <div className="page-header">
         <h1 className="page-title">📊 THIS WEEK'S TOP 10</h1>
         <p className="page-subtitle">
-          {recent.length >= 10 ? "tracks from the last 7 days" : "hardest tracks overall"}
+          {recent.length >= 10 ? "tracks from the last 7 days" : "most liked overall"}
         </p>
       </div>
 
@@ -64,7 +64,7 @@ export default function ChartsPage({ tracks, onVote, userVotes, onViewUser }) {
               </div>
 
               <div className="charts-hards">
-                <span className="hards-count">🔥 {track.hards.toLocaleString()}</span>
+                <span className="hards-count">❤️ {(track.cops || 0).toLocaleString()}</span>
               </div>
             </div>
           );

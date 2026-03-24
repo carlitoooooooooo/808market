@@ -252,20 +252,16 @@ export default function ProfilePage({ userVotes, tracks }) {
       {/* Stats */}
       <div className="profile-stats">
         <div className="stat-box">
-          <div className="stat-value">{seen}</div>
-          <div className="stat-label">rated</div>
-        </div>
-        <div className="stat-box">
-          <div className="stat-value" style={{ color: "var(--cyan)" }}>{copPct}%</div>
-          <div className="stat-label">cop %</div>
-        </div>
-        <div className="stat-box">
           <div className="stat-value" style={{ color: "var(--green)" }}>{totalCopsReceived}</div>
-          <div className="stat-label">cops recv'd</div>
+          <div className="stat-label">❤️ likes recv'd</div>
         </div>
         <div className="stat-box">
           <div className="stat-value" style={{ color: "var(--purple)" }}>{myUploads.length}</div>
-          <div className="stat-label">beats listed</div>
+          <div className="stat-label">🎵 beats</div>
+        </div>
+        <div className="stat-box">
+          <div className="stat-value" style={{ color: "var(--cyan)" }}>0</div>
+          <div className="stat-label">🎧 plays</div>
         </div>
       </div>
 
@@ -293,7 +289,7 @@ export default function ProfilePage({ userVotes, tracks }) {
         <div className="profile-section">
           <div className="section-title">🎯 YOUR TASTE</div>
           <div className="taste-tags">
-            {copsGiven > 0 && <span className="taste-tag">🛒 Collector</span>}
+            {copsGiven > 0 && <span className="taste-tag">❤️ Collector</span>}
             {copPct > 70 && <span className="taste-tag">💎 Picky AF</span>}
             {copPct < 30 && <span className="taste-tag">🎯 Discerning</span>}
             {seen > 10 && <span className="taste-tag">👀 Deep Diver</span>}
@@ -427,11 +423,11 @@ export default function ProfilePage({ userVotes, tracks }) {
                         <span className="analytics-value">{total}</span>
                       </div>
                       <div className="analytics-item">
-                        <span className="analytics-label">cop %</span>
+                        <span className="analytics-label">like %</span>
                         <span className="analytics-value" style={{ color: "var(--green)" }}>{hp}%</span>
                       </div>
                       <div className="analytics-item">
-                        <span className="analytics-label">cops</span>
+                        <span className="analytics-label">likes</span>
                         <span className="analytics-value" style={{ color: "var(--cyan)" }}>{track.cops || 0}</span>
                       </div>
                       {topRx && (
@@ -448,7 +444,7 @@ export default function ProfilePage({ userVotes, tracks }) {
                       />
                     </div>
                     <div className="analytics-ratio-labels">
-                      <span style={{ color: "var(--green)" }}>🛒 {track.cops || 0} cops</span>
+                      <span style={{ color: "var(--green)" }}>❤️ {track.cops || 0} likes</span>
                       <span style={{ color: "var(--red)" }}>💨 {track.passes || 0} passes</span>
                     </div>
                   </div>

@@ -24,8 +24,8 @@ function mapTrack(t) {
     uploadedBy: t.uploaded_by_username || t.uploaded_by || "unknown",
     uploadedById: t.uploaded_by || null,
     listedAt: t.listed_at || new Date().toISOString(),
-    hards: t.hards || 0,
-    trash: t.trash || 0,
+    cops: t.cops || t.hards || 0,
+    passes: t.passes || t.trash || 0,
     soundcloudUrl: t.soundcloud_url || null,
     embedUrl: t.embed_url || null,
     isSoundCloud: !!(t.soundcloud_url),
@@ -62,8 +62,7 @@ export default function UserProfilePage({ username, onClose, onOpenModal, userVo
     if (username) load();
   }, [username]);
 
-  const totalHards = tracks.reduce((s, t) => s + (t.hards || 0), 0);
-  const totalTrash = tracks.reduce((s, t) => s + (t.trash || 0), 0);
+  const totalLikes = tracks.reduce((s, t) => s + (t.cops || 0), 0);
 
   const avatarColor = profile?.avatar_color || "#ff2d78";
   const bio = profile?.bio || "";
@@ -107,16 +106,16 @@ export default function UserProfilePage({ username, onClose, onOpenModal, userVo
             {/* Stats */}
             <div className="user-profile-stats">
               <div className="stat-box">
+                <div className="stat-value" style={{ color: "var(--green)" }}>{totalLikes}</div>
+                <div className="stat-label">❤️ likes</div>
+              </div>
+              <div className="stat-box">
                 <div className="stat-value">{tracks.length}</div>
-                <div className="stat-label">uploads</div>
+                <div className="stat-label">🎵 beats</div>
               </div>
               <div className="stat-box">
-                <div className="stat-value" style={{ color: "var(--green)" }}>{totalHards}</div>
-                <div className="stat-label">🔥 hards</div>
-              </div>
-              <div className="stat-box">
-                <div className="stat-value" style={{ color: "#ff4444" }}>{totalTrash}</div>
-                <div className="stat-label">💀 trash</div>
+                <div className="stat-value" style={{ color: "var(--cyan)" }}>0</div>
+                <div className="stat-label">🎧 plays</div>
               </div>
             </div>
 
@@ -133,8 +132,6 @@ export default function UserProfilePage({ username, onClose, onOpenModal, userVo
               ) : (
                 <div className="user-profile-tracks-grid">
                   {tracks.map(track => {
-                    const total = (track.hards || 0) + (track.trash || 0);
-                    const hp = total > 0 ? Math.round((track.hards / total) * 100) : 0;
                     return (
                       <div
                         key={track.id}
@@ -150,7 +147,7 @@ export default function UserProfilePage({ username, onClose, onOpenModal, userVo
                           <div className="user-profile-track-artist">{track.artist}</div>
                           <div style={{ display: "flex", gap: "6px", alignItems: "center", marginTop: "3px" }}>
                             <span className="genre-tag" style={{ fontSize: "6px", padding: "2px 5px" }}>{track.genre}</span>
-                            <span style={{ fontFamily: "var(--font-pixel)", fontSize: "7px", color: "var(--green)" }}>🔥{track.hards}</span>
+                            <span style={{ fontFamily: "var(--font-pixel)", fontSize: "7px", color: "var(--green)" }}>❤️{track.cops || 0}</span>
                           </div>
                         </div>
                       </div>

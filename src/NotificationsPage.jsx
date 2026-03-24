@@ -11,7 +11,8 @@ function timeAgo(iso) {
 }
 
 const TYPE_ICONS = {
-  hard: "🔥",
+  hard: "❤️",
+  like: "❤️",
   comment: "💬",
   reaction: "😤",
 };
@@ -101,7 +102,7 @@ export default function NotificationsPage({ onNotificationsRead }) {
             NO NOTIFICATIONS YET
           </div>
           <div style={{ fontFamily: "var(--font-vt)", fontSize: "18px", color: "#555", marginTop: "8px" }}>
-            when people hard your tracks you'll see it here
+            when people like your tracks you'll see it here
           </div>
         </div>
       ) : (

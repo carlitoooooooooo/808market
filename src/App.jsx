@@ -63,7 +63,7 @@ function mapTrack(t) {
 
 function Toast({ message, visible }) {
   return (
-    <div className={`toast ${visible ? "toast--visible" : ""} ${message?.includes("COP") ? "toast--hard" : "toast--trash"}`}>
+    <div className={`toast ${visible ? "toast--visible" : ""} ${message?.includes("Liked") ? "toast--hard" : "toast--trash"}`}>
       {message}
     </div>
   );
@@ -195,7 +195,7 @@ export default function App() {
       saveSeen(currentUser.username, [...seen, track.id]);
     }
 
-    showToast(dir === "right" ? "🛒 COP IT!" : "💨 PASSED");
+    showToast(dir === "right" ? "❤️ Liked!" : "💨 PASSED");
     setReactionTarget({ trackId: track.id });
 
     // Persist vote
@@ -220,11 +220,11 @@ export default function App() {
         try {
           await dbInsert('notifications', {
             user_username: track.uploadedBy,
-            type: 'hard',
+            type: 'like',
             from_username: currentUser.username,
             track_id: track.id,
             track_title: track.title,
-            message: `${currentUser.username} copped your beat "${track.title}" 🛒`,
+            message: `${currentUser.username} liked your beat "${track.title}" ❤️`,
           });
         } catch (err) {
           console.error('Notification insert error:', err);
@@ -363,7 +363,7 @@ export default function App() {
               <div className="discover-swipe-hint">
                 <span>← Pass</span>
                 <span className="hint-count">{filteredQueue.length} beats</span>
-                <span>Cop It →</span>
+                <span>Like →</span>
               </div>
             )}
           </div>

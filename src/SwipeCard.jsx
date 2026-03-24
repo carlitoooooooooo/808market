@@ -69,7 +69,7 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
   }
 
   const triggerSwipe = useCallback((dir) => {
-    const label = dir === "right" ? "COP IT 🛒" : "PASS 💨";
+    const label = dir === "right" ? "❤️ LIKED" : "PASS 💨";
     setStamp(label);
     setFlyDir(dir);
     setIsFlying(true);
@@ -100,7 +100,7 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
       setIsDragging(true);
       setDragX(dx);
       setDragY(dy);
-      if (dx > 30) setStamp("COP IT 🛒");
+      if (dx > 30) setStamp("❤️ LIKED");
       else if (dx < -30) setStamp("PASS 💨");
       else setStamp(null);
     }
@@ -228,7 +228,7 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
       {/* Stamps */}
       {stamp && (
         <div
-          className={`swipe-stamp swipe-stamp--${dragX > 0 || flyDir === "right" ? "hard" : "trash"}`}
+          className={`swipe-stamp swipe-stamp--${dragX > 0 || flyDir === "right" ? "like" : "pass"}`}
           style={{ opacity: isFlying ? 1 : stampOpacity }}
         >
           {stamp}

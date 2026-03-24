@@ -314,7 +314,7 @@ export default function TrackModal({ track, onClose, onVote, userVotes, onViewUs
           {/* Cops/Passes ratio bar */}
           <div className="track-modal__ratio">
             <div className="ratio-label">
-              <span className="ratio-hard">🛒 {cops} cops</span>
+              <span className="ratio-hard">❤️ {cops} likes</span>
               <span className="ratio-trash">💨 {passes} passes</span>
             </div>
             <div className="ratio-bar">
@@ -334,7 +334,7 @@ export default function TrackModal({ track, onClose, onVote, userVotes, onViewUs
             </div>
           ) : (
             <div className="track-modal__voted">
-              {userVote === "right" ? "🛒 You copped this" : "💨 You passed"}
+              {userVote === "right" ? "❤️ You liked this" : "💨 You passed"}
             </div>
           )}
 

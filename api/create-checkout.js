@@ -1,4 +1,4 @@
-import Stripe from 'stripe';
+﻿import Stripe from 'stripe';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -22,9 +22,15 @@ export default async function handler(req, res) {
     }
 
     const priceInCents = Math.round(parseFloat(price) * 100);
+    // 10% to 808market, 90% to the producer
     const platformFee = Math.round(priceInCents * PLATFORM_FEE_PCT);
+    const producerPayout = priceInCents - platformFee;
 
-    const beatPrice = priceInCents - platformFee;
+    const licenseLabel =
+      licenseType === 'free'      ? 'Free Download' :
+      licenseType === 'lease'     ? 'Non-Exclusive Lease' :
+      licenseType === 'exclusive' ? 'Exclusive License' :
+      licenseType               || 'Non-Exclusive Lease';
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -33,10 +39,10 @@ export default async function handler(req, res) {
           price_data: {
             currency: 'usd',
             product_data: {
-              name: trackTitle || 'Beat',
-              description: `${licenseType || 'Non-Exclusive Lease'} · by ${artist || 'Producer'}`,
+              name: (trackTitle || 'Beat') + ' - ' + licenseLabel,
+              description: 'by ' + (artist || 'Producer') + ' (90% goes directly to the producer)',
             },
-            unit_amount: beatPrice,
+            unit_amount: producerPayout,
           },
           quantity: 1,
         },
@@ -44,8 +50,8 @@ export default async function handler(req, res) {
           price_data: {
             currency: 'usd',
             product_data: {
-              name: '808market Platform Fee',
-              description: '10% platform fee · keeps 808market running',
+              name: '808market Platform Fee (10%)',
+              description: 'Supports the platform that connects you to producers',
             },
             unit_amount: platformFee,
           },
@@ -62,6 +68,7 @@ export default async function handler(req, res) {
         licenseType,
         buyerUsername: buyerUsername || 'anonymous',
         platformFee: platformFee.toString(),
+        producerPayout: producerPayout.toString(),
       },
     });
 

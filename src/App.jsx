@@ -108,7 +108,8 @@ export default function App() {
   const [viewingUser, setViewingUser] = useState(null);
   const [deepLinkTrack, setDeepLinkTrack] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [discoverFeed, setDiscoverFeed] = useState("foryou"); // "foryou" | "following"
+  const [discoverFeed, setDiscoverFeed] = useState("foryou"); // "foryou" | "following" | "browse"
+  const [browseTrack, setBrowseTrack] = useState(null);
   const [followingList, setFollowingList] = useState([]); // usernames current user follows
   const toastTimer = useRef(null);
   const notifTimer = useRef(null);
@@ -422,21 +423,21 @@ export default function App() {
       <main className="app-main">
         {activeTab === "discover" && (
           <div className="discover-view">
-            {/* For You / Following toggle */}
+            {/* For You / Following / Browse toggle */}
             {currentUser && (
               <div className="feed-toggle">
                 <button
                   className={`feed-toggle-btn ${discoverFeed === "foryou" ? "feed-toggle-btn--active" : ""}`}
                   onClick={() => setDiscoverFeed("foryou")}
-                >
-                  For You
-                </button>
+                >For You</button>
                 <button
                   className={`feed-toggle-btn ${discoverFeed === "following" ? "feed-toggle-btn--active" : ""}`}
                   onClick={() => setDiscoverFeed("following")}
-                >
-                  Following
-                </button>
+                >Following</button>
+                <button
+                  className={`feed-toggle-btn ${discoverFeed === "browse" ? "feed-toggle-btn--active" : ""}`}
+                  onClick={() => setDiscoverFeed("browse")}
+                >Browse</button>
               </div>
             )}
 
@@ -453,7 +454,43 @@ export default function App() {
               ))}
             </div>
 
-            {tracksLoading ? (
+            {/* ── Browse grid ── */}
+            {discoverFeed === "browse" && (
+              <div className="browse-grid">
+                {tracksLoading ? (
+                  <div className="empty-queue"><div className="empty-queue__icon">⏳</div><div className="empty-queue__text">Loading beats...</div></div>
+                ) : (activeGenre === "ALL" ? tracks : tracks.filter(t => t.genre === activeGenre)).length === 0 ? (
+                  <div className="empty-queue"><div className="empty-queue__icon">🎧</div><div className="empty-queue__text">No beats found</div></div>
+                ) : (activeGenre === "ALL" ? tracks : tracks.filter(t => t.genre === activeGenre)).map(track => {
+                  const isFree = !track.price || track.price === 0;
+                  return (
+                    <div key={track.id} className="browse-card" onClick={() => setBrowseTrack(track)}>
+                      <div className="browse-card__cover" style={{ backgroundImage: `url(${track.coverUrl})` }} />
+                      <div className="browse-card__info">
+                        <div className="browse-card__title">{track.title}</div>
+                        <div className="browse-card__artist">@{track.artist}</div>
+                        <div className="browse-card__meta">
+                          <span className="genre-tag" style={{ fontSize: '9px', padding: '1px 6px' }}>{track.genre}</span>
+                          <span style={{ fontSize: '11px', fontWeight: 700, fontFamily: 'var(--font-head)', color: isFree ? 'var(--cyan)' : 'var(--green)' }}>{isFree ? 'FREE' : `$${track.price}`}</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {browseTrack && (
+              <TrackModal
+                track={browseTrack}
+                onClose={() => setBrowseTrack(null)}
+                onVote={(dir, track) => { handleVoteFromModal(dir, track); setBrowseTrack(null); }}
+                userVotes={userVotes}
+                onViewUser={setViewingUser}
+              />
+            )}
+
+            {discoverFeed !== "browse" && tracksLoading ? (
               <div className="empty-queue">
                 <div className="empty-queue__icon">⏳</div>
                 <div className="empty-queue__text">Loading beats...</div>
@@ -517,7 +554,7 @@ export default function App() {
               </div>
             )}
 
-            {!tracksLoading && !tracksError && filteredQueue.length > 0 && (
+            {discoverFeed !== "browse" && !tracksLoading && !tracksError && filteredQueue.length > 0 && (
               <div className="discover-swipe-hint">
                 <span>← Pass</span>
                 <span className="hint-count">{filteredQueue.length} beats</span>

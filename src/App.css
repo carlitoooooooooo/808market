@@ -120,6 +120,7 @@ body {
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
 .app-main::-webkit-scrollbar { display: none; }
 
@@ -784,7 +785,7 @@ body {
 }
 
 /* ===== PROFILE PAGE ===== */
-.profile-page { padding: 16px 16px 32px; overflow-y: auto; }
+.profile-page { padding: 16px 16px 100px; }
 
 .profile-header {
   display: flex;

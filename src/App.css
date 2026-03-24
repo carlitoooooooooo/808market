@@ -1595,11 +1595,21 @@ body {
   display: flex;
   gap: 6px;
   overflow-x: auto;
-  padding: 10px 12px 8px 12px;
-  padding-right: 24px;
+  padding: 10px 0 8px;
   scrollbar-width: none;
   flex-shrink: 0;
   width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+.genre-filter-bar::before {
+  content: '';
+  padding-left: 12px;
+  flex-shrink: 0;
+}
+.genre-filter-bar::after {
+  content: '';
+  padding-right: 24px;
+  flex-shrink: 0;
 }
 .genre-filter-bar::-webkit-scrollbar { display: none; }
 

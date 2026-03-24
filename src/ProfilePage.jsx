@@ -156,6 +156,24 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload })
     }).catch(() => {});
   }, [currentUser?.username]);
 
+  // Send name glow unlock notification when user hits 5 uploads
+  useEffect(() => {
+    if (!currentUser?.username || myUploads.length !== 5) return;
+    const key = `tsh_nameglow_notif_${currentUser.username}`;
+    if (localStorage.getItem(key)) return; // already sent
+    localStorage.setItem(key, '1');
+    fetch(`${SUPABASE_URL}/rest/v1/notifications`, {
+      method: 'POST',
+      headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+      body: JSON.stringify({
+        user_username: currentUser.username,
+        type: 'unlock',
+        from_username: '808market',
+        message: '🎨 You\'ve uploaded 5 beats — Name Glow is now unlocked! Go to Edit Profile to customize.',
+      }),
+    }).catch(() => {});
+  }, [myUploads.length, currentUser?.username]);
+
   // Load saved beats
   useEffect(() => {
     if (!currentUser?.username) { setSavedLoading(false); return; }

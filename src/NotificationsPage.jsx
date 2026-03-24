@@ -15,6 +15,8 @@ const TYPE_ICONS = {
   like: "❤️",
   comment: "💬",
   reaction: "😤",
+  follow: "👥",
+  unlock: "🎨",
 };
 
 export default function NotificationsPage({ onNotificationsRead }) {

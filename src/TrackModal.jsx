@@ -5,6 +5,36 @@ import { useAuth } from "./AuthContext.jsx";
 import { supabase } from "./supabase.js";
 import { dbInsert, dbSelect, dbUpsert } from "./dbHelper.js";
 
+const SUPABASE_URL = 'https://bkapxykeryzxbqpgjgab.supabase.co';
+const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
+
+function mapTrackMini(t) {
+  return {
+    id: t.id,
+    title: t.title,
+    artist: t.artist,
+    genre: t.genre,
+    bpm: t.bpm || 0,
+    coverUrl: t.cover_url || "",
+    audioUrl: t.audio_url || "",
+    snippetStart: t.snippet_start || 0,
+    tags: t.tags || [],
+    uploadedBy: t.uploaded_by_username || t.uploaded_by || "unknown",
+    uploadedById: t.uploaded_by || null,
+    listedAt: t.listed_at || new Date().toISOString(),
+    cops: t.cops || t.hards || 0,
+    passes: t.passes || t.trash || 0,
+    price: t.price || 0,
+    licenseType: t.license_type || "lease",
+    beatKey: t.beat_key || "",
+    paymentLink: t.payment_link || "",
+    soundcloudUrl: t.soundcloud_url || null,
+    embedUrl: t.embed_url || null,
+    isSoundCloud: !!(t.soundcloud_url),
+    producerNotes: t.producer_notes || "",
+  };
+}
+
 async function insertNotification(data) {
   try {
     await dbInsert('notifications', data);
@@ -23,7 +53,7 @@ function timeAgo(iso) {
   return `${Math.floor(diff / 86400)}d ago`;
 }
 
-export default function TrackModal({ track, onClose, onVote, userVotes, onViewUser }) {
+export default function TrackModal({ track, onClose, onVote, userVotes, onViewUser, onOpenModal }) {
   const { currentUser } = useAuth();
   const [isPlaying, setIsPlaying] = useState(false);
   const [shareToast, setShareToast] = useState("");
@@ -37,6 +67,7 @@ export default function TrackModal({ track, onClose, onVote, userVotes, onViewUs
   const [commentSubmitting, setCommentSubmitting] = useState(false);
   const commentsEndRef = useRef(null);
   const channelRef = useRef(null);
+  const [moreTracks, setMoreTracks] = useState([]);
 
   useEffect(() => {
     setCommentsLoading(true);
@@ -104,6 +135,21 @@ export default function TrackModal({ track, onClose, onVote, userVotes, onViewUs
       })
       .catch(err => console.error('Load reactions error:', err));
   }, [track.id]);
+
+  // Load more from this producer
+  useEffect(() => {
+    if (!track.uploadedBy) return;
+    setMoreTracks([]);
+    fetch(
+      `${SUPABASE_URL}/rest/v1/tracks?uploaded_by_username=eq.${encodeURIComponent(track.uploadedBy)}&id=neq.${track.id}&order=cops.desc&limit=3`,
+      { headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` } }
+    )
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data)) setMoreTracks(data.slice(0, 3).map(mapTrackMini));
+      })
+      .catch(() => {});
+  }, [track.id, track.uploadedBy]);
 
   const submitComment = async () => {
     const text = commentText.trim();
@@ -421,6 +467,52 @@ export default function TrackModal({ track, onClose, onVote, userVotes, onViewUs
               <div className="share-toast">{shareToast}</div>
             )}
           </div>
+
+          {/* More from this producer */}
+          {moreTracks.length > 0 && (
+            <div style={{ marginTop: '20px', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '14px' }}>
+              <div style={{ fontSize: '11px', fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, color: 'rgba(255,255,255,0.35)', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '10px' }}>
+                More from @{track.uploadedBy}
+              </div>
+              <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: '2px' }}>
+                {moreTracks.map(t => {
+                  const mPrice = t.price || 0;
+                  const mFree = !mPrice || mPrice === 0;
+                  return (
+                    <div
+                      key={t.id}
+                      onClick={() => {
+                        if (onOpenModal) { onOpenModal(t); }
+                      }}
+                      style={{
+                        flexShrink: 0, cursor: onOpenModal ? 'pointer' : 'default',
+                        display: 'flex', flexDirection: 'column', gap: '5px', width: '72px',
+                      }}
+                    >
+                      <div style={{
+                        width: '72px', height: '72px', borderRadius: '10px',
+                        backgroundImage: `url(${t.coverUrl})`, backgroundSize: 'cover', backgroundPosition: 'center',
+                        border: '1px solid rgba(255,255,255,0.08)', backgroundColor: 'rgba(255,255,255,0.04)',
+                        position: 'relative',
+                      }}>
+                        <span style={{
+                          position: 'absolute', bottom: '3px', right: '4px',
+                          fontSize: '9px', fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700,
+                          color: mFree ? '#00f5ff' : '#00ff88',
+                          background: 'rgba(0,0,0,0.65)', borderRadius: '8px', padding: '1px 5px',
+                        }}>
+                          {mFree ? 'FREE' : `$${mPrice}`}
+                        </span>
+                      </div>
+                      <div style={{ fontSize: '11px', fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, color: 'rgba(255,255,255,0.7)', lineHeight: '1.2', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '72px' }}>
+                        {t.title}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Comments */}
           <div className="comments-section">

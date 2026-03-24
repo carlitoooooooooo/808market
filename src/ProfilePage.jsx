@@ -734,7 +734,7 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload })
                   { value: 'purple', bg: '#bf5fff' },
                   { value: 'green', bg: '#00ff88' },
                   { value: 'gold', bg: '#ffd700' },
-                  { value: 'rainbow', bg: 'conic-gradient(#ff3366, #ff9900, #00f5ff, #bf5fff, #ff3366)' },
+                  { value: 'rainbow', bg: 'linear-gradient(135deg, #ff3366, #ff9900, #00f5ff, #bf5fff)' },
                 ].map(b => (
                   <button key={b.value} type="button" onClick={() => setProfileExtra(prev => ({ ...prev, avatar_border: b.value }))}
                     style={{ width: 36, height: 36, borderRadius: '50%', border: `3px solid ${profileExtra.avatar_border === b.value ? '#fff' : 'transparent'}`, background: b.bg, cursor: 'pointer', fontSize: '12px', color: '#000', fontWeight: 700 }}>

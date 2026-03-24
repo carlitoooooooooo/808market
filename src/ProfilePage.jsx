@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useAuth, AVATAR_COLORS } from "./AuthContext.jsx";
 import { BADGES } from "./badges.js";
-import { MOCK_USERS } from "./mockUsers.js";
+// MOCK_USERS removed — using real DB data for taste match
 import SnippetPicker from "./SnippetPicker.jsx";
 import { supabase } from "./supabase.js";
 import EditBeatModal from "./EditBeatModal.jsx";
@@ -43,12 +43,100 @@ export default function ProfilePage({ userVotes, tracks }) {
   const [myUploads, setMyUploads] = useState([]);
   const [uploadsLoading, setUploadsLoading] = useState(true);
   const [uploadReactions, setUploadReactions] = useState({});
+  const [tasteMatches, setTasteMatches] = useState([]);
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [editingBeat, setEditingBeat] = useState(null);
   const [cropFile, setCropFile] = useState(null);
   const [followList, setFollowList] = useState(null); // { type: 'followers'|'following', users: [] }
   const [followerCount, setFollowerCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
+
+  // Load real taste matches from DB
+  useEffect(() => {
+    if (!currentUser?.username || !tracks?.length) return;
+
+    async function loadTasteMatches() {
+      try {
+        // Get my liked genres
+        const myVotes = userVotes || {};
+        const myLikedIds = Object.entries(myVotes).filter(([,v]) => v === 'right').map(([id]) => id);
+        const myLikedTracks = tracks.filter(t => myLikedIds.includes(String(t.id)));
+        const myGenres = new Set(myLikedTracks.map(t => t.genre));
+        if (myGenres.size === 0) return;
+
+        // Get all other users' votes
+        const votesRes = await fetch(
+          `${SUPABASE_URL}/rest/v1/votes?vote=eq.right&select=user_id,track_id`,
+          { headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` } }
+        );
+        const allVotes = await votesRes.json();
+        if (!Array.isArray(allVotes)) return;
+
+        // Get all profiles (except me)
+        const profilesRes = await fetch(
+          `${SUPABASE_URL}/rest/v1/profiles?username=neq.${encodeURIComponent(currentUser.username)}&select=username,avatar_color,role`,
+          { headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` } }
+        );
+        const profiles = await profilesRes.json();
+        if (!Array.isArray(profiles)) return;
+
+        // Build votes map per user
+        const votesByUser = {};
+        allVotes.forEach(v => {
+          if (!votesByUser[v.user_id]) votesByUser[v.user_id] = [];
+          votesByUser[v.user_id].push(v.track_id);
+        });
+
+        // We need user_id → username mapping — get from profiles by id
+        // But profiles use username not id as primary key in our system
+        // So match by checking which tracks they liked and what genres those are
+        const matches = profiles.map(profile => {
+          // Find votes from this profile (we don't have their id easily, skip for now)
+          // Use a simpler approach: compare by track overlap
+          return { username: profile.username, avatarColor: profile.avatar_color, role: profile.role, pct: 0, shared: [] };
+        }).filter(m => m.pct > 0).slice(0, 3);
+
+        // Better approach: load each user's liked tracks by their votes
+        // Get all right-votes with user info by joining through profiles
+        const votesWithUsersRes = await fetch(
+          `${SUPABASE_URL}/rest/v1/votes?vote=eq.right&select=user_id,track_id`,
+          { headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` } }
+        );
+        const votesData = await votesWithUsersRes.json();
+
+        // Group track_ids by user_id
+        const userTrackMap = {};
+        if (Array.isArray(votesData)) {
+          votesData.forEach(v => {
+            if (!userTrackMap[v.user_id]) userTrackMap[v.user_id] = [];
+            userTrackMap[v.user_id].push(String(v.track_id));
+          });
+        }
+
+        // Get profiles with their ids
+        const profilesWithIdRes = await fetch(
+          `${SUPABASE_URL}/rest/v1/profiles?username=neq.${encodeURIComponent(currentUser.username)}&select=id,username,avatar_color,role`,
+          { headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` } }
+        );
+        const profilesWithId = await profilesWithIdRes.json();
+
+        const scored = (Array.isArray(profilesWithId) ? profilesWithId : []).map(profile => {
+          const theirTrackIds = userTrackMap[profile.id] || [];
+          const theirTracks = tracks.filter(t => theirTrackIds.includes(String(t.id)));
+          const theirGenres = new Set(theirTracks.map(t => t.genre));
+          const shared = [...myGenres].filter(g => theirGenres.has(g));
+          const total = new Set([...myGenres, ...theirGenres]).size;
+          const pct = total > 0 ? Math.round((shared.length / total) * 100) : 0;
+          return { username: profile.username, avatarColor: profile.avatar_color, role: profile.role, pct, shared };
+        }).filter(m => m.pct > 0).sort((a, b) => b.pct - a.pct).slice(0, 3);
+
+        setTasteMatches(scored);
+      } catch (err) {
+        console.error('Taste match error:', err);
+      }
+    }
+    loadTasteMatches();
+  }, [currentUser?.username, tracks?.length, JSON.stringify(userVotes)]);
 
   // Load follower/following counts
   useEffect(() => {
@@ -150,23 +238,7 @@ export default function ProfilePage({ userVotes, tracks }) {
     uniqueGenres: coppedGenres.length,
   };
 
-  function calcMatch(otherVotes) {
-    const otherCopIds = Object.entries(otherVotes)
-      .filter(([, v]) => v === "right")
-      .map(([id]) => String(id));
-    const otherCopTracks = (tracks || []).filter(t => otherCopIds.includes(String(t.id)));
-    const otherGenres = new Set(otherCopTracks.map(t => t.genre));
-    const myGenres = new Set(coppedGenres);
-    const shared = [...myGenres].filter(g => otherGenres.has(g));
-    const total = new Set([...myGenres, ...otherGenres]).size;
-    const pct = total > 0 ? Math.round((shared.length / total) * 100) : 0;
-    return { pct, shared };
-  }
-
-  const tasteMatches = MOCK_USERS.map(u => ({
-    ...u,
-    ...calcMatch(u.votes),
-  })).sort((a, b) => b.pct - a.pct).slice(0, 3);
+  // tasteMatches loaded from real DB via useEffect
 
   function saveEdit() {
     setUserData("bio", editBio);

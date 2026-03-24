@@ -119,8 +119,12 @@ export default function LeaderboardPage({ tracks, onVote, userVotes, onViewUser 
         </p>
       </div>
 
+      {/* ── DESKTOP: both columns always visible ── */}
+      <div className="leaderboard-desktop-grid">
+
       {/* ── TOP BEATS ── */}
-      {subTab === "beats" && (
+      <div className={`leaderboard-mobile-beats ${subTab !== "beats" ? "leaderboard-mobile-hidden" : ""}`}>
+        <div className="leaderboard-col-header">🔥 Top Beats — Fan Favorites ❤️</div>
         <div className="leaderboard-list">
           {sorted.map((track, idx) => {
             const rank = idx + 1;
@@ -164,10 +168,11 @@ export default function LeaderboardPage({ tracks, onVote, userVotes, onViewUser 
             );
           })}
         </div>
-      )}
+      </div>
 
       {/* ── TOP PRODUCERS ── */}
-      {subTab === "producers" && (
+      <div className={`leaderboard-mobile-producers ${subTab !== "producers" ? "leaderboard-mobile-hidden" : ""}`}>
+        <div className="leaderboard-col-header">👥 Top Producers — Most loved right now</div>
         <div className="leaderboard-list">
           {producersLoading ? (
             <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-dim)', fontFamily: "'Space Grotesk', sans-serif", fontSize: '14px' }}>
@@ -249,7 +254,9 @@ export default function LeaderboardPage({ tracks, onVote, userVotes, onViewUser 
             );
           })}
         </div>
-      )}
+      </div>
+
+      </div> {/* end leaderboard-desktop-grid */}
 
       {selectedTrack && (
         <TrackModal

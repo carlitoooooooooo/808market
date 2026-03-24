@@ -359,6 +359,24 @@ export default function App() {
           <Logo />
           <span className="beta-tag">BETA</span>
         </div>
+
+        {/* Desktop inline nav — hidden on mobile via CSS */}
+        <nav className="desktop-nav">
+          {(currentUser ? TABS : TABS.filter(t => t.id === 'discover')).map((tab) => (
+            <button
+              key={tab.id}
+              className={`desktop-nav-tab ${activeTab === tab.id ? "desktop-nav-tab--active" : ""}`}
+              onClick={() => setActiveTab(tab.id)}
+              style={{ position: "relative" }}
+            >
+              {tab.label}
+              {tab.id === "notifications" && unreadCount > 0 && (
+                <span className="notif-badge">{unreadCount > 9 ? "9+" : unreadCount}</span>
+              )}
+            </button>
+          ))}
+        </nav>
+
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           <button onClick={() => setShowUserSearch(true)} style={{
             background: 'none', border: '1px solid rgba(255,255,255,0.15)',

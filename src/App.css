@@ -895,9 +895,14 @@ body {
   word-break: break-all;
   flex-wrap: wrap;
 }
-/* Prevent role/beta pills from being squeezed to zero width */
+/* Prevent role/beta pills from being squeezed or text-broken */
 .profile-username > span {
   flex-shrink: 0;
+  white-space: nowrap;
+  word-break: normal;
+  min-width: max-content;
+  display: inline-flex;
+  align-items: center;
 }
 .profile-bio {
   font-family: var(--font-body);

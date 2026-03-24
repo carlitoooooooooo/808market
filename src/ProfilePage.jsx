@@ -402,6 +402,9 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload })
 
   return (
     <div className="profile-page">
+      {/* LEFT COLUMN: identity, stats, pinned, badges */}
+      <div className="profile-left-col">
+
       {/* Header */}
       <div className="profile-header">
         <div
@@ -557,6 +560,11 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload })
         </div>
       </div>
 
+      </div> {/* end profile-left-col */}
+
+      {/* RIGHT COLUMN: beats + saved */}
+      <div className="profile-right-col">
+
       {/* My Beats */}
       <div className="profile-section">
         <div className="section-title">🎵 MY BEATS</div>
@@ -702,8 +710,10 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload })
       </div>
 
 
+      </div> {/* end profile-right-col */}
+
       {/* Logout */}
-      <div style={{ padding: "16px", textAlign: "center" }}>
+      <div className="profile-logout" style={{ padding: "16px", textAlign: "center" }}>
         <button className="btn-secondary" onClick={logout} style={{ fontSize: "14px", padding: "10px 24px", color: "var(--red)", borderColor: "rgba(255,51,102,0.3)" }}>
           Log Out
         </button>

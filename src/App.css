@@ -2462,22 +2462,25 @@ body {
     align-items: start;
   }
 
-  /* Left column: header, stats, pinned, badges */
-  .profile-header      { grid-column: 1; }
-  .profile-stats       { grid-column: 1; }
+  .profile-left-col {
+    grid-column: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
 
-  /* Pinned track + Badges go in left column */
-  .profile-page > .profile-section:nth-of-type(1),
-  .profile-page > .profile-section:nth-of-type(2) { grid-column: 1; }
+  .profile-right-col {
+    grid-column: 2;
+    grid-row: 1 / span 10;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
 
-  /* My Beats + Saved Beats go in right column */
-  .profile-page > .profile-section:nth-of-type(3),
-  .profile-page > .profile-section:nth-of-type(4) { grid-column: 2; grid-row: 1 / span 10; }
+  .profile-logout {
+    grid-column: 1;
+  }
 
-  /* Logout button stays in left column at the bottom */
-  .profile-page > .profile-logout { grid-column: 1; }
-
-  /* Stats row: 3 cols looks great on desktop */
   .profile-stats {
     margin-bottom: 20px;
   }

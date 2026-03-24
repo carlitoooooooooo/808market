@@ -826,7 +826,7 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
               <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>
                 Name Glow
               </label>
-              {myUploads.length < 5 ? (
+              {myUploads.length < 5 && currentUser.role !== 'admin' ? (
                 <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '10px 14px', fontSize: '13px', color: 'rgba(255,255,255,0.3)', fontFamily: 'var(--font-body)' }}>
                   🔒 Upload {5 - myUploads.length} more beat{5 - myUploads.length !== 1 ? 's' : ''} to unlock name glow
                 </div>
@@ -856,14 +856,14 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
                   {/* Tier 2: 10 uploads */}
                   <div>
                     <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px' }}>
-                      10 UPLOADS {myUploads.length < 10 && <span style={{ color: '#ff3366' }}>🔒 {10 - myUploads.length} more to unlock</span>}
+                      10 UPLOADS {myUploads.length < 10 && currentUser.role !== 'admin' && <span style={{ color: '#ff3366' }}>🔒 {10 - myUploads.length} more to unlock</span>}
                     </div>
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                       {[
                         { value: 'pulse',   label: '💙 Pulse',   style: { background: '#00f5ff', color: '#000' } },
                         { value: 'flicker', label: '⚡ Flicker', style: { background: '#bf5fff', color: '#fff' } },
                       ].map(g => {
-                        const locked = myUploads.length < 10;
+                        const locked = myUploads.length < 10 && currentUser.role !== 'admin';
                         return (
                           <button key={g.value} type="button"
                             onClick={() => !locked && setProfileExtra(prev => ({ ...prev, name_glow: g.value }))}
@@ -877,14 +877,14 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
                   {/* Tier 3: 20 uploads */}
                   <div>
                     <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px' }}>
-                      20 UPLOADS {myUploads.length < 20 && <span style={{ color: '#ff3366' }}>🔒 {20 - myUploads.length} more to unlock</span>}
+                      20 UPLOADS {myUploads.length < 20 && currentUser.role !== 'admin' && <span style={{ color: '#ff3366' }}>🔒 {20 - myUploads.length} more to unlock</span>}
                     </div>
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                       {[
                         { value: 'fire', label: '🔥 Fire', style: { background: 'linear-gradient(135deg, #ff3366, #ff9900)', color: '#fff' } },
                         { value: 'ice',  label: '🧊 Ice',  style: { background: 'linear-gradient(135deg, #00f5ff, #ffffff)', color: '#000' } },
                       ].map(g => {
-                        const locked = myUploads.length < 20;
+                        const locked = myUploads.length < 20 && currentUser.role !== 'admin';
                         return (
                           <button key={g.value} type="button"
                             onClick={() => !locked && setProfileExtra(prev => ({ ...prev, name_glow: g.value }))}

@@ -1028,11 +1028,14 @@ body {
 .track-modal::-webkit-scrollbar { display: none; }
 
 .modal-close {
-  position: absolute;
+  position: sticky;
   top: 14px;
-  right: 14px;
+  float: right;
+  margin: 14px 14px -46px auto;
   z-index: 10;
-  background: rgba(255,255,255,0.1);
+  background: rgba(10,10,15,0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border: 1px solid var(--border);
   border-radius: 50%;
   color: var(--text);

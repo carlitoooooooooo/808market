@@ -275,11 +275,9 @@ export default function TrackModal({ track, onClose, onVote, userVotes, onViewUs
     onClose();
   }
 
-  const [checkoutLoading, setCheckoutLoading] = useState(false);
-
-  async function handleCopIt() {
+  function handleCopIt() {
     if (isFree) {
-      // Free download — trigger actual file download
+      // Free download — trigger file download directly
       if (track.audioUrl) {
         const a = document.createElement('a');
         a.href = track.audioUrl;
@@ -293,36 +291,13 @@ export default function TrackModal({ track, onClose, onVote, userVotes, onViewUs
       return;
     }
 
-    setCheckoutLoading(true);
-    try {
-      const res = await fetch('/api/create-checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          trackId: track.id,
-          trackTitle: track.title,
-          artist: track.artist,
-          price: track.price,
-          licenseType: track.licenseType,
-          buyerUsername: currentUser?.username || 'anonymous',
-        }),
-      });
-      const data = await res.json();
-      if (data.url) {
-        // Vote first, then redirect to Stripe
-        handleVote("right");
-        window.location.href = data.url;
-      } else {
-        // Fallback to payment link if API fails
-        if (track.paymentLink) window.open(track.paymentLink, '_blank');
-        handleVote("right");
-      }
-    } catch (err) {
-      // Fallback to payment link
-      if (track.paymentLink) window.open(track.paymentLink, '_blank');
+    // Paid — send buyer to producer's payment link
+    if (track.paymentLink) {
+      window.open(track.paymentLink, '_blank');
       handleVote("right");
-    } finally {
-      setCheckoutLoading(false);
+    } else {
+      // No payment link set — prompt to contact producer
+      alert(`No payment link set for this beat yet. Contact @${track.uploadedBy} directly.`);
     }
   }
 
@@ -474,8 +449,8 @@ export default function TrackModal({ track, onClose, onVote, userVotes, onViewUs
           {/* COP IT / PASS buttons */}
           {!userVote ? (
             <div>
-              <button className="btn-cop-it" onClick={handleCopIt} disabled={checkoutLoading}>
-                {checkoutLoading ? "Opening checkout..." : isFree ? "🎁 FREE DOWNLOAD" : `🛒 COP IT — ${priceLabel}`}
+              <button className="btn-cop-it" onClick={handleCopIt}>
+                {isFree ? "🎁 FREE DOWNLOAD" : `🛒 COP IT — ${priceLabel}`}
               </button>
               <button className="btn-pass-it" onClick={() => handleVote("left")}>
                 💨 Pass

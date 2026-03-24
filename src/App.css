@@ -814,6 +814,57 @@ body {
   border: 2px solid rgba(255,255,255,0.2);
   box-shadow: 0 0 20px rgba(0,245,255,0.15);
 }
+
+/* ===== AVATAR BORDER ANIMATIONS ===== */
+.avatar-border-cyan {
+  border: 2px solid transparent !important;
+  box-shadow: 0 0 0 2px #00f5ff, 0 0 16px rgba(0,245,255,0.5) !important;
+  animation: avatarPulseCyan 2s ease-in-out infinite alternate;
+}
+@keyframes avatarPulseCyan {
+  0%   { box-shadow: 0 0 0 2px #00f5ff, 0 0 10px rgba(0,245,255,0.4); }
+  100% { box-shadow: 0 0 0 2px #00f5ff, 0 0 24px rgba(0,245,255,0.8); }
+}
+.avatar-border-purple {
+  border: 2px solid transparent !important;
+  box-shadow: 0 0 0 2px #bf5fff, 0 0 16px rgba(191,95,255,0.5) !important;
+  animation: avatarPulsePurple 2s ease-in-out infinite alternate;
+}
+@keyframes avatarPulsePurple {
+  0%   { box-shadow: 0 0 0 2px #bf5fff, 0 0 10px rgba(191,95,255,0.4); }
+  100% { box-shadow: 0 0 0 2px #bf5fff, 0 0 24px rgba(191,95,255,0.8); }
+}
+.avatar-border-green {
+  border: 2px solid transparent !important;
+  box-shadow: 0 0 0 2px #00ff88, 0 0 16px rgba(0,255,136,0.5) !important;
+  animation: avatarPulseGreen 2s ease-in-out infinite alternate;
+}
+@keyframes avatarPulseGreen {
+  0%   { box-shadow: 0 0 0 2px #00ff88, 0 0 10px rgba(0,255,136,0.4); }
+  100% { box-shadow: 0 0 0 2px #00ff88, 0 0 24px rgba(0,255,136,0.8); }
+}
+.avatar-border-rainbow {
+  border: 3px solid transparent !important;
+  background-clip: padding-box;
+  animation: avatarRainbow 3s linear infinite;
+  box-shadow: 0 0 16px rgba(255,255,255,0.3) !important;
+}
+@keyframes avatarRainbow {
+  0%   { box-shadow: 0 0 0 3px #ff3366, 0 0 16px rgba(255,51,102,0.5); }
+  25%  { box-shadow: 0 0 0 3px #ff9900, 0 0 16px rgba(255,153,0,0.5); }
+  50%  { box-shadow: 0 0 0 3px #00f5ff, 0 0 16px rgba(0,245,255,0.5); }
+  75%  { box-shadow: 0 0 0 3px #bf5fff, 0 0 16px rgba(191,95,255,0.5); }
+  100% { box-shadow: 0 0 0 3px #ff3366, 0 0 16px rgba(255,51,102,0.5); }
+}
+.avatar-border-gold {
+  border: 2px solid transparent !important;
+  box-shadow: 0 0 0 2px #ffd700, 0 0 16px rgba(255,215,0,0.5) !important;
+  animation: avatarPulseGold 2s ease-in-out infinite alternate;
+}
+@keyframes avatarPulseGold {
+  0%   { box-shadow: 0 0 0 2px #ffd700, 0 0 10px rgba(255,215,0,0.4); }
+  100% { box-shadow: 0 0 0 2px #ffd700, 0 0 24px rgba(255,215,0,0.8); }
+}
 .profile-info { flex: 1; min-width: 0; }
 .profile-username {
   font-family: var(--font-head);

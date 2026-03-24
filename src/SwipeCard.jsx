@@ -35,14 +35,18 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
     stopPlay();
     const p = new AudioPlayer(track.audioUrl, track.snippetStart);
     p.onTimeUpdate((prog) => setProgress(prog));
-    p.onEnded(() => {
-      setIsPlaying(false);
-      setProgress(0);
-    });
+    p.onEnded(() => { setIsPlaying(false); setProgress(0); });
     playerRef.current = p;
     p.play();
     setIsPlaying(true);
     setProgress(0);
+    // Increment play count atomically
+    const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
+    fetch('https://bkapxykeryzxbqpgjgab.supabase.co/rest/v1/rpc/increment_play_count', {
+      method: 'POST',
+      headers: { 'apikey': ANON, 'Authorization': `Bearer ${ANON}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ track_id: track.id }),
+    }).catch(() => {});
   }
 
   function stopPlay() {

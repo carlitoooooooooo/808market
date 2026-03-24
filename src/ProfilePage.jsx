@@ -33,7 +33,8 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload })
   const [editing, setEditing] = useState(false);
   const [editBio, setEditBio] = useState(currentUser?.bio || "");
   const [editColor, setEditColor] = useState(currentUser?.avatarColor || AVATAR_COLORS[0]);
-  const [profileExtra, setProfileExtra] = useState({ location: '', tagline: '', instagram: '', twitter: '', soundcloud: '', youtube: '' });
+  const [profileExtra, setProfileExtra] = useState({ location: '', tagline: '', instagram: '', twitter: '', soundcloud: '', youtube: '', influenced_by: '', avatar_border: 'none' });
+  const [totalPlays, setTotalPlays] = useState(0);
   const [avatarUrl, setAvatarUrl] = useState(currentUser?.avatarUrl || null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const avatarInputRef = React.useRef(null);
@@ -156,11 +157,18 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload })
   // Load extra profile fields
   useEffect(() => {
     if (!currentUser?.username) return;
-    fetch(`${SUPABASE_URL}/rest/v1/profiles?username=eq.${encodeURIComponent(currentUser.username)}&select=location,tagline,instagram,twitter,soundcloud,youtube`, {
+    fetch(`${SUPABASE_URL}/rest/v1/profiles?username=eq.${encodeURIComponent(currentUser.username)}&select=location,tagline,instagram,twitter,soundcloud,youtube,influenced_by,avatar_border`, {
       headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` }
     }).then(r => r.json()).then(data => {
       const p = Array.isArray(data) ? data[0] : data;
-      if (p) setProfileExtra({ location: p.location||'', tagline: p.tagline||'', instagram: p.instagram||'', twitter: p.twitter||'', soundcloud: p.soundcloud||'', youtube: p.youtube||'' });
+      if (p) setProfileExtra({ location: p.location||'', tagline: p.tagline||'', instagram: p.instagram||'', twitter: p.twitter||'', soundcloud: p.soundcloud||'', youtube: p.youtube||'', influenced_by: p.influenced_by||'', avatar_border: p.avatar_border||'none' });
+    }).catch(() => {});
+
+    // Load total plays from tracks
+    fetch(`${SUPABASE_URL}/rest/v1/tracks?uploaded_by_username=eq.${encodeURIComponent(currentUser.username)}&select=play_count`, {
+      headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` }
+    }).then(r => r.json()).then(data => {
+      if (Array.isArray(data)) setTotalPlays(data.reduce((s, t) => s + (t.play_count || 0), 0));
     }).catch(() => {});
   }, [currentUser?.username]);
 
@@ -350,7 +358,7 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload })
       {/* Header */}
       <div className="profile-header">
         <div
-          className="profile-avatar"
+          className={`profile-avatar ${profileExtra.avatar_border !== 'none' ? `avatar-border-${profileExtra.avatar_border}` : ''}`}
           style={{ background: avatarUrl ? 'transparent' : currentUser.avatarColor, cursor: 'pointer', overflow: 'hidden', position: 'relative' }}
           onClick={() => avatarInputRef.current?.click()}
           title="Change profile picture"
@@ -409,6 +417,11 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload })
               <div className="profile-bio">{currentUser.bio || "no bio yet..."}</div>
               {profileExtra.tagline && <div style={{ fontSize: '12px', color: 'var(--cyan)', fontFamily: 'var(--font-body)', marginTop: '2px', fontStyle: 'italic' }}>{profileExtra.tagline}</div>}
               {profileExtra.location && <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-body)', marginTop: '2px' }}>📍 {profileExtra.location}</div>}
+              {profileExtra.influenced_by && (
+                <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-body)', marginTop: '4px' }}>
+                  🎵 Influenced by: <span style={{ color: 'rgba(255,255,255,0.6)' }}>{profileExtra.influenced_by}</span>
+                </div>
+              )}
               {(profileExtra.instagram || profileExtra.twitter || profileExtra.soundcloud || profileExtra.youtube) && (
                 <div style={{ display: 'flex', gap: '10px', marginTop: '6px', flexWrap: 'wrap' }}>
                   {profileExtra.instagram && <a href={`https://instagram.com/${profileExtra.instagram}`} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', textDecoration: 'none' }}>📸 Instagram</a>}
@@ -450,7 +463,7 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload })
           <div className="stat-label">🎵 beats</div>
         </div>
         <div className="stat-box">
-          <div className="stat-value" style={{ color: "var(--cyan)" }}>0</div>
+          <div className="stat-value" style={{ color: "var(--cyan)" }}>{totalPlays}</div>
           <div className="stat-label">🎧 plays</div>
         </div>
       </div>
@@ -705,6 +718,26 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload })
             <button onClick={saveEdit} style={{ background: 'linear-gradient(135deg, #00f5ff, #bf5fff)', border: 'none', color: '#000', borderRadius: '20px', padding: '6px 16px', fontSize: '14px', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-head)' }}>Save</button>
           </div>
           <div style={{ padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            {/* Avatar border picker */}
+            <div>
+              <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '10px', textTransform: 'uppercase' }}>Avatar Border</label>
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '8px' }}>
+                {[
+                  { value: 'none', bg: 'rgba(255,255,255,0.15)', label: '✕' },
+                  { value: 'cyan', bg: '#00f5ff' },
+                  { value: 'purple', bg: '#bf5fff' },
+                  { value: 'green', bg: '#00ff88' },
+                  { value: 'gold', bg: '#ffd700' },
+                  { value: 'rainbow', bg: 'conic-gradient(#ff3366, #ff9900, #00f5ff, #bf5fff, #ff3366)' },
+                ].map(b => (
+                  <button key={b.value} type="button" onClick={() => setProfileExtra(prev => ({ ...prev, avatar_border: b.value }))}
+                    style={{ width: 36, height: 36, borderRadius: '50%', border: `3px solid ${profileExtra.avatar_border === b.value ? '#fff' : 'transparent'}`, background: b.bg, cursor: 'pointer', fontSize: '12px', color: '#000', fontWeight: 700 }}>
+                    {profileExtra.avatar_border === b.value ? '✓' : (b.label || '')}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Avatar color picker */}
             <div>
               <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '10px', textTransform: 'uppercase' }}>Avatar Color</label>
@@ -726,6 +759,7 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload })
               </div>
             ))}
             {[
+              { key: 'influenced_by', label: 'INFLUENCED BY', placeholder: 'e.g. Metro Boomin, Southside, Pi\'erre' },
               { key: 'tagline', label: 'TAGLINE', placeholder: 'e.g. Trap producer from ATL' },
               { key: 'location', label: 'LOCATION', placeholder: 'e.g. Atlanta, GA' },
               { key: 'instagram', label: 'INSTAGRAM', placeholder: 'handle (no @)' },

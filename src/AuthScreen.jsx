@@ -113,7 +113,7 @@ export default function AuthScreen() {
         </form>
       </div>
 
-      <div className="auth-footer">swipe. cop. sell. 🎵</div>
+      <div className="auth-footer">swipe. discover. sell. 🎵</div>
     </div>
   );
 }

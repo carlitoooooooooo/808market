@@ -120,12 +120,31 @@ body {
   font-family: var(--font-head);
   font-size: clamp(18px, 5vw, 24px);
   font-weight: 700;
-  background: linear-gradient(90deg, var(--cyan) 0%, var(--purple) 100%);
+  background: linear-gradient(
+    90deg,
+    var(--cyan) 0%,
+    var(--purple) 35%,
+    #ff3366 55%,
+    var(--cyan) 75%,
+    var(--purple) 100%
+  );
+  background-size: 300% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   letter-spacing: -0.5px;
   display: inline-block;
+  animation: logoShimmer 4s linear infinite, logoPulse 3s ease-in-out infinite alternate;
+}
+
+@keyframes logoShimmer {
+  0%   { background-position: 0% center; }
+  100% { background-position: 300% center; }
+}
+
+@keyframes logoPulse {
+  0%   { filter: drop-shadow(0 0 4px rgba(0,245,255,0.4)); }
+  100% { filter: drop-shadow(0 0 12px rgba(191,95,255,0.7)); }
 }
 
 .beta-tag {

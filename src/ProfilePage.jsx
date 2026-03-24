@@ -156,23 +156,29 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload })
     }).catch(() => {});
   }, [currentUser?.username]);
 
-  // Send name glow unlock notification when user hits 5 uploads
+  // Send name glow unlock notification when user hits 5 uploads (once only)
   useEffect(() => {
-    if (!currentUser?.username || myUploads.length !== 5) return;
+    if (!currentUser?.username || myUploads.length < 5) return;
     const key = `tsh_nameglow_notif_${currentUser.username}`;
-    if (localStorage.getItem(key)) return; // already sent
-    localStorage.setItem(key, '1');
-    fetch(`${SUPABASE_URL}/rest/v1/notifications`, {
-      method: 'POST',
-      headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
-      body: JSON.stringify({
-        user_username: currentUser.username,
-        type: 'unlock',
-        from_username: '808market',
-        message: '🎨 You\'ve uploaded 5 beats — Name Glow is now unlocked! Go to Edit Profile to customize.',
-      }),
+    if (localStorage.getItem(key)) return;
+    localStorage.setItem(key, '1'); // set immediately to prevent race
+    // Check if notification already exists in DB before inserting
+    fetch(`${SUPABASE_URL}/rest/v1/notifications?user_username=eq.${encodeURIComponent(currentUser.username)}&type=eq.unlock&select=id`, {
+      headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` }
+    }).then(r => r.json()).then(existing => {
+      if (Array.isArray(existing) && existing.length > 0) return; // already exists
+      return fetch(`${SUPABASE_URL}/rest/v1/notifications`, {
+        method: 'POST',
+        headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+        body: JSON.stringify({
+          user_username: currentUser.username,
+          type: 'unlock',
+          from_username: '808market',
+          message: '🎨 Name Glow unlocked! You\'ve uploaded 5 beats. Go to Edit Profile to customize.',
+        }),
+      });
     }).catch(() => {});
-  }, [myUploads.length, currentUser?.username]);
+  }, [currentUser?.username, myUploads.length >= 5]);
 
   // Load saved beats
   useEffect(() => {

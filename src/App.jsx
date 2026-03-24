@@ -24,9 +24,9 @@ import { dbUpsert, dbSelect, dbUpdate, dbInsert } from "./dbHelper.js";
 const TABS = [
   { id: "discover", label: "🎵 Discover" },
   { id: "leaderboard", label: "🔥 Top Beats" },
-  { id: "messages", label: "💬 Messages" },
-  { id: "notifications", label: "🔔 Notifs" },
   { id: "profile", label: "👤 Profile" },
+  { id: "notifications", label: "🔔 Notifs" },
+  { id: "messages", label: "💬 Messages" },
 ];
 
 const GENRES = ["ALL", "Hip-Hop", "Drill", "Trap", "R&B", "Electronic", "Other"];

@@ -221,24 +221,6 @@ export default function App() {
     setQueue(shuffled);
   }, [currentUser?.id, tracksLoading, votesLoading, tracks.length, JSON.stringify(userVotes)]);
 
-  // Keyboard arrow swipe (desktop)
-  useEffect(() => {
-    function handleKeyDown(e) {
-      if (activeTab !== "discover") return;
-      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
-      // Build the same filtered queue inline
-      const fq = discoverFeed === "following" && currentUser
-        ? queue.filter(t => followingList.includes(t.uploadedBy))
-        : queue;
-      const top = activeGenre === "ALL" ? fq[0] : fq.find(t => t.genre === activeGenre);
-      if (!top) return;
-      if (e.key === "ArrowRight") handleSwipe("right", top);
-      if (e.key === "ArrowLeft")  handleSwipe("left",  top);
-    }
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [activeTab, queue, activeGenre, discoverFeed, followingList, currentUser, handleSwipe]);
-
   const showToast = useCallback((msg) => {
     setToast({ message: msg, visible: true });
     if (toastTimer.current) clearTimeout(toastTimer.current);
@@ -321,6 +303,23 @@ export default function App() {
   const handleVoteFromModal = useCallback((dir, track) => {
     handleSwipe(dir, track);
   }, [handleSwipe]);
+
+  // Keyboard arrow swipe (desktop) — must be after handleSwipe is defined
+  useEffect(() => {
+    function handleKeyDown(e) {
+      if (activeTab !== "discover") return;
+      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+      const fq = discoverFeed === "following" && currentUser
+        ? queue.filter(t => followingList.includes(t.uploadedBy))
+        : queue;
+      const top = activeGenre === "ALL" ? fq[0] : fq.find(t => t.genre === activeGenre);
+      if (!top) return;
+      if (e.key === "ArrowRight") handleSwipe("right", top);
+      if (e.key === "ArrowLeft")  handleSwipe("left",  top);
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [activeTab, queue, activeGenre, discoverFeed, followingList, currentUser, handleSwipe]);
 
   const handleSoundCloudSubmit = useCallback((track) => {
     setTracks(prev => [track, ...prev]);

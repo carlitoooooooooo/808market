@@ -123,7 +123,7 @@ body {
   overflow-x: hidden;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: contain;
+  overscroll-behavior: contain;
 }
 .app-main::-webkit-scrollbar { display: none; }
 
@@ -943,6 +943,7 @@ body {
   max-height: 92vh;
   overflow-y: scroll;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
   scrollbar-width: none;
   padding-bottom: max(100px, env(safe-area-inset-bottom, 100px));
 }
@@ -1418,6 +1419,7 @@ body {
   max-height: 92vh;
   overflow-y: scroll;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
   padding: 24px 20px 40px;
   padding-bottom: max(40px, env(safe-area-inset-bottom, 40px));
   animation: slideUp 0.25s ease-out;
@@ -2110,6 +2112,7 @@ body {
   background: #000;
   overflow-y: scroll;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
   scrollbar-width: none;
   padding-bottom: 80px;
 }

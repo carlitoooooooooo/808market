@@ -2494,6 +2494,41 @@ body {
     margin-bottom: 20px;
   }
 
+  /* ── Edit profile: constrained on desktop, no visible scrollbar ── */
+  /* Overlay: push down below header, center horizontally */
+  .profile-page ~ div[style*="position: fixed"][style*="zIndex: 400"] {
+    top: 64px !important;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 40px;
+    background: rgba(0,0,0,0.85) !important;
+    scrollbar-width: none;
+  }
+  .profile-page ~ div[style*="position: fixed"][style*="zIndex: 400"]::-webkit-scrollbar {
+    display: none;
+  }
+  /* Inner content box */
+  .profile-page ~ div[style*="position: fixed"][style*="zIndex: 400"] > div:first-child {
+    width: 540px;
+    max-height: calc(100vh - 64px - 80px);
+    background: #0a0a0a;
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.1);
+    overflow-y: auto;
+    scrollbar-width: none;
+    padding-bottom: 24px;
+  }
+  .profile-page ~ div[style*="position: fixed"][style*="zIndex: 400"] > div:first-child::-webkit-scrollbar {
+    display: none;
+  }
+  /* Sticky header inside: fix padding and bg */
+  .profile-page ~ div[style*="position: fixed"][style*="zIndex: 400"] > div:first-child > div:first-child {
+    padding-top: 20px !important;
+    border-radius: 16px 16px 0 0;
+    background: #0a0a0a !important;
+  }
+
 
 
   /* Un-absolute the edit/share buttons in the narrower left column */

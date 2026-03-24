@@ -405,17 +405,19 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload })
             </span>
           </div>
           {!editing && (
-            <div className="profile-bio">{currentUser.bio || "no bio yet..."}</div>
-            {profileExtra.tagline && <div style={{ fontSize: '12px', color: 'var(--cyan)', fontFamily: 'var(--font-body)', marginTop: '2px', fontStyle: 'italic' }}>{profileExtra.tagline}</div>}
-            {profileExtra.location && <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-body)', marginTop: '2px' }}>📍 {profileExtra.location}</div>}
-            {(profileExtra.instagram || profileExtra.twitter || profileExtra.soundcloud || profileExtra.youtube) && (
-              <div style={{ display: 'flex', gap: '10px', marginTop: '6px', flexWrap: 'wrap' }}>
-                {profileExtra.instagram && <a href={`https://instagram.com/${profileExtra.instagram}`} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', textDecoration: 'none' }}>📸 IG</a>}
-                {profileExtra.twitter && <a href={`https://x.com/${profileExtra.twitter}`} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', textDecoration: 'none' }}>🐦 X</a>}
-                {profileExtra.soundcloud && <a href={`https://soundcloud.com/${profileExtra.soundcloud}`} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', textDecoration: 'none' }}>☁️ SC</a>}
-                {profileExtra.youtube && <a href={`https://youtube.com/@${profileExtra.youtube}`} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', textDecoration: 'none' }}>▶️ YT</a>}
-              </div>
-            )}
+            <>
+              <div className="profile-bio">{currentUser.bio || "no bio yet..."}</div>
+              {profileExtra.tagline && <div style={{ fontSize: '12px', color: 'var(--cyan)', fontFamily: 'var(--font-body)', marginTop: '2px', fontStyle: 'italic' }}>{profileExtra.tagline}</div>}
+              {profileExtra.location && <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-body)', marginTop: '2px' }}>📍 {profileExtra.location}</div>}
+              {(profileExtra.instagram || profileExtra.twitter || profileExtra.soundcloud || profileExtra.youtube) && (
+                <div style={{ display: 'flex', gap: '10px', marginTop: '6px', flexWrap: 'wrap' }}>
+                  {profileExtra.instagram && <a href={`https://instagram.com/${profileExtra.instagram}`} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', textDecoration: 'none' }}>📸 IG</a>}
+                  {profileExtra.twitter && <a href={`https://x.com/${profileExtra.twitter}`} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', textDecoration: 'none' }}>🐦 X</a>}
+                  {profileExtra.soundcloud && <a href={`https://soundcloud.com/${profileExtra.soundcloud}`} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', textDecoration: 'none' }}>☁️ SC</a>}
+                  {profileExtra.youtube && <a href={`https://youtube.com/@${profileExtra.youtube}`} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', textDecoration: 'none' }}>▶️ YT</a>}
+                </div>
+              )}
+            </>
           )}
           {editing && (
             <div className="profile-edit-form">

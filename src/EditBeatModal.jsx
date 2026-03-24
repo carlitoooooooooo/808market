@@ -98,7 +98,7 @@ export default function EditBeatModal({ track, onClose, onSave }) {
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.9)', zIndex: 300, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
-      <div style={{ background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px 20px 0 0', width: '100%', maxWidth: '480px', maxHeight: '92vh', overflowY: 'scroll', WebkitOverflowScrolling: 'touch', padding: '24px', paddingBottom: 'max(80px, env(safe-area-inset-bottom, 80px))' }}>
+      <div className="edit-beat-modal" style={{ background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px 20px 0 0', width: '100%', maxWidth: '480px', maxHeight: '92vh', overflowY: 'scroll', WebkitOverflowScrolling: 'touch', padding: '24px', paddingBottom: 'max(80px, env(safe-area-inset-bottom, 80px))', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
           <h2 style={{ fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '18px' }}>Edit Beat</h2>

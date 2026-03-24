@@ -2410,6 +2410,9 @@ body {
 
 
 
+/* ===== GLOBAL SCROLLBAR HIDE for modals ===== */
+.edit-beat-modal::-webkit-scrollbar { display: none; }
+
 /* ===== SETTINGS MODAL ===== */
 .settings-overlay {
   position: fixed;

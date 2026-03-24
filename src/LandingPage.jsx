@@ -29,7 +29,7 @@ export default function LandingPage({ onGetStarted, onBrowseAsGuest }) {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#000', color: '#fff', fontFamily: "'Inter', sans-serif", overflowY: 'auto', position: 'relative', zIndex: 2 }}>
+    <div style={{ minHeight: '100vh', height: '100%', background: '#000', color: '#fff', fontFamily: "'Inter', sans-serif", overflowY: 'auto', position: 'fixed', inset: 0, zIndex: 2 }}>
 
       {/* Gradient bg */}
       <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',

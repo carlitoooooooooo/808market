@@ -98,7 +98,17 @@ export default function UserProfilePage({ username, onClose, onOpenModal, userVo
                 {initial}
               </div>
               <div className="user-profile-info">
-                <div className="user-profile-username">@{username}</div>
+                <div className="user-profile-username" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                  @{username}
+                  {profile?.role === 'admin' && (
+                    <span style={{
+                      background: 'linear-gradient(135deg, #00f5ff, #bf5fff)',
+                      color: '#000', fontSize: '9px', fontFamily: "'Space Grotesk', sans-serif",
+                      fontWeight: 700, padding: '2px 8px', borderRadius: '20px',
+                      letterSpacing: '1px', textTransform: 'uppercase',
+                    }}>ADMIN</span>
+                  )}
+                </div>
                 {bio && <div className="user-profile-bio">{bio}</div>}
               </div>
             </div>

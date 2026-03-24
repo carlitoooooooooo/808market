@@ -261,7 +261,22 @@ export default function ProfilePage({ userVotes, tracks }) {
           <input ref={avatarInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatarChange} />
         </div>
         <div className="profile-info">
-          <div className="profile-username">{currentUser.username}</div>
+          <div className="profile-username" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {currentUser.username}
+            {currentUser.role === 'admin' && (
+              <span style={{
+                background: 'linear-gradient(135deg, #00f5ff, #bf5fff)',
+                color: '#000',
+                fontSize: '9px',
+                fontFamily: 'var(--font-head)',
+                fontWeight: 700,
+                padding: '2px 8px',
+                borderRadius: '20px',
+                letterSpacing: '1px',
+                textTransform: 'uppercase',
+              }}>ADMIN</span>
+            )}
+          </div>
           {!editing && (
             <div className="profile-bio">{currentUser.bio || "no bio yet..."}</div>
           )}

@@ -475,21 +475,7 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload })
       )}
 
       {/* Taste tags */}
-      {copsGiven > 0 && (
-        <div className="profile-section">
-          <div className="section-title">🎯 YOUR TASTE</div>
-          <div className="taste-tags">
-            {copsGiven > 0 && <span className="taste-tag">❤️ Collector</span>}
-            {copPct > 70 && <span className="taste-tag">💎 Picky AF</span>}
-            {copPct < 30 && <span className="taste-tag">🎯 Discerning</span>}
-            {seen > 10 && <span className="taste-tag">👀 Deep Diver</span>}
-            {tasteScore > 100 && <span className="taste-tag">⚡ Taste God</span>}
-            {coppedGenres.map((g) => (
-              <span key={g} className="taste-tag" style={{ borderColor: "var(--purple)", color: "var(--purple)" }}>{g}</span>
-            ))}
-          </div>
-        </div>
-      )}
+
 
       {/* Badges */}
       <div className="profile-section">

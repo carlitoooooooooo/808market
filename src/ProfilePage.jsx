@@ -45,11 +45,24 @@ export default function ProfilePage({ userVotes, tracks }) {
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [editingBeat, setEditingBeat] = useState(null);
 
-  // Load avatar from DB
+  // Load avatar — check localStorage first, then DB
   useEffect(() => {
     if (!currentUser?.username) return;
-    supabase.from('profiles').select('avatar_url').eq('username', currentUser.username).maybeSingle()
-      .then(({ data }) => { if (data?.avatar_url) setAvatarUrl(data.avatar_url); });
+    // Check localStorage session first
+    try {
+      const saved = localStorage.getItem('tsh_session');
+      if (saved) {
+        const session = JSON.parse(saved);
+        if (session.avatarUrl) { setAvatarUrl(session.avatarUrl); return; }
+      }
+    } catch {}
+    // Fall back to DB
+    fetch(`${SUPABASE_URL}/rest/v1/profiles?username=eq.${encodeURIComponent(currentUser.username)}&select=avatar_url`, {
+      headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}` }
+    }).then(r => r.json()).then(data => {
+      const url = Array.isArray(data) ? data[0]?.avatar_url : data?.avatar_url;
+      if (url) setAvatarUrl(url);
+    }).catch(() => {});
   }, [currentUser?.username]);
 
   useEffect(() => {
@@ -163,8 +176,21 @@ export default function ProfilePage({ userVotes, tracks }) {
       if (uploadRes.ok) {
         const url = `${SUPABASE_URL}/storage/v1/object/public/avatars/${path}?t=${Date.now()}`;
         setAvatarUrl(url);
-        // Save to profiles table
-        await supabase.from('profiles').update({ avatar_url: url }).eq('username', currentUser.username);
+        // Save to profiles table via direct REST
+        await fetch(`${SUPABASE_URL}/rest/v1/profiles?username=eq.${encodeURIComponent(currentUser.username)}`, {
+          method: 'PATCH',
+          headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ avatar_url: url }),
+        });
+        // Save to localStorage session so it persists on reload
+        try {
+          const saved = localStorage.getItem('tsh_session');
+          if (saved) {
+            const session = JSON.parse(saved);
+            session.avatarUrl = url;
+            localStorage.setItem('tsh_session', JSON.stringify(session));
+          }
+        } catch {}
       }
     } catch (err) { console.error('Avatar upload error:', err); }
     finally { setUploadingAvatar(false); }

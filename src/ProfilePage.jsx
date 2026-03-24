@@ -4,6 +4,7 @@ import { BADGES } from "./badges.js";
 import { MOCK_USERS } from "./mockUsers.js";
 import SnippetPicker from "./SnippetPicker.jsx";
 import { supabase } from "./supabase.js";
+import EditBeatModal from "./EditBeatModal.jsx";
 
 const REACTIONS_EMOJIS = ["🔥", "😤", "💯", "🥶", "😭", "💀"];
 
@@ -42,6 +43,7 @@ export default function ProfilePage({ userVotes, tracks }) {
   const [uploadsLoading, setUploadsLoading] = useState(true);
   const [uploadReactions, setUploadReactions] = useState({});
   const [confirmDelete, setConfirmDelete] = useState(null);
+  const [editingBeat, setEditingBeat] = useState(null);
 
   // Load avatar from DB
   useEffect(() => {
@@ -423,6 +425,14 @@ export default function ProfilePage({ userVotes, tracks }) {
                       </button>
                       <button
                         className="btn-bevel"
+                        onClick={() => setEditingBeat(track)}
+                        title="Edit beat"
+                        style={{ fontSize: "12px", padding: "4px 8px" }}
+                      >
+                        ✏️
+                      </button>
+                      <button
+                        className="btn-bevel"
                         onClick={() => handleDeleteTrack(track.id)}
                         title="Delete beat"
                         style={{ color: "var(--red)", borderColor: "var(--red)", fontSize: "12px", padding: "4px 8px" }}
@@ -497,6 +507,18 @@ export default function ProfilePage({ userVotes, tracks }) {
         <SnippetPicker
           onClose={() => setShowSnippetPicker(false)}
           onConfirm={handleSnippetConfirm}
+        />
+      )}
+
+      {/* Edit beat modal */}
+      {editingBeat && (
+        <EditBeatModal
+          track={editingBeat}
+          onClose={() => setEditingBeat(null)}
+          onSave={(updated) => {
+            setMyUploads(prev => prev.map(t => t.id === updated.id ? updated : t));
+            setEditingBeat(null);
+          }}
         />
       )}
 

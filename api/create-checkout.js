@@ -2,8 +2,8 @@ import Stripe from 'stripe';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-// Platform fee: 15% goes to 808market
-const PLATFORM_FEE_PCT = 0.15;
+// Platform fee: 10% goes to 808market
+const PLATFORM_FEE_PCT = 0.10;
 
 export default async function handler(req, res) {
   // CORS headers
@@ -24,20 +24,34 @@ export default async function handler(req, res) {
     const priceInCents = Math.round(parseFloat(price) * 100);
     const platformFee = Math.round(priceInCents * PLATFORM_FEE_PCT);
 
+    const beatPrice = priceInCents - platformFee;
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
-      line_items: [{
-        price_data: {
-          currency: 'usd',
-          product_data: {
-            name: trackTitle || 'Beat',
-            description: `${licenseType || 'Non-Exclusive Lease'} by ${artist || 'Producer'} · via 808market`,
-            metadata: { trackId, artist, licenseType },
+      line_items: [
+        {
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: trackTitle || 'Beat',
+              description: `${licenseType || 'Non-Exclusive Lease'} · by ${artist || 'Producer'}`,
+            },
+            unit_amount: beatPrice,
           },
-          unit_amount: priceInCents,
+          quantity: 1,
         },
-        quantity: 1,
-      }],
+        {
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: '808market Platform Fee',
+              description: '10% platform fee · keeps 808market running',
+            },
+            unit_amount: platformFee,
+          },
+          quantity: 1,
+        },
+      ],
       mode: 'payment',
       success_url: `${process.env.VITE_APP_URL || 'https://808market.vercel.app'}/success?session_id={CHECKOUT_SESSION_ID}&track_id=${trackId}`,
       cancel_url: `${process.env.VITE_APP_URL || 'https://808market.vercel.app'}/track/${trackId}`,

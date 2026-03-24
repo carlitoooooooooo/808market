@@ -6,6 +6,7 @@ import SnippetPicker from "./SnippetPicker.jsx";
 import { supabase } from "./supabase.js";
 import EditBeatModal from "./EditBeatModal.jsx";
 import ImageCropper from "./ImageCropper.jsx";
+import TrackModal from "./TrackModal.jsx";
 
 const REACTIONS_EMOJIS = ["🔥", "😤", "💯", "🥶", "😭", "💀"];
 
@@ -50,6 +51,7 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
   const [tasteMatches, setTasteMatches] = useState([]);
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [editingBeat, setEditingBeat] = useState(null);
+  const [viewingLikedBeat, setViewingLikedBeat] = useState(null);
 
   const [cropFile, setCropFile] = useState(null);
   const [followList, setFollowList] = useState(null); // { type: 'followers'|'following', users: [] }
@@ -712,6 +714,48 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
       </div>
 
 
+      {/* Liked Beats */}
+      <div className="profile-section">
+        <div className="section-title">❤️ LIKED BEATS</div>
+        {(() => {
+          const likedIds = new Set(
+            Object.entries(userVotes || {}).filter(([, v]) => v === 'right').map(([id]) => String(id))
+          );
+          const likedTracks = (tracks || []).filter(t => likedIds.has(String(t.id)));
+          if (likedTracks.length === 0) return (
+            <div style={{ color: 'var(--text-dim)', fontSize: '13px', fontFamily: 'var(--font-body)' }}>
+              No liked beats yet — start swiping!
+            </div>
+          );
+          return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {likedTracks.map(beat => {
+                const isFree = !beat.price || beat.price === 0;
+                return (
+                  <div
+                    key={beat.id}
+                    onClick={() => setViewingLikedBeat(beat)}
+                    style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--glass-bg)', border: '1px solid var(--border)', borderRadius: '12px', padding: '10px', cursor: 'pointer', transition: 'border-color 0.15s' }}
+                    onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'}
+                    onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
+                  >
+                    <div style={{ width: 48, height: 48, borderRadius: '8px', background: beat.coverUrl ? `url(${beat.coverUrl}) center/cover` : 'rgba(255,255,255,0.08)', backgroundSize: 'cover', flexShrink: 0 }} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontFamily: 'var(--font-head)', fontWeight: 600, fontSize: '14px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{beat.title}</div>
+                      <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', fontFamily: 'var(--font-body)', marginTop: '2px' }}>by {beat.artist}</div>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '3px', flexShrink: 0 }}>
+                      <span style={{ fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '13px', color: isFree ? 'var(--cyan)' : 'var(--green)' }}>{isFree ? 'FREE' : `$${beat.price}`}</span>
+                      <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', fontFamily: 'var(--font-body)' }}>{beat.genre}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })()}
+      </div>
+
       </div> {/* end profile-right-col */}
 
       {/* Logout */}
@@ -720,6 +764,16 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
           Log Out
         </button>
       </div>
+
+      {viewingLikedBeat && (
+        <TrackModal
+          track={viewingLikedBeat}
+          onClose={() => setViewingLikedBeat(null)}
+          userVotes={userVotes}
+          onVote={() => {}}
+          onViewUser={onViewUser}
+        />
+      )}
 
       {showSnippetPicker && (
         <SnippetPicker

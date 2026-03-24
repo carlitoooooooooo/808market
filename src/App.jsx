@@ -13,6 +13,7 @@ import NotificationsPage from "./NotificationsPage.jsx";
 import UserProfilePage from "./UserProfilePage.jsx";
 import { FireAnimation, TrashAnimation } from "./SwipeAnimations.jsx";
 import AboutPage from "./AboutPage.jsx";
+import SettingsPage from "./SettingsPage.jsx";
 import LandingPage from "./LandingPage.jsx";
 import AuthPrompt from "./AuthPrompt.jsx";
 import UserSearch from "./UserSearch.jsx";
@@ -95,6 +96,7 @@ export default function App() {
   const [reactionTarget, setReactionTarget] = useState(null);
   const [showUpload, setShowUpload] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [guestMode, setGuestMode] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
@@ -393,9 +395,18 @@ export default function App() {
             fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500,
           }}>About</button>
           {currentUser ? (
-            <button className="btn-upload" onClick={() => setShowUpload(true)}>
-              + LIST BEAT
-            </button>
+            <>
+              <button className="btn-upload" onClick={() => setShowUpload(true)}>
+                + LIST BEAT
+              </button>
+              <button onClick={() => setShowSettings(true)} style={{
+                background: 'none', border: '1px solid rgba(255,255,255,0.15)',
+                color: 'rgba(255,255,255,0.5)', borderRadius: '50%',
+                width: '32px', height: '32px', fontSize: '16px', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                flexShrink: 0,
+              }}>⚙️</button>
+            </>
           ) : (
             <>
               <button onClick={() => { setGuestMode(false); setShowAuth(true); }} style={{
@@ -569,6 +580,10 @@ export default function App() {
       </nav>
 
       <Toast message={toast.message} visible={toast.visible} />
+
+      {showSettings && (
+        <SettingsPage onClose={() => setShowSettings(false)} />
+      )}
 
       {reactionTarget && (
         <ReactionPicker

@@ -41,6 +41,7 @@ export default function ProfilePage({ userVotes, tracks }) {
   const [myUploads, setMyUploads] = useState([]);
   const [uploadsLoading, setUploadsLoading] = useState(true);
   const [uploadReactions, setUploadReactions] = useState({});
+  const [confirmDelete, setConfirmDelete] = useState(null);
 
   // Load avatar from DB
   useEffect(() => {
@@ -168,17 +169,20 @@ export default function ProfilePage({ userVotes, tracks }) {
   }
 
   async function handleDeleteTrack(trackId) {
-    if (!window.confirm("Delete this beat? This can't be undone.")) return;
+    setConfirmDelete(trackId);
+  }
+
+  async function confirmDeleteTrack() {
+    const trackId = confirmDelete;
+    setConfirmDelete(null);
     try {
       const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/tracks?id=eq.${trackId}&uploaded_by_username=eq.${encodeURIComponent(currentUser.username)}`,
+        `${SUPABASE_URL}/rest/v1/tracks?id=eq.${trackId}`,
         { method: 'DELETE', headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}` } }
       );
       if (res.ok || res.status === 204) {
         setMyUploads(prev => prev.filter(t => t.id !== trackId));
         if (pinnedId === trackId) { setPinnedId(null); setPinnedTrack(currentUser.username, null); }
-      } else {
-        alert('Failed to delete. Try again.');
       }
     } catch (err) {
       console.error('Delete error:', err);
@@ -494,6 +498,25 @@ export default function ProfilePage({ userVotes, tracks }) {
           onClose={() => setShowSnippetPicker(false)}
           onConfirm={handleSnippetConfirm}
         />
+      )}
+
+      {/* Delete confirmation */}
+      {confirmDelete && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+          <div style={{ background: '#111', border: '1px solid rgba(255,51,102,0.4)', borderRadius: '16px', padding: '28px 24px', maxWidth: '320px', width: '100%', textAlign: 'center' }}>
+            <div style={{ fontSize: '36px', marginBottom: '12px' }}>🗑</div>
+            <div style={{ fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '18px', marginBottom: '8px' }}>Delete this beat?</div>
+            <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '14px', marginBottom: '24px' }}>This can't be undone.</div>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button onClick={() => setConfirmDelete(null)} style={{ flex: 1, padding: '12px', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '12px', color: '#fff', fontSize: '14px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
+                Cancel
+              </button>
+              <button onClick={confirmDeleteTrack} style={{ flex: 1, padding: '12px', background: 'var(--red)', border: 'none', borderRadius: '12px', color: '#fff', fontSize: '14px', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

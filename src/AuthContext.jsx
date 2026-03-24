@@ -207,7 +207,21 @@ export function AuthProvider({ children }) {
     localStorage.setItem(`tsh_${currentUser.username}_${key}`, JSON.stringify(value));
     if (key === "avatarColor" || key === "bio") {
       const col = key === "avatarColor" ? "avatar_color" : "bio";
-      supabase.from("profiles").update({ [col]: value }).eq("id", currentUser.id);
+      const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
+      fetch(`https://bkapxykeryzxbqpgjgab.supabase.co/rest/v1/profiles?username=eq.${encodeURIComponent(currentUser.username)}`, {
+        method: 'PATCH',
+        headers: { 'apikey': ANON, 'Authorization': `Bearer ${ANON}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ [col]: value }),
+      }).catch(e => console.error('Profile update error:', e));
+      // Also update localStorage session
+      const saved = localStorage.getItem('tsh_session');
+      if (saved) {
+        try {
+          const session = JSON.parse(saved);
+          session[key] = value;
+          localStorage.setItem('tsh_session', JSON.stringify(session));
+        } catch {}
+      }
       setCurrentUser(prev => prev ? { ...prev, [key]: value } : prev);
     }
   }, [currentUser]);

@@ -198,11 +198,46 @@ export default function TrackModal({ track, onClose, onVote, userVotes, onViewUs
     onClose();
   }
 
-  function handleCopIt() {
-    if (!isFree && track.paymentLink) {
-      window.open(track.paymentLink, '_blank');
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+
+  async function handleCopIt() {
+    if (isFree) {
+      // Free download — just vote and close
+      handleVote("right");
+      return;
     }
-    handleVote("right");
+
+    setCheckoutLoading(true);
+    try {
+      const res = await fetch('/api/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          trackId: track.id,
+          trackTitle: track.title,
+          artist: track.artist,
+          price: track.price,
+          licenseType: track.licenseType,
+          buyerUsername: currentUser?.username || 'anonymous',
+        }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        // Vote first, then redirect to Stripe
+        handleVote("right");
+        window.location.href = data.url;
+      } else {
+        // Fallback to payment link if API fails
+        if (track.paymentLink) window.open(track.paymentLink, '_blank');
+        handleVote("right");
+      }
+    } catch (err) {
+      // Fallback to payment link
+      if (track.paymentLink) window.open(track.paymentLink, '_blank');
+      handleVote("right");
+    } finally {
+      setCheckoutLoading(false);
+    }
   }
 
   const hasReactions = Object.keys(reactionCounts).length > 0;
@@ -325,8 +360,8 @@ export default function TrackModal({ track, onClose, onVote, userVotes, onViewUs
           {/* COP IT / PASS buttons */}
           {!userVote ? (
             <div>
-              <button className="btn-cop-it" onClick={handleCopIt}>
-                {isFree ? "🎁 FREE DOWNLOAD" : `🛒 COP IT — ${priceLabel}`}
+              <button className="btn-cop-it" onClick={handleCopIt} disabled={checkoutLoading}>
+                {checkoutLoading ? "Opening checkout..." : isFree ? "🎁 FREE DOWNLOAD" : `🛒 COP IT — ${priceLabel}`}
               </button>
               <button className="btn-pass-it" onClick={() => handleVote("left")}>
                 💨 Pass

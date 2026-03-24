@@ -2604,6 +2604,17 @@ body {
     margin-bottom: 20px;
   }
 
+  /* ── Track modal: centered on desktop, never hidden behind header ── */
+  .modal-overlay {
+    align-items: center;
+    padding-top: 80px; /* clear the header */
+  }
+  .modal-sheet {
+    border-radius: 20px; /* full rounded on desktop */
+    max-height: calc(100vh - 100px);
+    max-width: 560px;
+  }
+
   /* ── Edit profile popup on desktop ── */
   .edit-profile-overlay {
     display: flex;

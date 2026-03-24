@@ -472,16 +472,16 @@ export default function TrackModal({ track, onClose, onVote, userVotes, onViewUs
             </div>
           </div>
 
-          {/* COP IT / PASS buttons */}
+          {/* COP IT always visible */}
+          <button className="btn-cop-it" onClick={handleCopIt} disabled={checkoutLoading}>
+            {checkoutLoading ? "Opening checkout..." : isFree ? "🎁 FREE DOWNLOAD" : `🛒 COP IT — ${priceLabel}`}
+          </button>
+
+          {/* Vote buttons / status */}
           {!userVote ? (
-            <div>
-              <button className="btn-cop-it" onClick={handleCopIt} disabled={checkoutLoading}>
-                {checkoutLoading ? "Opening checkout..." : isFree ? "🎁 FREE DOWNLOAD" : `🛒 COP IT — ${priceLabel}`}
-              </button>
-              <button className="btn-pass-it" onClick={() => handleVote("left")}>
-                💨 Pass
-              </button>
-            </div>
+            <button className="btn-pass-it" onClick={() => handleVote("left")}>
+              💨 Pass
+            </button>
           ) : (
             <div className="track-modal__voted">
               {userVote === "right" ? "❤️ You liked this" : "💨 You passed"}

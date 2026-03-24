@@ -893,6 +893,11 @@ body {
   color: var(--text);
   margin-bottom: 6px;
   word-break: break-all;
+  flex-wrap: wrap;
+}
+/* Prevent role/beta pills from being squeezed to zero width */
+.profile-username > span {
+  flex-shrink: 0;
 }
 .profile-bio {
   font-family: var(--font-body);

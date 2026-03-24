@@ -2546,13 +2546,18 @@ body {
   margin-bottom: 2px;
 }
 .browse-card__artist {
-  font-family: var(--font-body);
+  font-family: var(--font-head);
   font-size: 11px;
+  font-weight: 600;
   color: var(--text-dim);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   margin-bottom: 5px;
+}
+/* Name glow overrides for browse cards */
+.browse-card__artist[class*="name-glow-"] {
+  color: unset;
 }
 .browse-card__meta {
   display: flex;

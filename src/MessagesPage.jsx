@@ -79,21 +79,19 @@ function ChatThread({ otherUsername, onBack, currentUser }) {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 50, background: 'var(--bg)' }}>
+    <div className="chat-thread">
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 16px', paddingTop: 'max(14px, env(safe-area-inset-top, 14px))', borderBottom: '1px solid var(--border)', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(20px)', flexShrink: 0, zIndex: 10 }}>
-        <button onClick={onBack} style={{ background: 'none', border: 'none', color: 'var(--text-dim)', fontSize: '22px', cursor: 'pointer', padding: '0 4px', lineHeight: 1 }}>←</button>
+      <div className="chat-thread__header">
+        <button onClick={onBack} className="chat-thread__back">←</button>
         <div style={{ fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '15px' }}>@{otherUsername}</div>
       </div>
 
-      {/* Messages — fills remaining space, scrollable */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}>
+      {/* Messages */}
+      <div className="chat-thread__messages">
         {loading ? (
           <div style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: '13px', paddingTop: '40px' }}>Loading...</div>
         ) : messages.length === 0 ? (
-          <div style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: '13px', paddingTop: '40px' }}>
-            No messages yet. Say something! 👋
-          </div>
+          <div style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: '13px', paddingTop: '40px' }}>No messages yet. Say something! 👋</div>
         ) : messages.map(msg => {
           const isMe = msg.sender === currentUser.username;
           return (
@@ -117,42 +115,21 @@ function ChatThread({ otherUsername, onBack, currentUser }) {
         <div ref={bottomRef} />
       </div>
 
-      {/* Input — always at bottom, above keyboard */}
-      <div style={{
-        padding: '10px 12px',
-        paddingBottom: 'max(10px, env(safe-area-inset-bottom, 10px))',
-        borderTop: '1px solid var(--border)',
-        display: 'flex', gap: '8px', alignItems: 'center',
-        flexShrink: 0,
-        background: 'rgba(0,0,0,0.9)',
-        backdropFilter: 'blur(20px)',
-      }}>
+      {/* Input */}
+      <div className="chat-thread__input-row">
         <input
+          className="chat-thread__input"
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && !e.shiftKey && sendMessage()}
-          onFocus={() => setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 400)}
+          onFocus={() => setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 350)}
           placeholder="Message..."
-          style={{
-            flex: 1, background: 'rgba(255,255,255,0.08)',
-            border: '1px solid rgba(255,255,255,0.15)',
-            borderRadius: '22px', padding: '11px 16px',
-            color: '#fff', fontSize: '16px',
-            fontFamily: 'var(--font-body)', outline: 'none',
-          }}
         />
         <button
+          className="chat-thread__send"
           onClick={sendMessage}
           disabled={!input.trim() || sending}
-          style={{
-            background: 'linear-gradient(135deg, var(--cyan), var(--purple))',
-            border: 'none', borderRadius: '50%',
-            width: '42px', height: '42px', cursor: 'pointer',
-            fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            flexShrink: 0, opacity: !input.trim() || sending ? 0.4 : 1,
-          }}>
-          ➤
-        </button>
+        >➤</button>
       </div>
     </div>
   );

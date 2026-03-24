@@ -536,14 +536,6 @@ export default function App() {
           />
         )}
 
-        {activeTab === "messages" && currentUser && (
-          <MessagesPage
-            key={messageThread}
-            initialThread={messageThread}
-            onUnreadChange={setUnreadMessages}
-          />
-        )}
-
         {activeTab === "notifications" && (
           <NotificationsPage
             onNotificationsRead={loadUnreadCount}
@@ -585,6 +577,23 @@ export default function App() {
       </nav>
 
       <Toast message={toast.message} visible={toast.visible} />
+
+      {/* Messages: full-screen overlay, sits above app-main but below modals */}
+      {activeTab === "messages" && currentUser && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 10, background: 'var(--bg)', display: 'flex', flexDirection: 'column' }}>
+          {/* Spacer for the app header */}
+          <div style={{ height: '56px', flexShrink: 0 }} />
+          <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+            <MessagesPage
+              key={messageThread}
+              initialThread={messageThread}
+              onUnreadChange={setUnreadMessages}
+            />
+          </div>
+          {/* Spacer for bottom nav on mobile */}
+          <div style={{ height: '64px', flexShrink: 0 }} />
+        </div>
+      )}
 
       {showSettings && (
         <SettingsPage onClose={() => setShowSettings(false)} />

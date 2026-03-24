@@ -23,11 +23,17 @@ function setPinnedTrack(username, trackId) {
   localStorage.setItem(`ds_pinned_${username}`, JSON.stringify(trackId));
 }
 
+const SUPABASE_URL = 'https://bkapxykeryzxbqpgjgab.supabase.co';
+const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
+
 export default function ProfilePage({ userVotes, tracks }) {
   const { currentUser, setUserData, logout } = useAuth();
   const [editing, setEditing] = useState(false);
   const [editBio, setEditBio] = useState(currentUser?.bio || "");
   const [editColor, setEditColor] = useState(currentUser?.avatarColor || AVATAR_COLORS[0]);
+  const [avatarUrl, setAvatarUrl] = useState(currentUser?.avatarUrl || null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const avatarInputRef = React.useRef(null);
   const [showSnippetPicker, setShowSnippetPicker] = useState(false);
   const [snippetConfirmed, setSnippetConfirmed] = useState(null);
   const [pinnedId, setPinnedId] = useState(() => getPinnedTrack(currentUser?.username));
@@ -35,6 +41,13 @@ export default function ProfilePage({ userVotes, tracks }) {
   const [myUploads, setMyUploads] = useState([]);
   const [uploadsLoading, setUploadsLoading] = useState(true);
   const [uploadReactions, setUploadReactions] = useState({});
+
+  // Load avatar from DB
+  useEffect(() => {
+    if (!currentUser?.username) return;
+    supabase.from('profiles').select('avatar_url').eq('username', currentUser.username).maybeSingle()
+      .then(({ data }) => { if (data?.avatar_url) setAvatarUrl(data.avatar_url); });
+  }, [currentUser?.username]);
 
   useEffect(() => {
     if (!currentUser?.id) return;
@@ -127,6 +140,28 @@ export default function ProfilePage({ userVotes, tracks }) {
     setPinnedTrack(currentUser.username, newId);
   }
 
+  async function handleAvatarChange(e) {
+    const file = e.target.files[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    setUploadingAvatar(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const path = `${currentUser.id || currentUser.username}/avatar.${ext}`;
+      const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/avatars/${path}`, {
+        method: 'POST',
+        headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}`, 'Content-Type': file.type, 'x-upsert': 'true' },
+        body: file,
+      });
+      if (uploadRes.ok) {
+        const url = `${SUPABASE_URL}/storage/v1/object/public/avatars/${path}?t=${Date.now()}`;
+        setAvatarUrl(url);
+        // Save to profiles table
+        await supabase.from('profiles').update({ avatar_url: url }).eq('username', currentUser.username);
+      }
+    } catch (err) { console.error('Avatar upload error:', err); }
+    finally { setUploadingAvatar(false); }
+  }
+
   async function handleDeleteTrack(trackId) {
     if (!window.confirm("Delete this beat? This can't be undone.")) return;
     await supabase.from('tracks').delete().eq('id', trackId).eq('uploaded_by_username', currentUser.username);
@@ -155,9 +190,21 @@ export default function ProfilePage({ userVotes, tracks }) {
       <div className="profile-header">
         <div
           className="profile-avatar"
-          style={{ background: currentUser.avatarColor }}
+          style={{ background: avatarUrl ? 'transparent' : currentUser.avatarColor, cursor: 'pointer', overflow: 'hidden', position: 'relative' }}
+          onClick={() => avatarInputRef.current?.click()}
+          title="Change profile picture"
         >
-          {currentUser.username[0].toUpperCase()}
+          {avatarUrl ? (
+            <img src={avatarUrl} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+          ) : (
+            currentUser.username[0].toUpperCase()
+          )}
+          {uploadingAvatar && (
+            <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', fontSize: '12px' }}>
+              ⏳
+            </div>
+          )}
+          <input ref={avatarInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatarChange} />
         </div>
         <div className="profile-info">
           <div className="profile-username">{currentUser.username}</div>

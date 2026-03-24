@@ -33,6 +33,7 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload })
   const [editing, setEditing] = useState(false);
   const [editBio, setEditBio] = useState(currentUser?.bio || "");
   const [editColor, setEditColor] = useState(currentUser?.avatarColor || AVATAR_COLORS[0]);
+  const [profileExtra, setProfileExtra] = useState({ location: '', tagline: '', instagram: '', twitter: '', soundcloud: '', youtube: '' });
   const [avatarUrl, setAvatarUrl] = useState(currentUser?.avatarUrl || null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const avatarInputRef = React.useRef(null);
@@ -152,6 +153,17 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload })
     }).catch(() => {});
   }, [currentUser?.username]);
 
+  // Load extra profile fields
+  useEffect(() => {
+    if (!currentUser?.username) return;
+    fetch(`${SUPABASE_URL}/rest/v1/profiles?username=eq.${encodeURIComponent(currentUser.username)}&select=location,tagline,instagram,twitter,soundcloud,youtube`, {
+      headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` }
+    }).then(r => r.json()).then(data => {
+      const p = Array.isArray(data) ? data[0] : data;
+      if (p) setProfileExtra({ location: p.location||'', tagline: p.tagline||'', instagram: p.instagram||'', twitter: p.twitter||'', soundcloud: p.soundcloud||'', youtube: p.youtube||'' });
+    }).catch(() => {});
+  }, [currentUser?.username]);
+
   // Load avatar — check localStorage first, then DB
   useEffect(() => {
     if (!currentUser?.username) return;
@@ -243,6 +255,12 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload })
   function saveEdit() {
     setUserData("bio", editBio);
     setUserData("avatarColor", editColor);
+    // Save extra fields to DB
+    fetch(`${SUPABASE_URL}/rest/v1/profiles?username=eq.${encodeURIComponent(currentUser.username)}`, {
+      method: 'PATCH',
+      headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(profileExtra),
+    }).catch(() => {});
     setEditing(false);
   }
 
@@ -388,6 +406,16 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload })
           </div>
           {!editing && (
             <div className="profile-bio">{currentUser.bio || "no bio yet..."}</div>
+            {profileExtra.tagline && <div style={{ fontSize: '12px', color: 'var(--cyan)', fontFamily: 'var(--font-body)', marginTop: '2px', fontStyle: 'italic' }}>{profileExtra.tagline}</div>}
+            {profileExtra.location && <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-body)', marginTop: '2px' }}>📍 {profileExtra.location}</div>}
+            {(profileExtra.instagram || profileExtra.twitter || profileExtra.soundcloud || profileExtra.youtube) && (
+              <div style={{ display: 'flex', gap: '10px', marginTop: '6px', flexWrap: 'wrap' }}>
+                {profileExtra.instagram && <a href={`https://instagram.com/${profileExtra.instagram}`} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', textDecoration: 'none' }}>📸 IG</a>}
+                {profileExtra.twitter && <a href={`https://x.com/${profileExtra.twitter}`} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', textDecoration: 'none' }}>🐦 X</a>}
+                {profileExtra.soundcloud && <a href={`https://soundcloud.com/${profileExtra.soundcloud}`} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', textDecoration: 'none' }}>☁️ SC</a>}
+                {profileExtra.youtube && <a href={`https://youtube.com/@${profileExtra.youtube}`} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', textDecoration: 'none' }}>▶️ YT</a>}
+              </div>
+            )}
           )}
           {editing && (
             <div className="profile-edit-form">
@@ -409,7 +437,26 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload })
                   />
                 ))}
               </div>
-              <div style={{ display: "flex", gap: "8px", marginTop: "8px" }}>
+              {/* Extra profile fields */}
+              {[
+                { key: 'tagline', placeholder: 'Tagline (e.g. "Trap producer from ATL")', emoji: '✍️' },
+                { key: 'location', placeholder: 'Location (e.g. "Atlanta, GA")', emoji: '📍' },
+                { key: 'instagram', placeholder: 'Instagram handle (no @)', emoji: '📸' },
+                { key: 'twitter', placeholder: 'Twitter/X handle (no @)', emoji: '🐦' },
+                { key: 'soundcloud', placeholder: 'SoundCloud username', emoji: '☁️' },
+                { key: 'youtube', placeholder: 'YouTube channel', emoji: '▶️' },
+              ].map(f => (
+                <input key={f.key}
+                  className="auth-input"
+                  style={{ marginTop: '6px' }}
+                  value={profileExtra[f.key]}
+                  onChange={e => setProfileExtra(prev => ({ ...prev, [f.key]: e.target.value }))}
+                  placeholder={`${f.emoji} ${f.placeholder}`}
+                  maxLength={80}
+                />
+              ))}
+
+              <div style={{ display: "flex", gap: "8px", marginTop: "12px" }}>
                 <button className="btn-primary" onClick={saveEdit} style={{ fontSize: "13px", padding: "8px 16px" }}>
                   Save
                 </button>

@@ -243,7 +243,7 @@ export default function TrackModal({ track, onClose, onVote, userVotes, onViewUs
   const hasReactions = Object.keys(reactionCounts).length > 0;
 
   async function handleShare() {
-    const url = `https://808market.vercel.app/track/${track.id}`;
+    const url = `https://808market.app/track/${track.id}`;
     const shareData = {
       title: track.title,
       text: `Check out "${track.title}" by ${track.artist} on 808market`,

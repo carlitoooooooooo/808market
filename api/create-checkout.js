@@ -59,8 +59,8 @@ export default async function handler(req, res) {
         },
       ],
       mode: 'payment',
-      success_url: `${process.env.VITE_APP_URL || 'https://808market.vercel.app'}/success?session_id={CHECKOUT_SESSION_ID}&track_id=${trackId}`,
-      cancel_url: `${process.env.VITE_APP_URL || 'https://808market.vercel.app'}/track/${trackId}`,
+      success_url: `${process.env.VITE_APP_URL || 'https://808market.app'}/success?session_id={CHECKOUT_SESSION_ID}&track_id=${trackId}`,
+      cancel_url: `${process.env.VITE_APP_URL || 'https://808market.app'}/track/${trackId}`,
       metadata: {
         trackId,
         trackTitle,

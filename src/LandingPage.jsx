@@ -11,164 +11,161 @@ export default function LandingPage({ onGetStarted, onBrowseAsGuest }) {
   const playerRef = useRef(null);
 
   useEffect(() => {
-    async function fetchBeats() {
-      try {
-        const res = await fetch(
-          `${SUPABASE_URL}/rest/v1/tracks?order=cops.desc&limit=3`,
-          { headers: { apikey: ANON, Authorization: `Bearer ${ANON}` } }
-        );
-        const data = await res.json();
-        if (Array.isArray(data)) setBeats(data);
-      } catch (e) {
-        console.error("Landing beats fetch error:", e);
-      }
-    }
-    fetchBeats();
-    return () => {
-      if (playerRef.current) {
-        playerRef.current.destroy();
-        playerRef.current = null;
-      }
-    };
+    fetch(`${SUPABASE_URL}/rest/v1/tracks?order=listed_at.desc&limit=3`, {
+      headers: { apikey: ANON, Authorization: `Bearer ${ANON}` }
+    }).then(r => r.json()).then(d => { if (Array.isArray(d)) setBeats(d); }).catch(() => {});
+    return () => { if (playerRef.current) { playerRef.current.destroy(); playerRef.current = null; } };
   }, []);
 
   function handlePlay(beat) {
     if (!beat.audio_url) return;
     if (playingId === beat.id) {
-      if (playerRef.current) {
-        playerRef.current.destroy();
-        playerRef.current = null;
-      }
-      setPlayingId(null);
-      return;
+      playerRef.current?.destroy(); playerRef.current = null; setPlayingId(null); return;
     }
-    if (playerRef.current) {
-      playerRef.current.destroy();
-      playerRef.current = null;
-    }
+    playerRef.current?.destroy();
     const p = new AudioPlayer(beat.audio_url, beat.snippet_start || 0);
     p.onEnded(() => setPlayingId(null));
-    p.play();
-    playerRef.current = p;
-    setPlayingId(beat.id);
+    p.play(); playerRef.current = p; setPlayingId(beat.id);
   }
 
   return (
-    <div className="landing-page">
-      <div className="app-bg" style={{ zIndex: -1 }} />
+    <div style={{ minHeight: '100vh', background: '#000', color: '#fff', fontFamily: "'Inter', sans-serif", overflowY: 'auto', position: 'relative', zIndex: 2 }}>
 
-      {/* === HERO === */}
-      <section className="landing-hero">
-        <div className="landing-logo-wrap">
-          <Logo />
-          <span className="beta-tag">BETA</span>
-        </div>
-        <h1 className="landing-tagline">
-          Swipe.<br />
-          <span className="landing-tagline--accent">Discover.</span><br />
-          Cop.
-        </h1>
-        <p className="landing-sub">
-          The beat marketplace built for producers and artists who move different.
-        </p>
-        <div className="landing-ctas">
-          <button className="btn-primary landing-cta-primary" onClick={onGetStarted}>
-            Get Started →
-          </button>
-          <button className="btn-secondary landing-cta-secondary" onClick={onBrowseAsGuest}>
-            Browse as Guest
+      {/* Gradient bg */}
+      <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
+        background: 'radial-gradient(ellipse 80vw 60vh at 20% 20%, rgba(0,245,255,0.07) 0%, transparent 60%), radial-gradient(ellipse 70vw 80vh at 80% 80%, rgba(191,95,255,0.07) 0%, transparent 60%)',
+      }} />
+
+      <div style={{ position: 'relative', zIndex: 1, maxWidth: '480px', margin: '0 auto', padding: '0 20px 60px' }}>
+
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 0 0' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Logo />
+            <span style={{ fontSize: '10px', border: '1px solid rgba(0,245,255,0.4)', color: '#00f5ff', borderRadius: '20px', padding: '2px 7px', fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600 }}>BETA</span>
+          </div>
+          <button onClick={onGetStarted} style={{ background: 'none', border: '1px solid rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.7)', borderRadius: '20px', padding: '6px 14px', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>
+            Sign In
           </button>
         </div>
-      </section>
 
-      {/* === HOW IT WORKS === */}
-      <section className="landing-how">
-        <h2 className="landing-section-title">How it works</h2>
-        <div className="landing-steps">
-          <div className="landing-step">
-            <div className="landing-step__icon">🎵</div>
-            <div className="landing-step__label">Producers upload beats</div>
-          </div>
-          <div className="landing-step-arrow">→</div>
-          <div className="landing-step">
-            <div className="landing-step__icon">👆</div>
-            <div className="landing-step__label">You swipe to discover</div>
-          </div>
-          <div className="landing-step-arrow">→</div>
-          <div className="landing-step">
-            <div className="landing-step__icon">🛒</div>
-            <div className="landing-step__label">Cop the ones you love</div>
+        {/* Hero */}
+        <div style={{ padding: '48px 0 40px' }}>
+          <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 'clamp(42px, 12vw, 56px)', lineHeight: 1.1, marginBottom: '20px', letterSpacing: '-2px' }}>
+            Swipe.<br />
+            <span style={{ background: 'linear-gradient(135deg, #00f5ff, #bf5fff)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Discover.</span><br />
+            Cop.
+          </h1>
+          <p style={{ fontSize: '16px', color: 'rgba(255,255,255,0.55)', lineHeight: 1.6, marginBottom: '32px', maxWidth: '340px' }}>
+            The beat marketplace built for producers and artists who move different.
+          </p>
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            <button onClick={onGetStarted} style={{
+              background: 'linear-gradient(135deg, #00f5ff, #bf5fff)', border: 'none', color: '#000',
+              borderRadius: '50px', padding: '14px 28px', fontSize: '15px', fontWeight: 700,
+              cursor: 'pointer', fontFamily: "'Space Grotesk', sans-serif",
+            }}>Get Started →</button>
+            <button onClick={onBrowseAsGuest} style={{
+              background: 'transparent', border: '1px solid rgba(255,255,255,0.25)', color: '#fff',
+              borderRadius: '50px', padding: '14px 24px', fontSize: '15px',
+              cursor: 'pointer', fontFamily: "'Inter', sans-serif",
+            }}>Browse as Guest</button>
           </div>
         </div>
-      </section>
 
-      {/* === FEATURED BEATS === */}
-      {beats.length > 0 && (
-        <section className="landing-beats">
-          <h2 className="landing-section-title">🔥 Featured Beats</h2>
-          <div className="landing-beats-grid">
-            {beats.map((beat) => {
-              const isFree = !beat.price || beat.price === 0;
-              const isPlaying = playingId === beat.id;
-              return (
-                <div key={beat.id} className="landing-beat-card">
-                  {/* Cover */}
-                  <div
-                    className="landing-beat-cover"
-                    style={{ backgroundImage: beat.cover_url ? `url(${beat.cover_url})` : "none" }}
-                  >
-                    <div className="landing-beat-cover-overlay" />
-                    {beat.audio_url && (
-                      <button
-                        className={`landing-beat-play ${isPlaying ? "landing-beat-play--active" : ""}`}
-                        onClick={() => handlePlay(beat)}
-                      >
-                        {isPlaying ? "⏸" : "▶"}
-                      </button>
-                    )}
-                    <span className={`landing-beat-price ${isFree ? "landing-beat-price--free" : ""}`}>
-                      {isFree ? "FREE" : `$${beat.price}`}
-                    </span>
-                  </div>
-
-                  {/* Info */}
-                  <div className="landing-beat-info">
-                    <div className="landing-beat-artist">{beat.artist}</div>
-                    <div className="landing-beat-title">{beat.title}</div>
-                    {beat.genre && <span className="genre-tag">{beat.genre}</span>}
-                  </div>
-
-                  {/* Auth overlay on tap */}
-                  <div className="landing-beat-auth-overlay" onClick={onGetStarted}>
-                    <div className="landing-beat-auth-text">
-                      Sign up to cop this beat 🛒
-                    </div>
-                    <button className="btn-primary" style={{ fontSize: "13px", padding: "8px 20px" }}>
-                      Get Started →
-                    </button>
-                  </div>
+        {/* How it works */}
+        <div style={{ marginBottom: '48px' }}>
+          <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: '20px', marginBottom: '24px', color: 'rgba(255,255,255,0.9)' }}>How it works</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
+            {[
+              { icon: '🎵', title: 'Producers upload beats', desc: 'Set your price, license type, and let the world hear your work.' },
+              { icon: '👆', title: 'Swipe to discover', desc: 'Hear 15-second previews. Like what you hear, cop what you love.' },
+              { icon: '🛒', title: 'Cop the ones you love', desc: 'Buy direct. No middlemen. Producers get paid.' },
+            ].map((step, i) => (
+              <div key={i} style={{ display: 'flex', gap: '16px', padding: '16px 0', borderBottom: i < 2 ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
+                <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', flexShrink: 0 }}>
+                  {step.icon}
                 </div>
-              );
-            })}
+                <div>
+                  <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: '15px', marginBottom: '4px' }}>{step.title}</div>
+                  <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', lineHeight: 1.5 }}>{step.desc}</div>
+                </div>
+              </div>
+            ))}
           </div>
-        </section>
-      )}
-
-      {/* === FOOTER === */}
-      <footer className="landing-footer">
-        <div className="landing-footer-text">
-          Join 808market — the beat marketplace built by producers, for producers.
         </div>
-        <button className="btn-primary landing-footer-cta" onClick={onGetStarted}>
-          Get Started →
-        </button>
-        <button
-          className="landing-footer-guest"
-          onClick={onBrowseAsGuest}
-        >
-          or browse as guest
-        </button>
-      </footer>
+
+        {/* Featured Beats */}
+        {beats.length > 0 && (
+          <div style={{ marginBottom: '48px' }}>
+            <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: '20px', marginBottom: '16px' }}>🔥 Featured Beats</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {beats.map(beat => {
+                const isFree = !beat.price || beat.price === 0;
+                const isPlaying = playingId === beat.id;
+                return (
+                  <div key={beat.id} style={{
+                    background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+                    borderRadius: '16px', overflow: 'hidden', display: 'flex', alignItems: 'center', gap: '14px', padding: '12px',
+                  }}>
+                    {/* Cover */}
+                    <div style={{
+                      width: '64px', height: '64px', borderRadius: '10px', flexShrink: 0,
+                      background: beat.cover_url ? `url(${beat.cover_url}) center/cover` : 'rgba(255,255,255,0.08)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      position: 'relative', overflow: 'hidden',
+                    }}>
+                      {!beat.cover_url && <span style={{ fontSize: '24px' }}>🎵</span>}
+                      {beat.audio_url && (
+                        <button onClick={() => handlePlay(beat)} style={{
+                          position: 'absolute', inset: 0, background: isPlaying ? 'rgba(0,245,255,0.3)' : 'rgba(0,0,0,0.5)',
+                          border: 'none', color: '#fff', fontSize: '20px', cursor: 'pointer',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        }}>{isPlaying ? '⏸' : '▶'}</button>
+                      )}
+                    </div>
+
+                    {/* Info */}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: '14px', marginBottom: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{beat.title}</div>
+                      <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', marginBottom: '6px' }}>by {beat.artist || beat.uploaded_by_username}</div>
+                      <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                        {beat.genre && <span style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)', fontSize: '10px', padding: '2px 8px', borderRadius: '20px' }}>{beat.genre}</span>}
+                        <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: '13px', color: isFree ? '#00f5ff' : '#00ff88' }}>{isFree ? 'FREE' : `$${beat.price}`}</span>
+                      </div>
+                    </div>
+
+                    {/* CTA */}
+                    <button onClick={onGetStarted} style={{
+                      background: 'linear-gradient(135deg, #00f5ff, #bf5fff)', border: 'none', color: '#000',
+                      borderRadius: '30px', padding: '8px 14px', fontSize: '11px', fontWeight: 700,
+                      cursor: 'pointer', fontFamily: "'Space Grotesk', sans-serif", flexShrink: 0,
+                    }}>Cop It</button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Footer CTA */}
+        <div style={{ textAlign: 'center', padding: '12px 0 40px' }}>
+          <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '14px', lineHeight: 1.6, marginBottom: '24px' }}>
+            Join 808market — the beat marketplace built by producers, for producers.
+          </div>
+          <button onClick={onGetStarted} style={{
+            background: 'linear-gradient(135deg, #00f5ff, #bf5fff)', border: 'none', color: '#000',
+            borderRadius: '50px', padding: '16px 40px', fontSize: '16px', fontWeight: 700,
+            cursor: 'pointer', fontFamily: "'Space Grotesk', sans-serif", width: '100%', maxWidth: '320px',
+          }}>Create Free Account →</button>
+          <div style={{ marginTop: '16px' }}>
+            <button onClick={onBrowseAsGuest} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>
+              or browse as guest
+            </button>
+          </div>
+        </div>
+
+      </div>
     </div>
   );
 }

@@ -119,12 +119,10 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
     pointerDownRef.current = false;
 
     if (!dragStartedRef.current) {
-      // Tap — flip the card
       setDragX(0);
       setDragY(0);
       setIsDragging(false);
       setStamp(null);
-      setIsFlipped(prev => !prev);
       return;
     }
 
@@ -234,10 +232,10 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
         cursor: isTop ? (isFlipped ? "pointer" : "grab") : "default",
         position: "relative",
       }}
-      onPointerDown={isTop ? onPointerDown : undefined}
-      onPointerMove={isTop ? onPointerMove : undefined}
-      onPointerUp={isTop ? onPointerUp : undefined}
-      onPointerCancel={isTop ? onPointerUp : undefined}
+      onPointerDown={isTop && !isFlipped ? onPointerDown : undefined}
+      onPointerMove={isTop && !isFlipped ? onPointerMove : undefined}
+      onPointerUp={isTop && !isFlipped ? onPointerUp : undefined}
+      onPointerCancel={isTop && !isFlipped ? onPointerUp : undefined}
     >
       {/* Flip container */}
       <div className="swipe-card__flipper" style={{
@@ -249,7 +247,10 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
       }}>
 
         {/* ── FRONT FACE ── */}
-        <div className="swipe-card__face swipe-card__face--front">
+        <div className="swipe-card__face swipe-card__face--front"
+          onClick={isTop ? () => setIsFlipped(true) : undefined}
+          style={{ cursor: isTop ? 'pointer' : 'default' }}
+        >
           <div className="swipe-card__cover" style={{ backgroundImage: `url(${track.coverUrl})` }} />
           <div className="swipe-card__overlay" />
           <div className={`price-badge ${isFree ? "price-badge--free" : ""}`}>{priceLabel}</div>
@@ -265,7 +266,7 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
               <button className="swipe-card__play-btn"
                 onPointerDown={(e) => e.stopPropagation()}
                 onPointerUp={(e) => e.stopPropagation()}
-                onClick={(e) => { e.stopPropagation(); togglePlay(); }}
+                onClick={(e) => { e.stopPropagation(); e.preventDefault(); togglePlay(); }}
                 aria-label={isPlaying ? "Pause" : "Play"}>
                 {isPlaying ? "⏸" : "▶"}
               </button>

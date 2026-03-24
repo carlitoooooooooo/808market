@@ -2343,6 +2343,30 @@ body {
 /* ===== DESKTOP NAV (hidden on mobile) ===== */
 .desktop-nav { display: none; }
 
+/* ===== EDIT PROFILE MODAL ===== */
+.edit-profile-overlay {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  z-index: 400;
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.edit-profile-overlay::-webkit-scrollbar { display: none; }
+.edit-profile-box { width: 100%; }
+.edit-profile-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 60px 16px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  position: sticky;
+  top: 0;
+  background: #000;
+  z-index: 10;
+}
+
 
 
 /* ===== LEADERBOARD MOBILE/DESKTOP VISIBILITY ===== */
@@ -2494,39 +2518,31 @@ body {
     margin-bottom: 20px;
   }
 
-  /* ── Edit profile: constrained on desktop, no visible scrollbar ── */
-  /* Overlay: push down below header, center horizontally */
-  .profile-page ~ div[style*="position: fixed"][style*="zIndex: 400"] {
-    top: 64px !important;
+  /* ── Edit profile popup on desktop ── */
+  .edit-profile-overlay {
     display: flex;
     align-items: flex-start;
     justify-content: center;
-    padding-top: 40px;
+    padding-top: 32px;
     background: rgba(0,0,0,0.85) !important;
-    scrollbar-width: none;
   }
-  .profile-page ~ div[style*="position: fixed"][style*="zIndex: 400"]::-webkit-scrollbar {
-    display: none;
-  }
-  /* Inner content box */
-  .profile-page ~ div[style*="position: fixed"][style*="zIndex: 400"] > div:first-child {
+  .edit-profile-box {
     width: 540px;
-    max-height: calc(100vh - 64px - 80px);
+    max-height: calc(100vh - 64px - 48px);
     background: #0a0a0a;
     border-radius: 16px;
-    border: 1px solid rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.12);
     overflow-y: auto;
     scrollbar-width: none;
     padding-bottom: 24px;
+    display: flex;
+    flex-direction: column;
   }
-  .profile-page ~ div[style*="position: fixed"][style*="zIndex: 400"] > div:first-child::-webkit-scrollbar {
-    display: none;
-  }
-  /* Sticky header inside: fix padding and bg */
-  .profile-page ~ div[style*="position: fixed"][style*="zIndex: 400"] > div:first-child > div:first-child {
-    padding-top: 20px !important;
+  .edit-profile-box::-webkit-scrollbar { display: none; }
+  .edit-profile-header {
     border-radius: 16px 16px 0 0;
     background: #0a0a0a !important;
+    padding: 20px 20px 16px !important;
   }
 
 

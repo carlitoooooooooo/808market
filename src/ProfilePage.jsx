@@ -756,7 +756,7 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload })
                     { value: 'green', label: 'Green', style: { background: '#00ff88', color: '#000' } },
                     { value: 'gold', label: 'Gold', style: { background: '#ffd700', color: '#000' } },
                     { value: 'red', label: 'Red', style: { background: '#ff3366', color: '#fff' } },
-                    { value: 'rainbow', label: '🌈', style: { background: 'linear-gradient(135deg, #ff3366, #ff9900, #00f5ff, #bf5fff)', color: '#000' } },
+                    { value: 'rainbow', label: 'Rainbow', style: { background: 'linear-gradient(135deg, #ff3366, #ff9900, #00f5ff, #bf5fff)', color: '#fff' } },
                   ].map(g => (
                     <button key={g.value} type="button"
                       onClick={() => setProfileExtra(prev => ({ ...prev, name_glow: g.value }))}

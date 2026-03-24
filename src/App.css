@@ -1335,6 +1335,44 @@ body {
   border-radius: 10px;
 }
 
+/* ===== AUTH PROMPT ===== */
+.auth-prompt-backdrop {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+  z-index: 400; display: flex; align-items: flex-end; justify-content: center;
+}
+.auth-prompt-sheet {
+  background: #0a0a0a; border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 24px 24px 0 0; width: 100%; max-width: 480px;
+  padding: 12px 24px 40px; text-align: center;
+  animation: slideUp 0.25s cubic-bezier(0.34,1.56,0.64,1);
+}
+.auth-prompt-pill {
+  width: 40px; height: 4px; background: rgba(255,255,255,0.2);
+  border-radius: 2px; margin: 0 auto 20px;
+}
+.auth-prompt-icon { font-size: 36px; margin-bottom: 12px; }
+.auth-prompt-title {
+  font-family: var(--font-head); font-weight: 700; font-size: 20px; margin-bottom: 8px;
+}
+.auth-prompt-body {
+  font-family: var(--font-body); color: rgba(255,255,255,0.5); font-size: 14px; margin-bottom: 24px; line-height: 1.5;
+}
+.auth-prompt-actions { display: flex; flex-direction: column; gap: 10px; }
+.auth-prompt-signup {
+  padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 700;
+  font-family: var(--font-head); cursor: pointer; border: none;
+  background: linear-gradient(135deg, #00f5ff, #bf5fff); color: #000;
+}
+.auth-prompt-login {
+  background: none; border: none; color: rgba(255,255,255,0.4);
+  font-size: 13px; font-family: var(--font-body); cursor: pointer; padding: 8px;
+}
+.auth-prompt-dismiss {
+  background: none; border: none; color: rgba(255,255,255,0.2);
+  font-size: 12px; font-family: var(--font-body); cursor: pointer;
+  margin-top: 8px; padding: 4px;
+}
+
 /* ===== WAVEFORM ===== */
 .waveform-visualizer { background: transparent; }
 

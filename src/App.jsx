@@ -13,6 +13,8 @@ import NotificationsPage from "./NotificationsPage.jsx";
 import UserProfilePage from "./UserProfilePage.jsx";
 import { FireAnimation, TrashAnimation } from "./SwipeAnimations.jsx";
 import AboutPage from "./AboutPage.jsx";
+import LandingPage from "./LandingPage.jsx";
+import AuthPrompt from "./AuthPrompt.jsx";
 import tracksData from "./tracks.js";
 import { supabase } from "./supabase.js";
 import { dbUpsert, dbSelect, dbUpdate, dbInsert } from "./dbHelper.js";
@@ -83,6 +85,9 @@ export default function App() {
   const [reactionTarget, setReactionTarget] = useState(null);
   const [showUpload, setShowUpload] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
+  const [guestMode, setGuestMode] = useState(false);
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
+  const [authMode, setAuthMode] = useState("login"); // for directing to login vs signup
   const [viewingUser, setViewingUser] = useState(null);
   const [deepLinkTrack, setDeepLinkTrack] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -180,8 +185,17 @@ export default function App() {
     }, 1500);
   }, []);
 
-  const handleSwipe = useCallback(async (dir, track) => {
-    if (!currentUser) return;
+  const requireAuth = useCallback(() => {
+    setShowAuthPrompt(true);
+  }, []);
+
+  const handleSwipe = useCallback(async (dir, track, cardRect) => {
+    if (!currentUser) {
+      // Guest — only allow passing, not liking
+      if (dir === "right") { requireAuth(); return; }
+      setQueue(prev => prev.filter(t => t.id !== track.id));
+      return;
+    }
 
     // Optimistic update
     setUserVotes(prev => ({ ...prev, [track.id]: dir }));
@@ -268,8 +282,23 @@ export default function App() {
     );
   }
 
-  if (!currentUser) {
-    return <AuthScreen />;
+  if (!currentUser && !guestMode) {
+    return (
+      <LandingPage
+        onGetStarted={() => { setAuthMode("signup"); setGuestMode(false); }}
+        onBrowseAsGuest={() => setGuestMode(true)}
+        onLogin={() => { setAuthMode("login"); setGuestMode(false); }}
+      />
+    );
+  }
+
+  if (!currentUser && guestMode) {
+    // Guest mode — show app but intercept auth-required actions
+  }
+
+  // Show auth screen when explicitly requested (from landing CTA)
+  if (!currentUser && !guestMode) {
+    return <AuthScreen initialMode={authMode} />;
   }
 
   const filteredQueue = activeGenre === "ALL"
@@ -294,9 +323,25 @@ export default function App() {
             padding: '5px 12px', fontSize: '12px', cursor: 'pointer',
             fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500,
           }}>About</button>
-          <button className="btn-upload" onClick={() => setShowUpload(true)}>
-            + LIST BEAT
-          </button>
+          {currentUser ? (
+            <button className="btn-upload" onClick={() => setShowUpload(true)}>
+              + LIST BEAT
+            </button>
+          ) : (
+            <>
+              <button onClick={() => { setGuestMode(false); }} style={{
+                background: 'none', border: '1px solid rgba(0,245,255,0.4)',
+                color: '#00f5ff', borderRadius: '20px', padding: '5px 14px',
+                fontSize: '12px', cursor: 'pointer', fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600,
+              }}>Log In</button>
+              <button onClick={() => { setGuestMode(false); }} style={{
+                background: 'linear-gradient(135deg, #00f5ff, #bf5fff)',
+                border: 'none', color: '#000', borderRadius: '20px',
+                padding: '5px 14px', fontSize: '12px', cursor: 'pointer',
+                fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700,
+              }}>Sign Up</button>
+            </>
+          )}
         </div>
       </header>
 
@@ -404,8 +449,18 @@ export default function App() {
         )}
       </main>
 
+      {/* Guest mode banner */}
+      {guestMode && !currentUser && (
+        <div style={{ background: 'rgba(0,245,255,0.08)', borderTop: '1px solid rgba(0,245,255,0.2)', padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '13px', fontFamily: "'Space Grotesk', sans-serif" }}>
+          <span style={{ color: 'rgba(255,255,255,0.6)' }}>👀 Browsing as guest</span>
+          <button onClick={() => setGuestMode(false)} style={{ background: 'linear-gradient(135deg, #00f5ff, #bf5fff)', border: 'none', color: '#000', borderRadius: '20px', padding: '4px 14px', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}>
+            Join Free
+          </button>
+        </div>
+      )}
+
       <nav className="bottom-nav">
-        {TABS.map((tab) => (
+        {(currentUser ? TABS : TABS.filter(t => t.id === 'discover')).map((tab) => (
           <button
             key={tab.id}
             className={`nav-tab ${activeTab === tab.id ? "nav-tab--active" : ""}`}
@@ -442,6 +497,13 @@ export default function App() {
       )}
 
       {showAbout && <AboutPage onClose={() => setShowAbout(false)} />}
+
+      <AuthPrompt
+        visible={showAuthPrompt}
+        onClose={() => setShowAuthPrompt(false)}
+        onSignUp={() => { setShowAuthPrompt(false); setGuestMode(false); }}
+        onLogIn={() => { setShowAuthPrompt(false); setGuestMode(false); }}
+      />
 
       {deepLinkTrack && (
         <TrackModal

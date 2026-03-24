@@ -108,16 +108,18 @@ export function AuthProvider({ children }) {
       return { error: "Username can only contain letters, numbers, dots, dashes, underscores (2-30 chars)" };
     }
 
-    // Check if username taken
+    const normalizedUsername = username.trim().toLowerCase();
+
+    // Check if username taken (case-insensitive)
     const { data: existing } = await supabase
       .from("profiles")
       .select("id")
-      .eq("username", username.trim())
+      .ilike("username", normalizedUsername)
       .maybeSingle();
 
     if (existing) return { error: "Username already taken" };
 
-    const email = usernameToEmail(username.trim());
+    const email = usernameToEmail(normalizedUsername);
 
     // Create auth user
     const { data, error } = await supabase.auth.signUp({ email, password });
@@ -143,7 +145,7 @@ export function AuthProvider({ children }) {
       .from("profiles")
       .insert({
         id: data.user.id,
-        username: username.trim(),
+        username: normalizedUsername,
         bio: bio || "",
         avatar_color: avatarColor || AVATAR_COLORS[0],
       })
@@ -170,7 +172,7 @@ export function AuthProvider({ children }) {
   const login = useCallback(async (username, password) => {
     if (!username || !password) return { error: "Username and password required" };
 
-    const email = usernameToEmail(username.trim());
+    const email = usernameToEmail(username.trim().toLowerCase());
 
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 

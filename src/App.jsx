@@ -6,7 +6,6 @@ import SwipeCard from "./SwipeCard.jsx";
 import LeaderboardPage from "./LeaderboardPage.jsx";
 import ProfilePage from "./ProfilePage.jsx";
 import TrackModal from "./TrackModal.jsx";
-import ReactionPicker from "./ReactionPicker.jsx";
 import Logo from "./Logo.jsx";
 import TrackUpload from "./TrackUpload.jsx";
 import NotificationsPage from "./NotificationsPage.jsx";
@@ -93,7 +92,7 @@ export default function App() {
   const [userVotes, setUserVotes] = useState({});
   const [toast, setToast] = useState({ message: "", visible: false });
   const [activeGenre, setActiveGenre] = useState("ALL");
-  const [reactionTarget, setReactionTarget] = useState(null);
+
   const [showUpload, setShowUpload] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -263,7 +262,6 @@ export default function App() {
     }
 
     showToast(dir === "right" ? "❤️ Liked!" : "💨 PASSED");
-    setReactionTarget({ trackId: track.id });
 
     // Persist vote
     try {
@@ -315,9 +313,7 @@ export default function App() {
     showToast("🔥 BEAT LISTED!");
   }, [showToast]);
 
-  const handleReactionDismiss = useCallback(() => {
-    setReactionTarget(null);
-  }, []);
+
 
   if (authLoading) {
     return (
@@ -579,14 +575,7 @@ export default function App() {
         <SettingsPage onClose={() => setShowSettings(false)} />
       )}
 
-      {reactionTarget && (
-        <ReactionPicker
-          key={reactionTarget.trackId}
-          trackId={reactionTarget.trackId}
-          username={currentUser.username}
-          onDismiss={handleReactionDismiss}
-        />
-      )}
+
 
       {showUpload && (
         <div className="modal-overlay">

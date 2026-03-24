@@ -129,12 +129,7 @@ export default function ProfilePage({ userVotes, tracks }) {
 
   async function handleDeleteTrack(trackId) {
     if (!window.confirm("Delete this beat? This can't be undone.")) return;
-    const { createClient } = await import('@supabase/supabase-js');
-    const sb = createClient(
-      'https://bkapxykeryzxbqpgjgab.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA'
-    );
-    await sb.from('tracks').delete().eq('id', trackId).eq('uploaded_by_username', currentUser.username);
+    await supabase.from('tracks').delete().eq('id', trackId).eq('uploaded_by_username', currentUser.username);
     setMyUploads(prev => prev.filter(t => t.id !== trackId));
     if (pinnedId === trackId) {
       setPinnedId(null);

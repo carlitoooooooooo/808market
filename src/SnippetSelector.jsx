@@ -2,9 +2,9 @@ import { useState, useRef, useEffect, useCallback } from "react";
 
 const SNIPPET_DURATION = 15;
 
-export default function SnippetSelector({ file, url, onConfirm, onCancel }) {
+export default function SnippetSelector({ file, url, initialStart, onConfirm, onCancel }) {
   const [duration, setDuration] = useState(0);
-  const [snippetStart, setSnippetStart] = useState(0);
+  const [snippetStart, setSnippetStart] = useState(initialStart || 0);
   const [playing, setPlaying] = useState(false);
   const [playhead, setPlayhead] = useState(0);
   const [loading, setLoading] = useState(true);

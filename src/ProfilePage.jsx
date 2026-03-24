@@ -428,12 +428,13 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
         <div className="profile-info">
           <div className={`profile-username ${profileExtra.name_glow !== 'none' ? `name-glow-${profileExtra.name_glow}` : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             {currentUser.username}
-            {currentUser.role === 'admin' && (
+            {currentUser.role?.toLowerCase() === 'admin' && (
               <span style={{
                 background: 'linear-gradient(135deg, #00f5ff, #bf5fff)',
-                color: '#000', fontSize: '9px', fontFamily: 'var(--font-head)',
-                fontWeight: 700, padding: '2px 8px', borderRadius: '20px',
+                color: '#000', fontSize: '10px', fontFamily: 'var(--font-head)',
+                fontWeight: 700, padding: '3px 10px', borderRadius: '20px',
                 letterSpacing: '1px', textTransform: 'uppercase',
+                flexShrink: 0, whiteSpace: 'nowrap',
               }}>ADMIN</span>
             )}
             {currentUser.isBetaTester && currentUser.role !== 'admin' && (

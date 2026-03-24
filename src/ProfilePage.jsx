@@ -419,55 +419,7 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload })
               )}
             </>
           )}
-          {editing && (
-            <div className="profile-edit-form">
-              <input
-                className="auth-input"
-                value={editBio}
-                onChange={(e) => setEditBio(e.target.value)}
-                placeholder="your bio..."
-                maxLength={80}
-              />
-              <div className="avatar-color-picker" style={{ marginTop: "8px" }}>
-                {AVATAR_COLORS.map((color) => (
-                  <button
-                    key={color}
-                    type="button"
-                    className={`avatar-color-option ${editColor === color ? "avatar-color-option--selected" : ""}`}
-                    style={{ background: color }}
-                    onClick={() => setEditColor(color)}
-                  />
-                ))}
-              </div>
-              {/* Extra profile fields */}
-              {[
-                { key: 'tagline', placeholder: 'Tagline (e.g. "Trap producer from ATL")', emoji: '✍️' },
-                { key: 'location', placeholder: 'Location (e.g. "Atlanta, GA")', emoji: '📍' },
-                { key: 'instagram', placeholder: 'Instagram handle (no @)', emoji: '📸' },
-                { key: 'twitter', placeholder: 'Twitter/X handle (no @)', emoji: '🐦' },
-                { key: 'soundcloud', placeholder: 'SoundCloud username', emoji: '☁️' },
-                { key: 'youtube', placeholder: 'YouTube channel', emoji: '▶️' },
-              ].map(f => (
-                <input key={f.key}
-                  className="auth-input"
-                  style={{ marginTop: '6px' }}
-                  value={profileExtra[f.key]}
-                  onChange={e => setProfileExtra(prev => ({ ...prev, [f.key]: e.target.value }))}
-                  placeholder={`${f.emoji} ${f.placeholder}`}
-                  maxLength={80}
-                />
-              ))}
-
-              <div style={{ display: "flex", gap: "8px", marginTop: "12px" }}>
-                <button className="btn-primary" onClick={saveEdit} style={{ fontSize: "13px", padding: "8px 16px" }}>
-                  Save
-                </button>
-                <button className="btn-secondary" onClick={() => setEditing(false)} style={{ fontSize: "13px", padding: "8px 16px" }}>
-                  Cancel
-                </button>
-              </div>
-            </div>
-          )}
+          {/* Edit button only shown inline — form is a full-screen modal */}
         </div>
         {!editing && (
           <div style={{ display: 'flex', gap: '6px' }}>
@@ -754,6 +706,52 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload })
                 </div>
               ))
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Full-screen edit modal */}
+      {editing && (
+        <div style={{ position: 'fixed', inset: 0, background: '#000', zIndex: 400, overflowY: 'scroll', WebkitOverflowScrolling: 'touch', padding: '0 0 80px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', borderBottom: '1px solid rgba(255,255,255,0.08)', position: 'sticky', top: 0, background: '#000', zIndex: 10 }}>
+            <button onClick={() => setEditing(false)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', fontSize: '16px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
+            <span style={{ fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '16px' }}>Edit Profile</span>
+            <button onClick={saveEdit} style={{ background: 'linear-gradient(135deg, #00f5ff, #bf5fff)', border: 'none', color: '#000', borderRadius: '20px', padding: '6px 16px', fontSize: '14px', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-head)' }}>Save</button>
+          </div>
+          <div style={{ padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            {/* Avatar color picker */}
+            <div>
+              <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '10px', textTransform: 'uppercase' }}>Avatar Color</label>
+              <div className="avatar-color-picker">
+                {AVATAR_COLORS.map(color => (
+                  <button key={color} type="button"
+                    className={`avatar-color-option ${editColor === color ? "avatar-color-option--selected" : ""}`}
+                    style={{ background: color }} onClick={() => setEditColor(color)} />
+                ))}
+              </div>
+            </div>
+            {/* Fields */}
+            {[
+              { state: editBio, set: setEditBio, placeholder: 'Bio...', label: 'BIO', maxLen: 80, isExtra: false },
+            ].map(f => (
+              <div key={f.label}>
+                <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>{f.label}</label>
+                <input className="auth-input" value={f.state} onChange={e => f.set(e.target.value)} placeholder={f.placeholder} maxLength={f.maxLen} />
+              </div>
+            ))}
+            {[
+              { key: 'tagline', label: 'TAGLINE', placeholder: 'e.g. Trap producer from ATL' },
+              { key: 'location', label: 'LOCATION', placeholder: 'e.g. Atlanta, GA' },
+              { key: 'instagram', label: 'INSTAGRAM', placeholder: 'handle (no @)' },
+              { key: 'twitter', label: 'TWITTER / X', placeholder: 'handle (no @)' },
+              { key: 'soundcloud', label: 'SOUNDCLOUD', placeholder: 'username' },
+              { key: 'youtube', label: 'YOUTUBE', placeholder: 'channel name' },
+            ].map(f => (
+              <div key={f.key}>
+                <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>{f.label}</label>
+                <input className="auth-input" value={profileExtra[f.key]} onChange={e => setProfileExtra(prev => ({ ...prev, [f.key]: e.target.value }))} placeholder={f.placeholder} maxLength={80} />
+              </div>
+            ))}
           </div>
         </div>
       )}

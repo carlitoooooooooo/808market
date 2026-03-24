@@ -510,31 +510,6 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload })
         </div>
       </div>
 
-                 <div className="taste-match-info">
-                  <div className="taste-match-username">@{u.username}</div>
-                  <div className="taste-match-bar-wrap">
-                    <div className="taste-match-bar">
-                      <div
-                        className="taste-match-fill"
-                        style={{ width: `${u.pct}%` }}
-                      />
-                    </div>
-                    <span className="taste-match-pct">{u.pct}%</span>
-                  </div>
-                  {u.shared.length > 0 && (
-                    <div className="taste-match-genres">
-                      {u.shared.map((g) => (
-                        <span key={g} className="taste-match-genre-tag">{g}</span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
       {/* My Beats */}
       <div className="profile-section">
         <div className="section-title">🎵 MY BEATS</div>

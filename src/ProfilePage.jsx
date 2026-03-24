@@ -528,32 +528,6 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload })
         </div>
       </div>
 
-      {/* Saved Beats */}
-      <div className="profile-section">
-        <div className="section-title">🔖 SAVED BEATS</div>
-        {savedLoading ? (
-          <div style={{ color: 'var(--cyan)', fontSize: '13px', fontFamily: 'var(--font-body)' }}>loading...</div>
-        ) : savedBeats.length === 0 ? (
-          <div style={{ color: 'var(--text-dim)', fontSize: '13px', fontFamily: 'var(--font-body)' }}>No saved beats yet. Tap 🔖 on any beat to save it for later.</div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {savedBeats.map(beat => {
-              const isFree = !beat.price || beat.price === 0;
-              return (
-                <div key={beat.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--glass-bg)', border: '1px solid var(--border)', borderRadius: '12px', padding: '10px', cursor: 'pointer' }}>
-                  <div style={{ width: 48, height: 48, borderRadius: '8px', background: beat.cover_url ? `url(${beat.cover_url}) center/cover` : 'rgba(255,255,255,0.08)', flexShrink: 0 }} />
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontFamily: 'var(--font-head)', fontWeight: 600, fontSize: '14px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{beat.title}</div>
-                    <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', fontFamily: 'var(--font-body)' }}>by {beat.artist || beat.uploaded_by_username}</div>
-                  </div>
-                  <span style={{ fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '13px', color: isFree ? 'var(--cyan)' : 'var(--green)', flexShrink: 0 }}>{isFree ? 'FREE' : `$${beat.price}`}</span>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
       {/* My Beats */}
       <div className="profile-section">
         <div className="section-title">🎵 MY BEATS</div>
@@ -669,6 +643,34 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload })
           </div>
         )}
       </div>
+
+
+      {/* Saved Beats */}
+      <div className="profile-section">
+        <div className="section-title">🔖 SAVED BEATS</div>
+        {savedLoading ? (
+          <div style={{ color: 'var(--cyan)', fontSize: '13px', fontFamily: 'var(--font-body)' }}>loading...</div>
+        ) : savedBeats.length === 0 ? (
+          <div style={{ color: 'var(--text-dim)', fontSize: '13px', fontFamily: 'var(--font-body)' }}>No saved beats yet. Tap 🔖 on any beat to save it for later.</div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {savedBeats.map(beat => {
+              const isFree = !beat.price || beat.price === 0;
+              return (
+                <div key={beat.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--glass-bg)', border: '1px solid var(--border)', borderRadius: '12px', padding: '10px', cursor: 'pointer' }}>
+                  <div style={{ width: 48, height: 48, borderRadius: '8px', background: beat.cover_url ? `url(${beat.cover_url}) center/cover` : 'rgba(255,255,255,0.08)', flexShrink: 0 }} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontFamily: 'var(--font-head)', fontWeight: 600, fontSize: '14px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{beat.title}</div>
+                    <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', fontFamily: 'var(--font-body)' }}>by {beat.artist || beat.uploaded_by_username}</div>
+                  </div>
+                  <span style={{ fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '13px', color: isFree ? 'var(--cyan)' : 'var(--green)', flexShrink: 0 }}>{isFree ? 'FREE' : `$${beat.price}`}</span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
 
       {/* Logout */}
       <div style={{ padding: "16px", textAlign: "center" }}>

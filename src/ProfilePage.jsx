@@ -42,6 +42,7 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
   const [showSnippetPicker, setShowSnippetPicker] = useState(false);
   const [snippetConfirmed, setSnippetConfirmed] = useState(null);
   const [pinnedId, setPinnedId] = useState(() => getPinnedTrack(currentUser?.username));
+  const [dbVoteStats, setDbVoteStats] = useState(null); // { totalHards, totalTrash, totalRated, uniqueGenres }
 
   const [myUploads, setMyUploads] = useState([]);
   const [uploadsLoading, setUploadsLoading] = useState(true);
@@ -287,6 +288,30 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
     return () => { cancelled = true; };
   }, [currentUser?.username]);
 
+  // Load vote stats directly from DB so badges persist on reload
+  useEffect(() => {
+    if (!currentUser?.id) return;
+    fetch(`${SUPABASE_URL}/rest/v1/votes?user_id=eq.${currentUser.id}&select=vote,track_id`, {
+      headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` }
+    }).then(r => r.json()).then(async data => {
+      if (!Array.isArray(data)) return;
+      const totalHards = data.filter(v => v.vote === 'right').length;
+      const totalTrash = data.filter(v => v.vote === 'left').length;
+      const totalRated = data.length;
+      const likedIds = data.filter(v => v.vote === 'right').map(v => v.track_id);
+      let uniqueGenres = 0;
+      if (likedIds.length > 0) {
+        const gRes = await fetch(
+          `${SUPABASE_URL}/rest/v1/tracks?id=in.(${likedIds.join(',')})&select=genre`,
+          { headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` } }
+        );
+        const gData = await gRes.json();
+        if (Array.isArray(gData)) uniqueGenres = new Set(gData.map(t => t.genre)).size;
+      }
+      setDbVoteStats({ totalHards, totalTrash, totalRated, uniqueGenres });
+    }).catch(() => {});
+  }, [currentUser?.id]);
+
   if (!currentUser) return null;
 
   const voteEntries = Object.entries(userVotes || {});
@@ -298,9 +323,12 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
 
   const coppedTrackIds = voteEntries.filter(([, v]) => v === "right").map(([id]) => String(id));
   const coppedTracks = (tracks || []).filter(t => coppedTrackIds.includes(String(t.id)));
+  // Use genres from matched tracks, but also count total votes as a floor
+  // so badges based purely on counts still work even if tracks aren't all loaded
   const coppedGenres = [...new Set(coppedTracks.map(t => t.genre))];
 
-  const badgeStats = {
+  // Use DB vote stats when available (persists on reload), fall back to prop-based
+  const badgeStats = dbVoteStats || {
     totalHards: copsGiven,
     totalTrash: passCount,
     totalRated: seen,

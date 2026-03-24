@@ -14,6 +14,13 @@ function timeAgo(iso) {
   return `${Math.floor(diff / 86400)}d ago`;
 }
 
+function normalizeLicense(val) {
+  if (!val || val === 'lease') return 'Non-Exclusive Lease';
+  if (val === 'exclusive') return 'Exclusive';
+  if (val === 'free') return 'Free Download';
+  return val;
+}
+
 function mapTrack(t) {
   return {
     id: t.id,
@@ -30,6 +37,10 @@ function mapTrack(t) {
     listedAt: t.listed_at || new Date().toISOString(),
     cops: t.cops || t.hards || 0,
     passes: t.passes || t.trash || 0,
+    price: t.price || 0,
+    licenseType: normalizeLicense(t.license_type),
+    paymentLink: t.payment_link || "",
+    beatKey: t.beat_key || "",
     soundcloudUrl: t.soundcloud_url || null,
     embedUrl: t.embed_url || null,
     isSoundCloud: !!(t.soundcloud_url),

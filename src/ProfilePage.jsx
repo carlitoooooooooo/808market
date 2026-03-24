@@ -755,15 +755,14 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload })
         </div>
       )}
 
-      {/* Full-screen edit modal */}
+      {/* Edit modal */}
       {editing && (
-        <div className="profile-edit-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)', zIndex: 400 }}>
-          <div className="profile-edit-modal">
-            <div className="profile-edit-modal__header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 20px 16px', borderBottom: '1px solid rgba(255,255,255,0.08)', position: 'sticky', top: 0, background: '#0a0a0a', zIndex: 10, borderRadius: '20px 20px 0 0' }}>
-              <button onClick={() => setEditing(false)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', fontSize: '16px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
-              <span style={{ fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '16px' }}>Edit Profile</span>
-              <button onClick={saveEdit} style={{ background: 'linear-gradient(135deg, #00f5ff, #bf5fff)', border: 'none', color: '#000', borderRadius: '20px', padding: '6px 16px', fontSize: '14px', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-head)' }}>Save</button>
-            </div>
+        <div style={{ position: 'fixed', inset: 0, background: '#000', zIndex: 400, overflowY: 'scroll', WebkitOverflowScrolling: 'touch', padding: '0 0 80px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '60px 16px 16px', borderBottom: '1px solid rgba(255,255,255,0.08)', position: 'sticky', top: 0, background: '#000', zIndex: 10 }}>
+            <button onClick={() => setEditing(false)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', fontSize: '16px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
+            <span style={{ fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '16px' }}>Edit Profile</span>
+            <button onClick={saveEdit} style={{ background: 'linear-gradient(135deg, #00f5ff, #bf5fff)', border: 'none', color: '#000', borderRadius: '20px', padding: '6px 16px', fontSize: '14px', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-head)' }}>Save</button>
+          </div>
           <div style={{ padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
             {/* Name glow picker */}
             <div>
@@ -850,7 +849,6 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload })
               </div>
             ))}
           </div>
-          </div> {/* end profile-edit-modal */}
         </div>
       )}
 

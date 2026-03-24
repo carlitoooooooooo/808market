@@ -28,7 +28,7 @@ function setPinnedTrack(username, trackId) {
 const SUPABASE_URL = 'https://bkapxykeryzxbqpgjgab.supabase.co';
 const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
 
-export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload }) {
+export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, onOpenSettings }) {
   const { currentUser, setUserData, logout } = useAuth();
   const [editing, setEditing] = useState(false);
   const [editBio, setEditBio] = useState(currentUser?.bio || "");
@@ -487,6 +487,7 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload })
         {!editing && (
           <div style={{ display: 'flex', gap: '6px' }}>
             <button className="profile-edit-btn" onClick={() => setEditing(true)} title="Edit profile">✏️</button>
+            <button className="profile-edit-btn profile-settings-btn" onClick={onOpenSettings} title="Settings">⚙️</button>
             <button className="profile-edit-btn" title="Share profile" onClick={async () => {
               const url = `https://808market.app/u/${currentUser.username}`;
               try {

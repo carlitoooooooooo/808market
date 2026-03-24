@@ -2356,6 +2356,10 @@ body {
 /* ===== DESKTOP NAV (hidden on mobile) ===== */
 .desktop-nav { display: none; }
 
+/* Settings gear: show in profile on mobile, show in header on desktop */
+.header-settings-btn { display: none; }
+.profile-settings-btn { display: flex; }
+
 /* ===== EDIT PROFILE MODAL ===== */
 .edit-profile-overlay {
   position: fixed;
@@ -2640,6 +2644,10 @@ body {
     max-height: calc(100vh - 100px);
     max-width: 560px;
   }
+
+  /* Settings gear: flip to header on desktop, hide in profile */
+  .header-settings-btn { display: flex !important; }
+  .profile-settings-btn { display: none !important; }
 
   /* ── Edit profile popup on desktop ── */
   .edit-profile-overlay {

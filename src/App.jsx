@@ -399,7 +399,7 @@ export default function App() {
               <button className="btn-upload" onClick={() => setShowUpload(true)}>
                 + LIST BEAT
               </button>
-              <button onClick={() => setShowSettings(true)} style={{
+              <button className="header-settings-btn" onClick={() => setShowSettings(true)} style={{
                 background: 'none', border: '1px solid rgba(255,255,255,0.15)',
                 color: 'rgba(255,255,255,0.5)', borderRadius: '50%',
                 width: '32px', height: '32px', fontSize: '16px', cursor: 'pointer',
@@ -549,7 +549,7 @@ export default function App() {
         )}
 
         {activeTab === "profile" && (
-          <ProfilePage userVotes={userVotes} tracks={tracks} onViewUser={(username) => setViewingUser(username)} onUpload={() => setShowUpload(true)} />
+          <ProfilePage userVotes={userVotes} tracks={tracks} onViewUser={(username) => setViewingUser(username)} onUpload={() => setShowUpload(true)} onOpenSettings={() => setShowSettings(true)} />
         )}
       </main>
 

@@ -16,7 +16,7 @@ export default function LeaderboardPage({ tracks, onVote, userVotes, onViewUser 
     <div className="leaderboard-page">
       <div className="page-header">
         <h1 className="page-title">🔥 Top Beats</h1>
-        <p className="page-subtitle">Heating Up 🔥</p>
+        <p className="page-subtitle">Fan Favorites ❤️</p>
       </div>
 
       <div className="leaderboard-list">

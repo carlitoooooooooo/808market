@@ -920,11 +920,11 @@ body {
 }
 .profile-edit-btn:hover { background: var(--bg3); }
 .profile-header > div:last-child {
-  position: absolute;
-  top: 0;
-  right: 0;
+  position: static;
   display: flex;
-  gap: 6px;
+  gap: 8px;
+  margin-top: 10px;
+  padding-left: 78px; /* align under bio, past avatar */
 }
 
 .profile-stats {
@@ -2357,7 +2357,20 @@ body {
 .desktop-nav { display: none; }
 
 /* Settings gear: show in profile on mobile, show in header on desktop */
-.header-settings-btn { display: none; }
+.header-settings-btn { display: none !important; }
+.header-settings-btn {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.5);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  font-size: 16px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
 .profile-settings-btn { display: flex; }
 
 /* ===== EDIT PROFILE MODAL ===== */

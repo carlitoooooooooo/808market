@@ -46,6 +46,22 @@ export default function ProfilePage({ userVotes, tracks }) {
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [editingBeat, setEditingBeat] = useState(null);
   const [cropFile, setCropFile] = useState(null);
+  const [followerCount, setFollowerCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
+
+  // Load follower/following counts
+  useEffect(() => {
+    if (!currentUser?.username) return;
+    fetch(`${SUPABASE_URL}/rest/v1/profiles?username=eq.${encodeURIComponent(currentUser.username)}&select=follower_count,following_count`, {
+      headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}` }
+    }).then(r => r.json()).then(data => {
+      const prof = Array.isArray(data) ? data[0] : data;
+      if (prof) {
+        setFollowerCount(prof.follower_count || 0);
+        setFollowingCount(prof.following_count || 0);
+      }
+    }).catch(() => {});
+  }, [currentUser?.username]);
 
   // Load avatar — check localStorage first, then DB
   useEffect(() => {
@@ -279,6 +295,12 @@ export default function ProfilePage({ userVotes, tracks }) {
                 letterSpacing: '1px', textTransform: 'uppercase',
               }}>BETA TESTER</span>
             )}
+          </div>
+          {/* Follower/Following counts */}
+          <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', fontFamily: 'var(--font-body)', marginTop: '2px', marginBottom: '2px' }}>
+            <span style={{ color: 'rgba(255,255,255,0.8)', fontWeight: 600 }}>{followerCount}</span> followers
+            {' · '}
+            <span style={{ color: 'rgba(255,255,255,0.8)', fontWeight: 600 }}>{followingCount}</span> following
           </div>
           {!editing && (
             <div className="profile-bio">{currentUser.bio || "no bio yet..."}</div>

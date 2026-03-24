@@ -1591,6 +1591,33 @@ body {
 }
 
 /* ===== GENRE FILTER BAR ===== */
+/* Feed Toggle (For You / Following) */
+.feed-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px 2px;
+}
+.feed-toggle-btn {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.4);
+  padding: 6px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  letter-spacing: 0.3px;
+}
+.feed-toggle-btn--active {
+  color: #fff;
+  background: rgba(0,245,255,0.1);
+  border-bottom: 2px solid #00f5ff;
+  border-radius: 20px 20px 0 0;
+}
+
 .genre-filter-bar {
   display: flex;
   gap: 6px;

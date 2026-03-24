@@ -120,6 +120,7 @@ function MP3Tab({ onSubmit, onCancel }) {
   const [licenseType, setLicenseType] = useState("lease");
   const [price, setPrice] = useState("");
   const [paymentLink, setPaymentLink] = useState("");
+  const [producerNotes, setProducerNotes] = useState("");
   const [audioFile, setAudioFile] = useState(null);
   const [coverFile, setCoverFile] = useState(null);
   const [coverPreview, setCoverPreview] = useState(null);
@@ -189,6 +190,7 @@ function MP3Tab({ onSubmit, onCancel }) {
         license_type: licenseType,
         beat_key: beatKey,
         payment_link: paymentLink.trim(),
+        producer_notes: producerNotes.trim(),
       };
       const trackRes = await fetch(`${SUPABASE_URL}/rest/v1/tracks`, {
         method: 'POST',
@@ -285,6 +287,20 @@ function MP3Tab({ onSubmit, onCancel }) {
         </div>
       )}
 
+      <div className="sc-upload__field">
+        <label className="sc-upload__label">PRODUCER NOTES (OPTIONAL)</label>
+        <textarea
+          className="sc-upload__input"
+          value={producerNotes}
+          onChange={e => setProducerNotes(e.target.value.slice(0, 300))}
+          placeholder="Tell people about this beat — vibe, inspiration, what you were going for..."
+          disabled={uploading}
+          rows={3}
+          style={{ resize: 'vertical', fontFamily: 'inherit' }}
+        />
+        <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.35)', textAlign: 'right', marginTop: '3px' }}>{producerNotes.length}/300</div>
+      </div>
+
       {error && <div className="sc-upload__error">{error}</div>}
 
       {uploading && (
@@ -315,6 +331,7 @@ function SoundCloudTab({ onSubmit, onCancel }) {
   const [licenseType, setLicenseType] = useState("lease");
   const [price, setPrice] = useState("");
   const [paymentLink, setPaymentLink] = useState("");
+  const [producerNotes, setProducerNotes] = useState("");
   const [preview, setPreview] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -353,6 +370,7 @@ function SoundCloudTab({ onSubmit, onCancel }) {
         license_type: licenseType,
         beat_key: beatKey,
         payment_link: paymentLink.trim(),
+        producer_notes: producerNotes.trim(),
       };
       const scRes = await fetch(`${SUPABASE_URL}/rest/v1/tracks`, {
         method: 'POST',
@@ -443,6 +461,18 @@ function SoundCloudTab({ onSubmit, onCancel }) {
                 <input className="sc-upload__input" type="text" value={paymentLink} onChange={e => setPaymentLink(e.target.value)} placeholder="Cashapp/PayPal/Beatstars link..." />
               </div>
             )}
+            <div className="sc-upload__field">
+              <label className="sc-upload__label">PRODUCER NOTES (OPTIONAL)</label>
+              <textarea
+                className="sc-upload__input"
+                value={producerNotes}
+                onChange={e => setProducerNotes(e.target.value.slice(0, 300))}
+                placeholder="Tell people about this beat — vibe, inspiration, what you were going for..."
+                rows={3}
+                style={{ resize: 'vertical', fontFamily: 'inherit' }}
+              />
+              <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.35)', textAlign: 'right', marginTop: '3px' }}>{producerNotes.length}/300</div>
+            </div>
           </div>
 
           {error && <div className="sc-upload__error">{error}</div>}

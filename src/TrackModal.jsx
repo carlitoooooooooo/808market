@@ -314,6 +314,33 @@ export default function TrackModal({ track, onClose, onVote, userVotes, onViewUs
             {priceLabel}
           </div>
 
+          {/* Producer Notes */}
+          {track.producerNotes && track.producerNotes.trim() && (
+            <div style={{
+              margin: '10px 0',
+              padding: '10px 14px',
+              background: 'rgba(255,255,255,0.04)',
+              borderLeft: '2px solid rgba(0,245,255,0.3)',
+              borderRadius: '0 8px 8px 0',
+            }}>
+              <div style={{
+                fontSize: '10px',
+                fontFamily: "'Space Grotesk', sans-serif",
+                fontWeight: 600,
+                color: 'rgba(0,245,255,0.6)',
+                letterSpacing: '1px',
+                marginBottom: '5px',
+              }}>🎹 Producer's note</div>
+              <div style={{
+                fontSize: '13px',
+                fontFamily: "'Space Grotesk', sans-serif",
+                fontStyle: 'italic',
+                color: 'rgba(255,255,255,0.55)',
+                lineHeight: '1.5',
+              }}>"{track.producerNotes}"</div>
+            </div>
+          )}
+
           {/* Tags */}
           {(track.tags || []).length > 0 && (
             <div className="track-modal__tags">

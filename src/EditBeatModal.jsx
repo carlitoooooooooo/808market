@@ -13,6 +13,7 @@ export default function EditBeatModal({ track, onClose, onSave }) {
   const [price, setPrice] = useState(track.price ?? 0);
   const [licenseType, setLicenseType] = useState(track.licenseType || "Non-Exclusive Lease");
   const [paymentLink, setPaymentLink] = useState(track.paymentLink || "");
+  const [producerNotes, setProducerNotes] = useState(track.producerNotes || "");
   const [coverFile, setCoverFile] = useState(null);
   const [coverPreview, setCoverPreview] = useState(track.coverUrl || null);
   const [saving, setSaving] = useState(false);
@@ -64,6 +65,7 @@ export default function EditBeatModal({ track, onClose, onSave }) {
           license_type: licenseType,
           payment_link: paymentLink.trim(),
           cover_url: coverUrl,
+          producer_notes: producerNotes.trim(),
         }),
       });
 
@@ -84,6 +86,7 @@ export default function EditBeatModal({ track, onClose, onSave }) {
         licenseType: savedTrack.license_type,
         paymentLink: savedTrack.payment_link,
         coverUrl: savedTrack.cover_url,
+        producerNotes: savedTrack.producer_notes || "",
       });
 
     } catch (err) {
@@ -144,12 +147,24 @@ export default function EditBeatModal({ track, onClose, onSave }) {
           </div>
         </div>
 
-        <div style={{ marginBottom: '20px' }}>
+        <div style={{ marginBottom: '14px' }}>
           <label style={{ display: 'block', fontSize: '10px', fontFamily: 'var(--font-head)', fontWeight: 600, color: 'rgba(255,255,255,0.4)', letterSpacing: '1px', marginBottom: '6px' }}>LICENSE TYPE</label>
           <select value={licenseType} onChange={e => setLicenseType(e.target.value)}
             style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '10px 12px', color: '#fff', fontSize: '14px', fontFamily: 'var(--font-body)' }}>
             {LICENSES.map(l => <option key={l} value={l} style={{ background: '#111' }}>{l}</option>)}
           </select>
+        </div>
+
+        <div style={{ marginBottom: '20px' }}>
+          <label style={{ display: 'block', fontSize: '10px', fontFamily: 'var(--font-head)', fontWeight: 600, color: 'rgba(255,255,255,0.4)', letterSpacing: '1px', marginBottom: '6px' }}>PRODUCER NOTES (OPTIONAL)</label>
+          <textarea
+            value={producerNotes}
+            onChange={e => setProducerNotes(e.target.value.slice(0, 300))}
+            placeholder="Tell people about this beat — vibe, inspiration, what you were going for..."
+            rows={3}
+            style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '10px 14px', color: '#fff', fontSize: '14px', fontFamily: 'var(--font-body)', outline: 'none', resize: 'vertical' }}
+          />
+          <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', textAlign: 'right', marginTop: '3px' }}>{producerNotes.length}/300</div>
         </div>
 
         {error && <div style={{ color: 'var(--red)', fontSize: '13px', marginBottom: '12px', fontFamily: 'var(--font-body)' }}>{error}</div>}

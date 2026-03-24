@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import TrackModal from "./TrackModal.jsx";
-import { dbSelect } from "./dbHelper.js";
+import { dbSelect, dbInsert, dbUpdate } from "./dbHelper.js";
+import { useAuth } from "./AuthContext.jsx";
+
+const SUPABASE_URL = 'https://bkapxykeryzxbqpgjgab.supabase.co';
+const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
 
 function timeAgo(iso) {
   const diff = (Date.now() - new Date(iso)) / 1000;
@@ -29,14 +33,20 @@ function mapTrack(t) {
     soundcloudUrl: t.soundcloud_url || null,
     embedUrl: t.embed_url || null,
     isSoundCloud: !!(t.soundcloud_url),
+    producerNotes: t.producer_notes || "",
   };
 }
 
 export default function UserProfilePage({ username, onClose, onOpenModal, userVotes }) {
+  const { currentUser } = useAuth();
   const [profile, setProfile] = useState(null);
   const [tracks, setTracks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedTrack, setSelectedTrack] = useState(null);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followLoading, setFollowLoading] = useState(false);
+  const [followerCount, setFollowerCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
 
   useEffect(() => {
     async function load() {
@@ -46,6 +56,8 @@ export default function UserProfilePage({ username, onClose, onOpenModal, userVo
         const profileData = await dbSelect('profiles', { username });
         const prof = Array.isArray(profileData) ? profileData[0] : profileData;
         setProfile(prof || null);
+        setFollowerCount(prof?.follower_count || 0);
+        setFollowingCount(prof?.following_count || 0);
 
         // Load their tracks
         const tracksData = await dbSelect('tracks', { uploaded_by_username: username });
@@ -53,6 +65,15 @@ export default function UserProfilePage({ username, onClose, onOpenModal, userVo
         // Sort by listed_at descending
         mapped.sort((a, b) => new Date(b.listedAt) - new Date(a.listedAt));
         setTracks(mapped);
+
+        // Check follow status
+        if (currentUser?.username && currentUser.username !== username) {
+          const followData = await fetch(
+            `${SUPABASE_URL}/rest/v1/follows?follower_username=eq.${encodeURIComponent(currentUser.username)}&following_username=eq.${encodeURIComponent(username)}&select=id`,
+            { headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}` } }
+          ).then(r => r.json());
+          setIsFollowing(Array.isArray(followData) && followData.length > 0);
+        }
       } catch (err) {
         console.error('UserProfilePage load error:', err);
       } finally {
@@ -60,7 +81,7 @@ export default function UserProfilePage({ username, onClose, onOpenModal, userVo
       }
     }
     if (username) load();
-  }, [username]);
+  }, [username, currentUser?.username]);
 
   const totalLikes = tracks.reduce((s, t) => s + (t.cops || 0), 0);
 
@@ -75,6 +96,86 @@ export default function UserProfilePage({ username, onClose, onOpenModal, userVo
       setSelectedTrack(track);
     }
   }
+
+  async function handleFollow() {
+    if (!currentUser?.username || followLoading) return;
+    setFollowLoading(true);
+    try {
+      if (isFollowing) {
+        // Unfollow
+        await fetch(
+          `${SUPABASE_URL}/rest/v1/follows?follower_username=eq.${encodeURIComponent(currentUser.username)}&following_username=eq.${encodeURIComponent(username)}`,
+          { method: 'DELETE', headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}` } }
+        );
+        setIsFollowing(false);
+        setFollowerCount(c => Math.max(0, c - 1));
+        // Decrement counts
+        await fetch(
+          `${SUPABASE_URL}/rest/v1/profiles?username=eq.${encodeURIComponent(currentUser.username)}`,
+          {
+            method: 'PATCH',
+            headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ following_count: Math.max(0, (profile?.following_count || 1) - 1) }),
+          }
+        );
+        await fetch(
+          `${SUPABASE_URL}/rest/v1/profiles?username=eq.${encodeURIComponent(username)}`,
+          {
+            method: 'PATCH',
+            headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ follower_count: Math.max(0, followerCount - 1) }),
+          }
+        );
+      } else {
+        // Follow
+        await dbInsert('follows', {
+          follower_username: currentUser.username,
+          following_username: username,
+        });
+        setIsFollowing(true);
+        setFollowerCount(c => c + 1);
+        // Increment counts
+        // Get current user's following_count
+        const myProfile = await fetch(
+          `${SUPABASE_URL}/rest/v1/profiles?username=eq.${encodeURIComponent(currentUser.username)}&select=following_count`,
+          { headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}` } }
+        ).then(r => r.json());
+        const myFollowingCount = (Array.isArray(myProfile) ? myProfile[0]?.following_count : myProfile?.following_count) || 0;
+
+        await fetch(
+          `${SUPABASE_URL}/rest/v1/profiles?username=eq.${encodeURIComponent(currentUser.username)}`,
+          {
+            method: 'PATCH',
+            headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ following_count: myFollowingCount + 1 }),
+          }
+        );
+        await fetch(
+          `${SUPABASE_URL}/rest/v1/profiles?username=eq.${encodeURIComponent(username)}`,
+          {
+            method: 'PATCH',
+            headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ follower_count: followerCount + 1 }),
+          }
+        );
+        // Notification
+        try {
+          await dbInsert('notifications', {
+            user_username: username,
+            type: 'follow',
+            from_username: currentUser.username,
+            message: `${currentUser.username} started following you`,
+          });
+        } catch (e) { console.error('Follow notification error:', e); }
+      }
+    } catch (err) {
+      console.error('Follow/unfollow error:', err);
+    } finally {
+      setFollowLoading(false);
+    }
+  }
+
+  const isOwnProfile = currentUser?.username === username;
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
@@ -117,9 +218,40 @@ export default function UserProfilePage({ username, onClose, onOpenModal, userVo
                     }}>BETA TESTER</span>
                   )}
                 </div>
+                {/* Follower/Following counts */}
+                <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', fontFamily: "'Space Grotesk', sans-serif", marginTop: '4px' }}>
+                  <span style={{ color: 'rgba(255,255,255,0.8)', fontWeight: 600 }}>{followerCount}</span> followers
+                  {' · '}
+                  <span style={{ color: 'rgba(255,255,255,0.8)', fontWeight: 600 }}>{followingCount}</span> following
+                </div>
                 {bio && <div className="user-profile-bio">{bio}</div>}
               </div>
             </div>
+
+            {/* Follow button (only if not own profile and logged in) */}
+            {!isOwnProfile && currentUser && (
+              <div style={{ padding: '0 16px 12px 16px' }}>
+                <button
+                  onClick={handleFollow}
+                  disabled={followLoading}
+                  style={{
+                    padding: '8px 20px',
+                    borderRadius: '20px',
+                    border: isFollowing ? 'none' : '1.5px solid #00f5ff',
+                    background: isFollowing ? '#00f5ff' : 'transparent',
+                    color: isFollowing ? '#000' : '#00f5ff',
+                    fontFamily: "'Space Grotesk', sans-serif",
+                    fontWeight: 700,
+                    fontSize: '13px',
+                    cursor: followLoading ? 'not-allowed' : 'pointer',
+                    opacity: followLoading ? 0.7 : 1,
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  {followLoading ? '...' : isFollowing ? 'Following ✓' : 'Follow +'}
+                </button>
+              </div>
+            )}
 
             {/* Stats */}
             <div className="user-profile-stats">

@@ -510,22 +510,7 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload })
         </div>
       </div>
 
-      {/* Taste Match */}
-      <div className="profile-section">
-        <div className="section-title">💞 TASTE MATCH</div>
-        {coppedGenres.length === 0 ? (
-          <div className="taste-match-empty">Cop some beats to see your matches!</div>
-        ) : (
-          <div className="taste-match-list">
-            {tasteMatches.map((u) => (
-              <div key={u.username} className="taste-match-card" style={{ cursor: 'pointer' }} onClick={() => onViewUser?.(u.username)}>
-                <div
-                  className="taste-match-avatar"
-                  style={{ background: u.avatarColor }}
-                >
-                  {u.username[0].toUpperCase()}
-                </div>
-                <div className="taste-match-info">
+                 <div className="taste-match-info">
                   <div className="taste-match-username">@{u.username}</div>
                   <div className="taste-match-bar-wrap">
                     <div className="taste-match-bar">

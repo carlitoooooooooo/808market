@@ -15,6 +15,7 @@ import { FireAnimation, TrashAnimation } from "./SwipeAnimations.jsx";
 import AboutPage from "./AboutPage.jsx";
 import LandingPage from "./LandingPage.jsx";
 import AuthPrompt from "./AuthPrompt.jsx";
+import UserSearch from "./UserSearch.jsx";
 import tracksData from "./tracks.js";
 import { supabase } from "./supabase.js";
 import { dbUpsert, dbSelect, dbUpdate, dbInsert } from "./dbHelper.js";
@@ -87,7 +88,8 @@ export default function App() {
   const [showAbout, setShowAbout] = useState(false);
   const [guestMode, setGuestMode] = useState(false);
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
-  const [authMode, setAuthMode] = useState("login"); // for directing to login vs signup
+  const [authMode, setAuthMode] = useState("login");
+  const [showUserSearch, setShowUserSearch] = useState(false); // for directing to login vs signup
   const [viewingUser, setViewingUser] = useState(null);
   const [deepLinkTrack, setDeepLinkTrack] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -317,6 +319,12 @@ export default function App() {
           <span className="beta-tag">BETA</span>
         </div>
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <button onClick={() => setShowUserSearch(true)} style={{
+            background: 'none', border: '1px solid rgba(255,255,255,0.15)',
+            color: 'rgba(255,255,255,0.5)', borderRadius: '50%',
+            width: '32px', height: '32px', fontSize: '14px', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>🔍</button>
           <button onClick={() => setShowAbout(true)} style={{
             background: 'none', border: '1px solid rgba(255,255,255,0.15)',
             color: 'rgba(255,255,255,0.5)', borderRadius: '20px',
@@ -497,6 +505,13 @@ export default function App() {
       )}
 
       {showAbout && <AboutPage onClose={() => setShowAbout(false)} />}
+
+      {showUserSearch && (
+        <UserSearch
+          onSelectUser={(username) => { setViewingUser(username); }}
+          onClose={() => setShowUserSearch(false)}
+        />
+      )}
 
       <AuthPrompt
         visible={showAuthPrompt}

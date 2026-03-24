@@ -28,7 +28,7 @@ function setPinnedTrack(username, trackId) {
 const SUPABASE_URL = 'https://bkapxykeryzxbqpgjgab.supabase.co';
 const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
 
-export default function ProfilePage({ userVotes, tracks, onViewUser }) {
+export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload }) {
   const { currentUser, setUserData, logout } = useAuth();
   const [editing, setEditing] = useState(false);
   const [editBio, setEditBio] = useState(currentUser?.bio || "");
@@ -643,7 +643,7 @@ export default function ProfilePage({ userVotes, tracks, onViewUser }) {
         <button
           className="btn-primary"
           style={{ marginTop: "14px", fontSize: "14px", padding: "12px 24px", display: "block", width: "100%" }}
-          onClick={() => setShowSnippetPicker(true)}
+          onClick={() => onUpload?.()}
         >
           + Upload Beat
         </button>

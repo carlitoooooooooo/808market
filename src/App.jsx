@@ -503,7 +503,7 @@ export default function App() {
         )}
 
         {activeTab === "profile" && (
-          <ProfilePage userVotes={userVotes} tracks={tracks} onViewUser={(username) => setViewingUser(username)} />
+          <ProfilePage userVotes={userVotes} tracks={tracks} onViewUser={(username) => setViewingUser(username)} onUpload={() => setShowUpload(true)} />
         )}
       </main>
 

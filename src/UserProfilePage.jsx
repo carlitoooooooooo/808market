@@ -255,6 +255,17 @@ export default function UserProfilePage({ username, onClose, onOpenModal, userVo
                 >
                   {followLoading ? '...' : isFollowing ? 'Following ✓' : 'Follow +'}
                 </button>
+                <button
+                  onClick={async () => {
+                    const url = `https://808market.app/u/${username}`;
+                    try {
+                      if (navigator.share) { await navigator.share({ title: `${username} on 808market`, url }); }
+                      else { await navigator.clipboard.writeText(url); alert('Profile link copied!'); }
+                    } catch {}
+                  }}
+                  style={{ background: 'none', border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.5)', borderRadius: '20px', padding: '8px 12px', fontSize: '13px', cursor: 'pointer' }}
+                  title="Share profile"
+                >📤</button>
               </div>
             )}
 

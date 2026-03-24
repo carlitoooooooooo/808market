@@ -190,12 +190,19 @@ export default function App() {
     if (match && tracks.length > 0) {
       const trackId = match[1];
       const found = tracks.find(t => String(t.id) === trackId);
-      if (found) {
-        setDeepLinkTrack(found);
-        history.replaceState(null, '', '/');
-      }
+      if (found) { setDeepLinkTrack(found); history.replaceState(null, '', '/'); }
     }
   }, [tracks]);
+
+  // Deep link: /u/:username
+  useEffect(() => {
+    const match = window.location.pathname.match(/^\/u\/([^/]+)/);
+    if (match) {
+      const username = decodeURIComponent(match[1]);
+      setViewingUser(username);
+      history.replaceState(null, '', '/');
+    }
+  }, []);
 
   // Build queue
   useEffect(() => {

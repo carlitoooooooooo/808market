@@ -13,6 +13,7 @@ import UserProfilePage from "./UserProfilePage.jsx";
 import { FireAnimation, TrashAnimation } from "./SwipeAnimations.jsx";
 import AboutPage from "./AboutPage.jsx";
 import SettingsPage from "./SettingsPage.jsx";
+import MessagesPage from "./MessagesPage.jsx";
 import LandingPage from "./LandingPage.jsx";
 import AuthPrompt from "./AuthPrompt.jsx";
 import UserSearch from "./UserSearch.jsx";
@@ -23,6 +24,7 @@ import { dbUpsert, dbSelect, dbUpdate, dbInsert } from "./dbHelper.js";
 const TABS = [
   { id: "discover", label: "🎵 Discover" },
   { id: "leaderboard", label: "🔥 Top Beats" },
+  { id: "messages", label: "💬 Messages" },
   { id: "notifications", label: "🔔 Notifs" },
   { id: "profile", label: "👤 Profile" },
 ];
@@ -96,6 +98,8 @@ export default function App() {
   const [showUpload, setShowUpload] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [messageThread, setMessageThread] = useState(null); // username to open DM with
+  const [unreadMessages, setUnreadMessages] = useState(0);
   const [guestMode, setGuestMode] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
@@ -532,6 +536,14 @@ export default function App() {
           />
         )}
 
+        {activeTab === "messages" && currentUser && (
+          <MessagesPage
+            key={messageThread}
+            initialThread={messageThread}
+            onUnreadChange={setUnreadMessages}
+          />
+        )}
+
         {activeTab === "notifications" && (
           <NotificationsPage
             onNotificationsRead={loadUnreadCount}
@@ -564,6 +576,9 @@ export default function App() {
             {tab.label}
             {tab.id === "notifications" && unreadCount > 0 && (
               <span className="notif-badge">{unreadCount > 9 ? "9+" : unreadCount}</span>
+            )}
+            {tab.id === "messages" && unreadMessages > 0 && (
+              <span className="notif-badge">{unreadMessages > 9 ? "9+" : unreadMessages}</span>
             )}
           </button>
         ))}
@@ -624,6 +639,11 @@ export default function App() {
           onClose={() => setViewingUser(null)}
           onOpenModal={(track) => { setViewingUser(null); setDeepLinkTrack(track); }}
           userVotes={userVotes}
+          onMessageUser={(username) => {
+            setViewingUser(null);
+            setMessageThread(username);
+            setActiveTab("messages");
+          }}
         />
       )}
     </div>

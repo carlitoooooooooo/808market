@@ -48,7 +48,7 @@ function mapTrack(t) {
   };
 }
 
-export default function UserProfilePage({ username, onClose, onOpenModal, userVotes }) {
+export default function UserProfilePage({ username, onClose, onOpenModal, userVotes, onMessageUser }) {
   const { currentUser } = useAuth();
   const [profile, setProfile] = useState(null);
   const [tracks, setTracks] = useState([]);
@@ -287,6 +287,12 @@ export default function UserProfilePage({ username, onClose, onOpenModal, userVo
                 >
                   {followLoading ? '...' : isFollowing ? 'Following ✓' : 'Follow +'}
                 </button>
+                {onMessageUser && (
+                  <button
+                    onClick={() => onMessageUser(username)}
+                    style={{ background: 'rgba(0,245,255,0.1)', border: '1px solid rgba(0,245,255,0.3)', color: 'var(--cyan)', borderRadius: '20px', padding: '8px 16px', fontSize: '13px', cursor: 'pointer', fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600 }}
+                  >💬 DM</button>
+                )}
                 <button
                   onClick={async () => {
                     const url = `https://808market.app/u/${username}`;

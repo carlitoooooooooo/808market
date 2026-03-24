@@ -468,10 +468,11 @@ body {
 /* ===== SWIPE CARD ===== */
 .swipe-card {
   width: 100%;
-  height: clamp(380px, 55vh, 500px);
+  height: 100%;
   border-radius: 20px;
   background: transparent;
   touch-action: none;
+  position: relative;
 }
 
 /* Flip faces */
@@ -492,7 +493,11 @@ body {
 .swipe-card__face--back {
   background: rgba(10,10,15,0.95);
   transform: rotateY(180deg);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
+.swipe-card__face--back::-webkit-scrollbar { display: none; }
 
 /* Tap hint on front */
 .swipe-card__tap-hint {

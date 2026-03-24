@@ -89,16 +89,16 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
   }, [track, onSwipe]);
 
   const onPointerDown = useCallback((e) => {
-    if (isFlying) return;
+    if (isFlying || isFlipped) return; // don't capture when flipped — let buttons work
     pointerDownRef.current = true;
     dragStartedRef.current = false;
     startXRef.current = e.clientX;
     startYRef.current = e.clientY;
     e.currentTarget.setPointerCapture(e.pointerId);
-  }, [isFlying]);
+  }, [isFlying, isFlipped]);
 
   const onPointerMove = useCallback((e) => {
-    if (!pointerDownRef.current || isFlying) return;
+    if (!pointerDownRef.current || isFlying || isFlipped) return;
     const dx = e.clientX - startXRef.current;
     const dy = e.clientY - startYRef.current;
     if (Math.abs(dx) > 8 || Math.abs(dy) > 8) {
@@ -213,16 +213,26 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
   const isFree = !track.price || track.price === 0;
 
   return (
+    // Outer: handles fly/drag transform + perspective
+    <div
+      style={{
+        position: "absolute",
+        zIndex: 10 - stackIndex,
+        width: "100%",
+        height: "clamp(380px, 55vh, 500px)",
+        perspective: "1000px",
+        userSelect: "none",
+        ...flyStyle,
+      }}
+    >
+    {/* Inner: captures pointer events, cursor */}
     <div
       ref={cardRef}
       className={`swipe-card ${isTop ? "swipe-card--top" : ""}`}
       style={{
-        position: "absolute",
-        zIndex: 10 - stackIndex,
+        width: "100%", height: "100%",
         cursor: isTop ? (isFlipped ? "pointer" : "grab") : "default",
-        userSelect: "none",
-        perspective: "1000px",
-        ...flyStyle,
+        position: "relative",
       }}
       onPointerDown={isTop ? onPointerDown : undefined}
       onPointerMove={isTop ? onPointerMove : undefined}
@@ -360,6 +370,7 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
         </div>
 
       </div>
+    </div>
     </div>
   );
 }

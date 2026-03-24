@@ -25,6 +25,13 @@ export default function LeaderboardPage({ tracks, onVote, userVotes, onViewUser 
     }
   }, [subTab]);
 
+  // On desktop both columns are always visible — load producers on mount too
+  useEffect(() => {
+    if (!producersLoaded) {
+      loadProducers();
+    }
+  }, []);
+
   async function loadProducers() {
     setProducersLoading(true);
     try {

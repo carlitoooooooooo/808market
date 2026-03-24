@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useAuth, AVATAR_COLORS } from "./AuthContext.jsx";
 import Logo from "./Logo.jsx";
+
+const TURNSTILE_SITE_KEY = '0x4AAAAAACvZvlyc-GFKm5Lm';
 
 export default function AuthScreen() {
   const { login, signup } = useAuth();
@@ -11,10 +13,62 @@ export default function AuthScreen() {
   const [avatarColor, setAvatarColor] = useState(AVATAR_COLORS[0]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState(null);
+  const turnstileRef = useRef(null);
+  const widgetIdRef = useRef(null);
+
+  // Render Turnstile widget when switching to signup
+  useEffect(() => {
+    if (mode !== 'signup') return;
+    const interval = setInterval(() => {
+      if (window.turnstile && turnstileRef.current && !widgetIdRef.current) {
+        clearInterval(interval);
+        widgetIdRef.current = window.turnstile.render(turnstileRef.current, {
+          sitekey: TURNSTILE_SITE_KEY,
+          theme: 'dark',
+          callback: (token) => setTurnstileToken(token),
+          'expired-callback': () => setTurnstileToken(null),
+          'error-callback': () => setTurnstileToken(null),
+        });
+      }
+    }, 100);
+    return () => {
+      clearInterval(interval);
+      if (widgetIdRef.current) {
+        try { window.turnstile?.remove(widgetIdRef.current); } catch {}
+        widgetIdRef.current = null;
+      }
+    };
+  }, [mode]);
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
+
+    // Verify Turnstile for signup
+    if (mode === 'signup') {
+      if (!turnstileToken) {
+        setError("Please complete the verification check.");
+        return;
+      }
+      try {
+        const verifyRes = await fetch('/api/verify-turnstile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: turnstileToken }),
+        });
+        const verifyData = await verifyRes.json();
+        if (!verifyData.success) {
+          setError("Verification failed. Please try again.");
+          if (widgetIdRef.current) window.turnstile?.reset(widgetIdRef.current);
+          setTurnstileToken(null);
+          return;
+        }
+      } catch {
+        // If verification API fails, allow signup anyway (don't block real users)
+      }
+    }
+
     setLoading(true);
     let result;
     if (mode === "login") {
@@ -107,7 +161,12 @@ export default function AuthScreen() {
 
           {error && <div className="auth-error">{error}</div>}
 
-          <button className="auth-submit btn-primary" type="submit" disabled={loading}>
+          {/* Turnstile widget - only shown on signup */}
+          {mode === 'signup' && (
+            <div ref={turnstileRef} style={{ margin: '8px 0', minHeight: '65px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} />
+          )}
+
+          <button className="auth-submit btn-primary" type="submit" disabled={loading || (mode === 'signup' && !turnstileToken)}>
             {loading ? "..." : mode === "login" ? "Enter 808market →" : "Create Account →"}
           </button>
         </form>

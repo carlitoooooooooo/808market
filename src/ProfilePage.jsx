@@ -263,6 +263,10 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload })
             passes: t.passes || 0,
             price: t.price || 0,
             licenseType: t.license_type === 'lease' ? 'Non-Exclusive Lease' : t.license_type === 'exclusive' ? 'Exclusive' : t.license_type === 'free' ? 'Free Download' : (t.license_type || 'Non-Exclusive Lease'),
+            paymentLink: t.payment_link || '',
+            producerNotes: t.producer_notes || '',
+            audioUrl: t.audio_url || '',
+            snippetStart: t.snippet_start || 0,
             listedAt: t.listed_at,
           }));
           setMyUploads(mapped);

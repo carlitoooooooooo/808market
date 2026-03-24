@@ -1008,41 +1008,49 @@ body {
   justify-content: center;
 }
 
-.track-modal {
+/* Wrapper: non-scrolling, holds the close button above the scroll area */
+.track-modal-wrapper {
   position: relative;
   width: 100%;
   max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  max-height: 92vh;
+}
+
+.track-modal {
+  width: 100%;
   background: rgba(10,10,15,0.95);
   backdrop-filter: blur(30px);
   -webkit-backdrop-filter: blur(30px);
   border: 1px solid var(--border);
   border-bottom: none;
   border-radius: 24px 24px 0 0;
-  max-height: 92vh;
   overflow-y: scroll;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   scrollbar-width: none;
   padding-bottom: max(100px, env(safe-area-inset-bottom, 100px));
+  flex: 1;
+  min-height: 0;
 }
 .track-modal::-webkit-scrollbar { display: none; }
 
 .modal-close {
-  position: sticky;
+  position: absolute;
   top: 14px;
-  float: right;
-  margin: 14px 14px -46px auto;
-  z-index: 10;
+  right: 14px;
+  z-index: 200;
   background: rgba(10,10,15,0.85);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid var(--border);
   border-radius: 50%;
   color: var(--text);
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2608,12 +2616,25 @@ body {
   }
 
   /* ── Track modal: centered on desktop, never hidden behind header ── */
+  .modal-backdrop {
+    align-items: center;
+    padding-top: 80px;
+  }
+  .track-modal-wrapper {
+    max-width: 560px;
+    max-height: calc(100vh - 100px);
+  }
+  .track-modal {
+    border-radius: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  /* Upload/other modal-sheet */
   .modal-overlay {
     align-items: center;
-    padding-top: 80px; /* clear the header */
+    padding-top: 80px;
   }
   .modal-sheet {
-    border-radius: 20px; /* full rounded on desktop */
+    border-radius: 20px;
     max-height: calc(100vh - 100px);
     max-width: 560px;
   }

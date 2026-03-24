@@ -359,8 +359,9 @@ export default function TrackModal({ track, onClose, onVote, userVotes, onViewUs
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="track-modal" onClick={(e) => e.stopPropagation()}>
+      <div className="track-modal-wrapper" onClick={(e) => e.stopPropagation()}>
         <button className="modal-close" onClick={onClose}>✕</button>
+        <div className="track-modal">
 
         {/* Cover */}
         <div
@@ -611,7 +612,8 @@ export default function TrackModal({ track, onClose, onVote, userVotes, onViewUs
             </div>
           </div>
         </div>
-      </div>
+        </div>{/* end track-modal */}
+      </div>{/* end track-modal-wrapper */}
     </div>
   );
 }

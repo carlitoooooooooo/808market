@@ -824,33 +824,77 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
             {/* Name glow picker */}
             <div>
               <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>
-                Name Glow {myUploads.length < 5 && <span style={{ color: '#ff3366', fontSize: '10px' }}>🔒 Upload 5 beats to unlock ({myUploads.length}/5)</span>}
+                Name Glow
               </label>
-              {myUploads.length >= 5 ? (
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                  {[
-                    { value: 'none',    label: 'Off',     style: { background: 'rgba(255,255,255,0.1)', color: '#fff' } },
-                    { value: 'cyan',    label: 'Cyan',    style: { background: '#00f5ff', color: '#000' } },
-                    { value: 'purple',  label: 'Purple',  style: { background: '#bf5fff', color: '#000' } },
-                    { value: 'green',   label: 'Green',   style: { background: '#00ff88', color: '#000' } },
-                    { value: 'gold',    label: 'Gold',    style: { background: '#ffd700', color: '#000' } },
-                    { value: 'red',     label: 'Red',     style: { background: '#ff3366', color: '#fff' } },
-                    { value: 'rainbow', label: '🌈 Rainbow', style: { background: 'linear-gradient(135deg, #ff3366, #ff9900, #00f5ff, #bf5fff)', color: '#fff' } },
-                    { value: 'pulse',   label: '💙 Pulse',   style: { background: '#00f5ff', color: '#000' } },
-                    { value: 'flicker', label: '⚡ Flicker', style: { background: '#bf5fff', color: '#fff' } },
-                    { value: 'fire',    label: '🔥 Fire',    style: { background: 'linear-gradient(135deg, #ff3366, #ff9900)', color: '#fff' } },
-                    { value: 'ice',     label: '🧊 Ice',     style: { background: 'linear-gradient(135deg, #00f5ff, #ffffff)', color: '#000' } },
-                  ].map(g => (
-                    <button key={g.value} type="button"
-                      onClick={() => setProfileExtra(prev => ({ ...prev, name_glow: g.value }))}
-                      style={{ ...g.style, border: `2px solid ${profileExtra.name_glow === g.value ? '#fff' : 'transparent'}`, borderRadius: '20px', padding: '4px 12px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-head)' }}>
-                      {g.label}
-                    </button>
-                  ))}
-                </div>
-              ) : (
+              {myUploads.length < 5 ? (
                 <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '10px 14px', fontSize: '13px', color: 'rgba(255,255,255,0.3)', fontFamily: 'var(--font-body)' }}>
                   🔒 Upload {5 - myUploads.length} more beat{5 - myUploads.length !== 1 ? 's' : ''} to unlock name glow
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {/* Tier 1: 5 uploads */}
+                  <div>
+                    <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px' }}>5 UPLOADS</div>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                      {[
+                        { value: 'none',    label: 'Off',        style: { background: 'rgba(255,255,255,0.1)', color: '#fff' } },
+                        { value: 'cyan',    label: 'Cyan',       style: { background: '#00f5ff', color: '#000' } },
+                        { value: 'purple',  label: 'Purple',     style: { background: '#bf5fff', color: '#000' } },
+                        { value: 'green',   label: 'Green',      style: { background: '#00ff88', color: '#000' } },
+                        { value: 'gold',    label: 'Gold',       style: { background: '#ffd700', color: '#000' } },
+                        { value: 'red',     label: 'Red',        style: { background: '#ff3366', color: '#fff' } },
+                        { value: 'rainbow', label: '🌈 Rainbow', style: { background: 'linear-gradient(135deg, #ff3366, #ff9900, #00f5ff, #bf5fff)', color: '#fff' } },
+                      ].map(g => (
+                        <button key={g.value} type="button"
+                          onClick={() => setProfileExtra(prev => ({ ...prev, name_glow: g.value }))}
+                          style={{ ...g.style, border: `2px solid ${profileExtra.name_glow === g.value ? '#fff' : 'transparent'}`, borderRadius: '20px', padding: '4px 12px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-head)' }}>
+                          {g.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  {/* Tier 2: 10 uploads */}
+                  <div>
+                    <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px' }}>
+                      10 UPLOADS {myUploads.length < 10 && <span style={{ color: '#ff3366' }}>🔒 {10 - myUploads.length} more to unlock</span>}
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                      {[
+                        { value: 'pulse',   label: '💙 Pulse',   style: { background: '#00f5ff', color: '#000' } },
+                        { value: 'flicker', label: '⚡ Flicker', style: { background: '#bf5fff', color: '#fff' } },
+                      ].map(g => {
+                        const locked = myUploads.length < 10;
+                        return (
+                          <button key={g.value} type="button"
+                            onClick={() => !locked && setProfileExtra(prev => ({ ...prev, name_glow: g.value }))}
+                            style={{ ...g.style, border: `2px solid ${profileExtra.name_glow === g.value ? '#fff' : 'transparent'}`, borderRadius: '20px', padding: '4px 12px', fontSize: '12px', fontWeight: 700, cursor: locked ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-head)', opacity: locked ? 0.35 : 1 }}>
+                            {locked ? '🔒' : g.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  {/* Tier 3: 20 uploads */}
+                  <div>
+                    <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px' }}>
+                      20 UPLOADS {myUploads.length < 20 && <span style={{ color: '#ff3366' }}>🔒 {20 - myUploads.length} more to unlock</span>}
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                      {[
+                        { value: 'fire', label: '🔥 Fire', style: { background: 'linear-gradient(135deg, #ff3366, #ff9900)', color: '#fff' } },
+                        { value: 'ice',  label: '🧊 Ice',  style: { background: 'linear-gradient(135deg, #00f5ff, #ffffff)', color: '#000' } },
+                      ].map(g => {
+                        const locked = myUploads.length < 20;
+                        return (
+                          <button key={g.value} type="button"
+                            onClick={() => !locked && setProfileExtra(prev => ({ ...prev, name_glow: g.value }))}
+                            style={{ ...g.style, border: `2px solid ${profileExtra.name_glow === g.value ? '#fff' : 'transparent'}`, borderRadius: '20px', padding: '4px 12px', fontSize: '12px', fontWeight: 700, cursor: locked ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-head)', opacity: locked ? 0.35 : 1 }}>
+                            {locked ? '🔒' : g.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
               )}
             </div>

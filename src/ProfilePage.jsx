@@ -757,7 +757,7 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload })
 
       {/* Full-screen edit modal */}
       {editing && (
-        <div style={{ position: 'fixed', inset: 0, background: '#000', zIndex: 400, overflowY: 'scroll', WebkitOverflowScrolling: 'touch', padding: '0 0 80px' }}>
+        <div className="profile-edit-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)', zIndex: 400, overflowY: 'scroll', WebkitOverflowScrolling: 'touch', padding: '0 0 80px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '60px 16px 16px', borderBottom: '1px solid rgba(255,255,255,0.08)', position: 'sticky', top: 0, background: '#000', zIndex: 10 }}>
             <button onClick={() => setEditing(false)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', fontSize: '16px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
             <span style={{ fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '16px' }}>Edit Profile</span>

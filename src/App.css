@@ -2490,6 +2490,31 @@ body {
     margin-bottom: 20px;
   }
 
+  /* ── Edit profile: compact centered modal on desktop ── */
+  /* The outer overlay stays fixed/full-screen but centers a constrained box */
+  .profile-edit-overlay {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+  }
+  .profile-edit-overlay > div:first-child {
+    /* The inner scroll container — cap it to a modal size */
+    position: relative !important;
+    inset: unset !important;
+    width: 560px;
+    max-height: 80vh;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 0 0 24px !important;
+    overflow-y: auto;
+  }
+  /* Sticky header inside the modal */
+  .profile-edit-overlay > div:first-child > div:first-child {
+    padding-top: 20px !important;
+    border-radius: 20px 20px 0 0;
+  }
+
   /* Un-absolute the edit/share buttons in the narrower left column */
   .profile-header {
     flex-wrap: wrap;

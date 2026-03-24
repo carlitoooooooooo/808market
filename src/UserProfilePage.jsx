@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import TrackModal from "./TrackModal.jsx";
+import DrumkitSection from "./DrumkitSection.jsx";
 import { dbSelect, dbInsert, dbUpdate } from "./dbHelper.js";
 import { useAuth } from "./AuthContext.jsx";
 
@@ -362,6 +363,7 @@ export default function UserProfilePage({ username, onClose, onOpenModal, userVo
                 </div>
               )}
             </div>
+          <DrumkitSection username={username} isOwnProfile={false} />
           </>
         )}
       {/* Inline TrackModal if no onOpenModal prop */}

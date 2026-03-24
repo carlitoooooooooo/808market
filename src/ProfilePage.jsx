@@ -7,6 +7,7 @@ import { supabase } from "./supabase.js";
 import EditBeatModal from "./EditBeatModal.jsx";
 import ImageCropper from "./ImageCropper.jsx";
 import TrackModal from "./TrackModal.jsx";
+import DrumkitSection from "./DrumkitSection.jsx";
 
 const REACTIONS_EMOJIS = ["🔥", "😤", "💯", "🥶", "😭", "💀"];
 
@@ -783,6 +784,8 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
           );
         })()}
       </div>
+
+      <DrumkitSection username={currentUser.username} isOwnProfile={true} />
 
       </div> {/* end profile-right-col */}
 

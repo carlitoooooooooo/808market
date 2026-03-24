@@ -93,7 +93,7 @@ body {
   height: 100%;
   max-width: 480px;
   margin: 0 auto;
-  overflow: hidden;
+  overflow: visible;
   z-index: 1;
 }
 

@@ -5,6 +5,7 @@ import { MOCK_USERS } from "./mockUsers.js";
 import SnippetPicker from "./SnippetPicker.jsx";
 import { supabase } from "./supabase.js";
 import EditBeatModal from "./EditBeatModal.jsx";
+import ImageCropper from "./ImageCropper.jsx";
 
 const REACTIONS_EMOJIS = ["🔥", "😤", "💯", "🥶", "😭", "💀"];
 
@@ -44,6 +45,7 @@ export default function ProfilePage({ userVotes, tracks }) {
   const [uploadReactions, setUploadReactions] = useState({});
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [editingBeat, setEditingBeat] = useState(null);
+  const [cropFile, setCropFile] = useState(null);
 
   // Load avatar — check localStorage first, then DB
   useEffect(() => {
@@ -164,7 +166,14 @@ export default function ProfilePage({ userVotes, tracks }) {
   async function handleAvatarChange(e) {
     const file = e.target.files[0];
     if (!file || !file.type.startsWith('image/')) return;
+    // Show cropper first
+    setCropFile(file);
+  }
+
+  async function handleCroppedAvatar(croppedFile) {
+    setCropFile(null);
     setUploadingAvatar(true);
+    const file = croppedFile;
     try {
       const ext = file.name.split('.').pop();
       const path = `${currentUser.id || currentUser.username}/avatar.${ext}`;
@@ -533,6 +542,15 @@ export default function ProfilePage({ userVotes, tracks }) {
         <SnippetPicker
           onClose={() => setShowSnippetPicker(false)}
           onConfirm={handleSnippetConfirm}
+        />
+      )}
+
+      {/* Image cropper */}
+      {cropFile && (
+        <ImageCropper
+          file={cropFile}
+          onCrop={handleCroppedAvatar}
+          onCancel={() => setCropFile(null)}
         />
       )}
 

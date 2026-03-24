@@ -263,14 +263,14 @@ export default function App() {
         vote: dir,
       }, 'user_id,track_id');
 
-      // Increment the relevant counter on the track
+      // Atomically increment the counter using RPC (no race condition)
       const field = dir === "right" ? "cops" : "passes";
-      const trackRows = await dbSelect('tracks', { id: track.id });
-      const trackData = Array.isArray(trackRows) ? trackRows[0] : trackRows;
-      if (trackData) {
-        const currentVal = trackData[field] || trackData['hards'] || trackData['trash'] || 0;
-        await dbUpdate('tracks', { id: track.id }, { [field]: currentVal + 1 });
-      }
+      const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
+      await fetch('https://bkapxykeryzxbqpgjgab.supabase.co/rest/v1/rpc/increment_track_field', {
+        method: 'POST',
+        headers: { 'apikey': ANON, 'Authorization': `Bearer ${ANON}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ track_id: track.id, field_name: field, amount: 1 }),
+      });
 
       // Send "cop" notification to uploader
       if (dir === "right" && track.uploadedBy && track.uploadedBy !== currentUser.username) {

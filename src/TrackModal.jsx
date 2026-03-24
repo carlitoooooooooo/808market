@@ -202,7 +202,16 @@ export default function TrackModal({ track, onClose, onVote, userVotes, onViewUs
 
   async function handleCopIt() {
     if (isFree) {
-      // Free download — just vote and close
+      // Free download — trigger actual file download
+      if (track.audioUrl) {
+        const a = document.createElement('a');
+        a.href = track.audioUrl;
+        a.download = `${track.title} - ${track.artist}.mp3`;
+        a.target = '_blank';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
       handleVote("right");
       return;
     }

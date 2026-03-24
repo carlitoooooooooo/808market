@@ -455,6 +455,7 @@ export default function TrackModal({ track, onClose, onVote, userVotes, onViewUs
                 value={commentText}
                 onChange={e => setCommentText(e.target.value)}
                 onKeyDown={e => e.key === "Enter" && submitComment()}
+                onFocus={e => setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300)}
                 maxLength={200}
                 disabled={commentSubmitting}
               />

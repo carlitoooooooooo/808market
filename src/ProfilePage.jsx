@@ -50,6 +50,7 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload })
   const [tasteMatches, setTasteMatches] = useState([]);
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [editingBeat, setEditingBeat] = useState(null);
+  const [snippetBeat, setSnippetBeat] = useState(null); // beat being snippet-edited
   const [cropFile, setCropFile] = useState(null);
   const [followList, setFollowList] = useState(null); // { type: 'followers'|'following', users: [] }
   const [followerCount, setFollowerCount] = useState(0);
@@ -598,10 +599,18 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload })
                       <button
                         className="btn-bevel"
                         onClick={() => setEditingBeat(track)}
-                        title="Edit beat"
+                        title="Edit beat info"
                         style={{ fontSize: "12px", padding: "4px 8px" }}
                       >
                         ✏️
+                      </button>
+                      <button
+                        className="btn-bevel"
+                        onClick={() => setSnippetBeat(track)}
+                        title="Edit snippet"
+                        style={{ fontSize: "12px", padding: "4px 8px" }}
+                      >
+                        🎚️
                       </button>
                       <button
                         className="btn-bevel"
@@ -843,6 +852,32 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload })
           onCrop={handleCroppedAvatar}
           onCancel={() => setCropFile(null)}
         />
+      )}
+
+      {/* Snippet editor modal */}
+      {snippetBeat && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.95)', zIndex: 400, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+          <div style={{ background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px 20px 0 0', width: '100%', maxWidth: '480px', maxHeight: '85vh', overflowY: 'auto' }}>
+            <div style={{ padding: '16px 20px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '15px' }}>Edit Snippet — {snippetBeat.title}</div>
+              <button onClick={() => setSnippetBeat(null)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '20px', cursor: 'pointer' }}>✕</button>
+            </div>
+            <SnippetSelector
+              url={snippetBeat.audioUrl}
+              onConfirm={async (start) => {
+                // Save new snippet_start to DB
+                await fetch(`${SUPABASE_URL}/rest/v1/tracks?id=eq.${snippetBeat.id}`, {
+                  method: 'PATCH',
+                  headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}`, 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ snippet_start: start }),
+                });
+                setMyUploads(prev => prev.map(t => t.id === snippetBeat.id ? { ...t, snippetStart: start } : t));
+                setSnippetBeat(null);
+              }}
+              onCancel={() => setSnippetBeat(null)}
+            />
+          </div>
+        </div>
       )}
 
       {/* Edit beat modal */}

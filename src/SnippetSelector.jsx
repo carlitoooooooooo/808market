@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 
 const SNIPPET_DURATION = 15;
 
-export default function SnippetSelector({ file, onConfirm, onCancel }) {
+export default function SnippetSelector({ file, url, onConfirm, onCancel }) {
   const [duration, setDuration] = useState(0);
   const [snippetStart, setSnippetStart] = useState(0);
   const [playing, setPlaying] = useState(false);
@@ -17,7 +17,7 @@ export default function SnippetSelector({ file, onConfirm, onCancel }) {
 
   // Decode audio + generate waveform
   useEffect(() => {
-    const objectUrl = URL.createObjectURL(file);
+    const objectUrl = file ? URL.createObjectURL(file) : url;
     const audio = new Audio(objectUrl);
     audioRef.current = audio;
 
@@ -34,7 +34,8 @@ export default function SnippetSelector({ file, onConfirm, onCancel }) {
 
     // Generate simple waveform from samples
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    file.arrayBuffer().then(buf => ctx.decodeAudioData(buf)).then(decoded => {
+    const bufferPromise = file ? file.arrayBuffer() : fetch(objectUrl).then(r => r.arrayBuffer());
+    bufferPromise.then(buf => ctx.decodeAudioData(buf)).then(decoded => {
       const data = decoded.getChannelData(0);
       const bars = 60;
       const step = Math.floor(data.length / bars);
@@ -50,10 +51,10 @@ export default function SnippetSelector({ file, onConfirm, onCancel }) {
 
     return () => {
       audio.pause();
-      URL.revokeObjectURL(objectUrl);
+      if (file) URL.revokeObjectURL(objectUrl);
       cancelAnimationFrame(rafRef.current);
     };
-  }, [file]);
+  }, [file, url]);
 
   const tick = useCallback(() => {
     if (!audioRef.current) return;

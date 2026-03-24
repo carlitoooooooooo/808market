@@ -829,13 +829,17 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
               {myUploads.length >= 5 ? (
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                   {[
-                    { value: 'none', label: 'Off', style: { background: 'rgba(255,255,255,0.1)', color: '#fff' } },
-                    { value: 'cyan', label: 'Cyan', style: { background: '#00f5ff', color: '#000' } },
-                    { value: 'purple', label: 'Purple', style: { background: '#bf5fff', color: '#000' } },
-                    { value: 'green', label: 'Green', style: { background: '#00ff88', color: '#000' } },
-                    { value: 'gold', label: 'Gold', style: { background: '#ffd700', color: '#000' } },
-                    { value: 'red', label: 'Red', style: { background: '#ff3366', color: '#fff' } },
-                    { value: 'rainbow', label: 'Rainbow', style: { background: 'linear-gradient(135deg, #ff3366, #ff9900, #00f5ff, #bf5fff)', color: '#fff' } },
+                    { value: 'none',    label: 'Off',     style: { background: 'rgba(255,255,255,0.1)', color: '#fff' } },
+                    { value: 'cyan',    label: 'Cyan',    style: { background: '#00f5ff', color: '#000' } },
+                    { value: 'purple',  label: 'Purple',  style: { background: '#bf5fff', color: '#000' } },
+                    { value: 'green',   label: 'Green',   style: { background: '#00ff88', color: '#000' } },
+                    { value: 'gold',    label: 'Gold',    style: { background: '#ffd700', color: '#000' } },
+                    { value: 'red',     label: 'Red',     style: { background: '#ff3366', color: '#fff' } },
+                    { value: 'rainbow', label: '🌈 Rainbow', style: { background: 'linear-gradient(135deg, #ff3366, #ff9900, #00f5ff, #bf5fff)', color: '#fff' } },
+                    { value: 'pulse',   label: '💙 Pulse',   style: { background: '#00f5ff', color: '#000' } },
+                    { value: 'flicker', label: '⚡ Flicker', style: { background: '#bf5fff', color: '#fff' } },
+                    { value: 'fire',    label: '🔥 Fire',    style: { background: 'linear-gradient(135deg, #ff3366, #ff9900)', color: '#fff' } },
+                    { value: 'ice',     label: '🧊 Ice',     style: { background: 'linear-gradient(135deg, #00f5ff, #ffffff)', color: '#000' } },
                   ].map(g => (
                     <button key={g.value} type="button"
                       onClick={() => setProfileExtra(prev => ({ ...prev, name_glow: g.value }))}

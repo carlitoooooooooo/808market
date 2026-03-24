@@ -59,8 +59,13 @@ export default function UserProfilePage({ username, onClose, onOpenModal, userVo
         setFollowerCount(prof?.follower_count || 0);
         setFollowingCount(prof?.following_count || 0);
 
-        // Load their tracks
-        const tracksData = await dbSelect('tracks', { uploaded_by_username: username });
+        // Load their tracks via direct REST (order by listed_at)
+        const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
+        const tracksRes = await fetch(
+          `https://bkapxykeryzxbqpgjgab.supabase.co/rest/v1/tracks?uploaded_by_username=eq.${encodeURIComponent(username)}&order=listed_at.desc`,
+          { headers: { apikey: ANON, Authorization: `Bearer ${ANON}` } }
+        );
+        const tracksData = await tracksRes.json();
         const mapped = Array.isArray(tracksData) ? tracksData.map(mapTrack) : [];
         // Sort by listed_at descending
         mapped.sort((a, b) => new Date(b.listedAt) - new Date(a.listedAt));

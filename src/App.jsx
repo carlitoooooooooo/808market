@@ -87,6 +87,7 @@ export default function App() {
   const [showUpload, setShowUpload] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [guestMode, setGuestMode] = useState(false);
+  const [showAuth, setShowAuth] = useState(false);
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
   const [authMode, setAuthMode] = useState("login");
   const [showUserSearch, setShowUserSearch] = useState(false); // for directing to login vs signup
@@ -284,23 +285,18 @@ export default function App() {
     );
   }
 
-  if (!currentUser && !guestMode) {
+  if (!currentUser && !guestMode && !showAuth) {
     return (
       <LandingPage
-        onGetStarted={() => { setAuthMode("signup"); setGuestMode(false); }}
+        onGetStarted={() => setShowAuth(true)}
         onBrowseAsGuest={() => setGuestMode(true)}
-        onLogin={() => { setAuthMode("login"); setGuestMode(false); }}
+        onLogin={() => setShowAuth(true)}
       />
     );
   }
 
-  if (!currentUser && guestMode) {
-    // Guest mode — show app but intercept auth-required actions
-  }
-
-  // Show auth screen when explicitly requested (from landing CTA)
-  if (!currentUser && !guestMode) {
-    return <AuthScreen initialMode={authMode} />;
+  if (!currentUser && showAuth) {
+    return <AuthScreen />;
   }
 
   const filteredQueue = activeGenre === "ALL"
@@ -337,12 +333,12 @@ export default function App() {
             </button>
           ) : (
             <>
-              <button onClick={() => { setGuestMode(false); }} style={{
+              <button onClick={() => { setGuestMode(false); setShowAuth(true); }} style={{
                 background: 'none', border: '1px solid rgba(0,245,255,0.4)',
                 color: '#00f5ff', borderRadius: '20px', padding: '5px 14px',
                 fontSize: '12px', cursor: 'pointer', fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600,
               }}>Log In</button>
-              <button onClick={() => { setGuestMode(false); }} style={{
+              <button onClick={() => { setGuestMode(false); setShowAuth(true); }} style={{
                 background: 'linear-gradient(135deg, #00f5ff, #bf5fff)',
                 border: 'none', color: '#000', borderRadius: '20px',
                 padding: '5px 14px', fontSize: '12px', cursor: 'pointer',
@@ -461,7 +457,7 @@ export default function App() {
       {guestMode && !currentUser && (
         <div style={{ background: 'rgba(0,245,255,0.08)', borderTop: '1px solid rgba(0,245,255,0.2)', padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '13px', fontFamily: "'Space Grotesk', sans-serif" }}>
           <span style={{ color: 'rgba(255,255,255,0.6)' }}>👀 Browsing as guest</span>
-          <button onClick={() => setGuestMode(false)} style={{ background: 'linear-gradient(135deg, #00f5ff, #bf5fff)', border: 'none', color: '#000', borderRadius: '20px', padding: '4px 14px', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}>
+          <button onClick={() => { setGuestMode(false); setShowAuth(true); }} style={{ background: 'linear-gradient(135deg, #00f5ff, #bf5fff)', border: 'none', color: '#000', borderRadius: '20px', padding: '4px 14px', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}>
             Join Free
           </button>
         </div>
@@ -516,8 +512,8 @@ export default function App() {
       <AuthPrompt
         visible={showAuthPrompt}
         onClose={() => setShowAuthPrompt(false)}
-        onSignUp={() => { setShowAuthPrompt(false); setGuestMode(false); }}
-        onLogIn={() => { setShowAuthPrompt(false); setGuestMode(false); }}
+        onSignUp={() => { setShowAuthPrompt(false); setGuestMode(false); setShowAuth(true); }}
+        onLogIn={() => { setShowAuthPrompt(false); setGuestMode(false); setShowAuth(true); }}
       />
 
       {deepLinkTrack && (

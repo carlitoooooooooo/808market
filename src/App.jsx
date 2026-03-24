@@ -581,6 +581,7 @@ export default function App() {
 
       {reactionTarget && (
         <ReactionPicker
+          key={reactionTarget.trackId}
           trackId={reactionTarget.trackId}
           username={currentUser.username}
           onDismiss={handleReactionDismiss}

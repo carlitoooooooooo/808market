@@ -1813,11 +1813,11 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0,0,0,0.5);
-  backdrop-filter: blur(4px);
-  pointer-events: all;
+  background: transparent;
+  pointer-events: none; /* let touches pass through to cards below */
 }
 .reaction-picker {
+  pointer-events: all; /* only the picker itself captures input */
   background: rgba(15,15,20,0.95);
   border: 1px solid var(--border);
   border-radius: 20px;

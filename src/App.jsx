@@ -76,6 +76,34 @@ function mapTrack(t) {
   };
 }
 
+function BetaTag() {
+  const [taps, setTaps] = React.useState(0);
+  const [spinning, setSpinning] = React.useState(false);
+  const timerRef = React.useRef(null);
+
+  function handleTap() {
+    const next = taps + 1;
+    setTaps(next);
+    clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => setTaps(0), 1200);
+    if (next >= 3) {
+      setTaps(0);
+      setSpinning(true);
+      setTimeout(() => setSpinning(false), 2500);
+    }
+  }
+
+  return (
+    <span
+      className={`beta-tag${spinning ? ' beta-tag--spinning' : ''}`}
+      onClick={handleTap}
+      style={{ cursor: 'pointer', userSelect: 'none' }}
+    >
+      {spinning ? 'STILL BETA' : 'BETA'}
+    </span>
+  );
+}
+
 function Toast({ message, visible }) {
   return (
     <div className={`toast ${visible ? "toast--visible" : ""} ${message?.includes("Liked") ? "toast--hard" : "toast--trash"}`}>
@@ -412,7 +440,7 @@ export default function App() {
       <header className="app-header">
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           <Logo />
-          <span className="beta-tag">BETA</span>
+          <BetaTag />
         </div>
 
         {/* Desktop inline nav — hidden on mobile via CSS */}

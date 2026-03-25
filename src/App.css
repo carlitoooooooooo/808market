@@ -170,6 +170,25 @@ body {
   letter-spacing: 1px;
   opacity: 0.8;
   margin-left: 6px;
+  transition: color 0.2s, border-color 0.2s;
+}
+.beta-tag--spinning {
+  animation: betaSpin 0.4s linear infinite, betaRainbow 0.6s linear infinite;
+  border-color: var(--purple);
+  opacity: 1;
+  white-space: nowrap;
+}
+@keyframes betaSpin {
+  0%   { transform: rotate(0deg) scale(1); }
+  25%  { transform: rotate(-8deg) scale(1.1); }
+  75%  { transform: rotate(8deg) scale(1.1); }
+  100% { transform: rotate(0deg) scale(1); }
+}
+@keyframes betaRainbow {
+  0%   { color: #00f5ff; border-color: #00f5ff; }
+  33%  { color: #bf5fff; border-color: #bf5fff; }
+  66%  { color: #ff3366; border-color: #ff3366; }
+  100% { color: #00f5ff; border-color: #00f5ff; }
 }
 
 /* ===== GLASSMORPHISM BASE ===== */

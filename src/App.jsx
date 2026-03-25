@@ -261,8 +261,20 @@ export default function App() {
     if (!currentUser || tracksLoading || votesLoading || tracks.length === 0) return;
     const votedIds = new Set(Object.keys(userVotes).map(String));
     const unvoted = tracks.filter(t => !votedIds.has(String(t.id)));
-    const shuffled = [...unvoted].sort(() => Math.random() - 0.5);
-    setQueue(shuffled);
+    const voteCount = Object.keys(userVotes).length;
+
+    let ordered;
+    if (voteCount < 5) {
+      // New user — show most liked beats first, then shuffle the rest
+      const sorted = [...unvoted].sort((a, b) => (b.cops || 0) - (a.cops || 0));
+      const topN = sorted.slice(0, 10); // top 10 most liked, in order
+      const rest = sorted.slice(10).sort(() => Math.random() - 0.5);
+      ordered = [...topN, ...rest];
+    } else {
+      // Experienced user — full shuffle
+      ordered = [...unvoted].sort(() => Math.random() - 0.5);
+    }
+    setQueue(ordered);
   }, [currentUser?.id, tracksLoading, votesLoading, tracks.length, JSON.stringify(userVotes)]);
 
   const showToast = useCallback((msg) => {

@@ -4,6 +4,18 @@ import { supabase } from "./supabase.js";
 import SnippetSelector from "./SnippetSelector.jsx";
 
 const GENRES = ["Hip-Hop", "Drill", "Trap", "R&B", "Electronic", "Other"];
+const UPLOAD_LIMIT = 10;
+
+async function checkUploadLimit(username) {
+  const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/tracks?uploaded_by_username=eq.${encodeURIComponent(username)}&listed_at=gte.${encodeURIComponent(since)}&select=id`,
+    { headers: { apikey: ANON, Authorization: `Bearer ${ANON}` } }
+  );
+  const data = await res.json();
+  return Array.isArray(data) ? data.length : 0;
+}
 const LICENSE_TYPES = [
   { value: "free", label: "Free Download" },
   { value: "lease", label: "Non-Exclusive Lease" },
@@ -196,6 +208,11 @@ function MP3Tab({ onSubmit, onCancel }) {
   const handleSubmit = async () => {
     if (!title.trim()) return setError("Title required");
     if (!audioFile) return setError("Select an audio file");
+    // Rate limit check
+    try {
+      const count = await checkUploadLimit(currentUser.username);
+      if (count >= UPLOAD_LIMIT) return setError(`Upload limit reached — max ${UPLOAD_LIMIT} beats per 24 hours.`);
+    } catch {}
     setUploading(true); setError("");
 
     try {
@@ -423,6 +440,11 @@ function SoundCloudTab({ onSubmit, onCancel }) {
 
   const handleSubmit = async () => {
     if (!title.trim()) return setError("Title required");
+    // Rate limit check
+    try {
+      const count = await checkUploadLimit(currentUser.username);
+      if (count >= UPLOAD_LIMIT) return setError(`Upload limit reached — max ${UPLOAD_LIMIT} beats per 24 hours.`);
+    } catch {}
     setSaving(true); setError("");
     try {
       const embedUrl = buildSCEmbedUrl(url);

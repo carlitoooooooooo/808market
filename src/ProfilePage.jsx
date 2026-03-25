@@ -941,26 +941,34 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
               <button onClick={saveEdit} style={{ background: 'linear-gradient(135deg, #00f5ff, #bf5fff)', border: 'none', color: '#000', borderRadius: '20px', padding: '6px 16px', fontSize: '14px', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-head)' }}>Save</button>
             </div>
           <div style={{ padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            {/* Cover image button */}
-            <button
-              onClick={() => coverInputRef.current?.click()}
-              style={{
-                background: 'linear-gradient(135deg, rgba(0,245,255,0.2), rgba(191,95,255,0.2))',
-                border: '1px solid rgba(0,245,255,0.3)',
-                borderRadius: '10px',
-                padding: '12px',
-                fontSize: '13px',
-                fontFamily: 'var(--font-head)',
-                fontWeight: 600,
-                color: 'var(--cyan)',
-                cursor: 'pointer',
-                transition: 'all 0.15s',
-              }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'linear-gradient(135deg, rgba(0,245,255,0.3), rgba(191,95,255,0.3))'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'linear-gradient(135deg, rgba(0,245,255,0.2), rgba(191,95,255,0.2))'; }}
-            >
-              🖼️ {coverUrl ? 'Change' : 'Add'} Cover Image
-            </button>
+            {/* Cover image button - unlock at 50 cops */}
+            {(() => {
+              const totalCopsReceived = myUploads.reduce((sum, track) => sum + (track.cops || 0), 0);
+              const locked = totalCopsReceived < 50 && currentUser.role !== 'admin';
+              return (
+                <button
+                  onClick={() => !locked && coverInputRef.current?.click()}
+                  disabled={locked}
+                  style={{
+                    background: locked ? 'rgba(255,255,255,0.05)' : 'linear-gradient(135deg, rgba(0,245,255,0.2), rgba(191,95,255,0.2))',
+                    border: locked ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,245,255,0.3)',
+                    borderRadius: '10px',
+                    padding: '12px',
+                    fontSize: '13px',
+                    fontFamily: 'var(--font-head)',
+                    fontWeight: 600,
+                    color: locked ? 'rgba(255,255,255,0.3)' : 'var(--cyan)',
+                    cursor: locked ? 'not-allowed' : 'pointer',
+                    transition: 'all 0.15s',
+                    opacity: locked ? 0.5 : 1,
+                  }}
+                  onMouseEnter={e => { !locked && (e.currentTarget.style.background = 'linear-gradient(135deg, rgba(0,245,255,0.3), rgba(191,95,255,0.3))'); }}
+                  onMouseLeave={e => { !locked && (e.currentTarget.style.background = 'linear-gradient(135deg, rgba(0,245,255,0.2), rgba(191,95,255,0.2))'); }}
+                >
+                  {locked ? `🔒 ${50 - totalCopsReceived} more ❤️ to unlock cover` : `🖼️ ${coverUrl ? 'Change' : 'Add'} Cover Image`}
+                </button>
+              );
+            })()}
             {/* Name glow picker */}
             <div>
               <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>

@@ -141,6 +141,10 @@ export default function MessagesPage({ initialThread, onUnreadChange }) {
   const [threads, setThreads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeThread, setActiveThread] = useState(initialThread || null);
+  const [search, setSearch] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [searching, setSearching] = useState(false);
+  const searchTimer = useRef(null);
   const pollRef = useRef(null);
 
   async function loadThreads() {
@@ -187,6 +191,25 @@ export default function MessagesPage({ initialThread, onUnreadChange }) {
     if (initialThread) setActiveThread(initialThread);
   }, [initialThread]);
 
+  function handleSearchChange(e) {
+    const q = e.target.value;
+    setSearch(q);
+    clearTimeout(searchTimer.current);
+    if (!q.trim()) { setSearchResults([]); return; }
+    searchTimer.current = setTimeout(async () => {
+      setSearching(true);
+      try {
+        const res = await fetch(
+          `${URL}/rest/v1/profiles?username=ilike.*${encodeURIComponent(q.trim())}*&select=username,avatar_color,avatar_url&limit=8&username=neq.${encodeURIComponent(currentUser.username)}`,
+          { headers: { apikey: ANON, Authorization: `Bearer ${ANON}` } }
+        );
+        const data = await res.json();
+        setSearchResults(Array.isArray(data) ? data : []);
+      } catch {}
+      setSearching(false);
+    }, 300);
+  }
+
   if (activeThread) {
     return (
       <ChatThread
@@ -199,8 +222,39 @@ export default function MessagesPage({ initialThread, onUnreadChange }) {
 
   return (
     <div className="messages-page">
-      <div style={{ padding: '16px 16px 8px', borderBottom: '1px solid var(--border)' }}>
-        <div style={{ fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '18px' }}>Messages</div>
+      {/* Header + search */}
+      <div style={{ padding: '14px 16px 10px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
+        <div style={{ fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '18px', marginBottom: '10px' }}>Messages</div>
+        <div style={{ position: 'relative' }}>
+          <input
+            value={search}
+            onChange={handleSearchChange}
+            placeholder="🔍 New conversation..."
+            style={{ width: '100%', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '22px', padding: '9px 16px', color: '#fff', fontSize: '14px', fontFamily: 'var(--font-body)', outline: 'none', boxSizing: 'border-box' }}
+          />
+          {/* Search results dropdown */}
+          {search.trim() && (
+            <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#0f0f12', border: '1px solid var(--border)', borderRadius: '12px', marginTop: '6px', zIndex: 50, overflow: 'hidden', boxShadow: '0 8px 24px rgba(0,0,0,0.5)' }}>
+              {searching ? (
+                <div style={{ padding: '14px 16px', color: 'var(--text-dim)', fontSize: '13px', fontFamily: 'var(--font-body)' }}>Searching...</div>
+              ) : searchResults.length === 0 ? (
+                <div style={{ padding: '14px 16px', color: 'var(--text-dim)', fontSize: '13px', fontFamily: 'var(--font-body)' }}>No users found</div>
+              ) : searchResults.map(u => (
+                <div key={u.username}
+                  onClick={() => { setActiveThread(u.username); setSearch(''); setSearchResults([]); }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', cursor: 'pointer', transition: 'background 0.1s' }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.06)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                >
+                  <div style={{ width: 36, height: 36, borderRadius: '50%', background: u.avatar_color || 'var(--purple)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '14px', color: '#000', flexShrink: 0, overflow: 'hidden' }}>
+                    {u.avatar_url ? <img src={u.avatar_url} alt={u.username} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : u.username[0].toUpperCase()}
+                  </div>
+                  <span style={{ fontFamily: 'var(--font-head)', fontWeight: 600, fontSize: '14px' }}>@{u.username}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {loading ? (
@@ -209,7 +263,7 @@ export default function MessagesPage({ initialThread, onUnreadChange }) {
         <div style={{ textAlign: 'center', padding: '60px 24px', color: 'var(--text-dim)' }}>
           <div style={{ fontSize: '36px', marginBottom: '12px' }}>💬</div>
           <div style={{ fontFamily: 'var(--font-head)', fontWeight: 600, fontSize: '16px', marginBottom: '8px' }}>No messages yet</div>
-          <div style={{ fontSize: '13px', fontFamily: 'var(--font-body)' }}>Visit a producer's profile to start a convo</div>
+          <div style={{ fontSize: '13px', fontFamily: 'var(--font-body)' }}>Search for a producer above to start a convo</div>
         </div>
       ) : threads.map(t => (
         <div key={t.threadId}

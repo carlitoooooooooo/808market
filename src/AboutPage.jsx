@@ -2,6 +2,23 @@ import { useState } from "react";
 
 const CHANGELOG = [
   {
+    version: "1.6.0", date: "Mar 25, 2026", items: [
+      "Target artists feature: select who beats are made for (Drake, Future, etc.)",
+      "Artists discovery tab in Discover",
+      "Open Graph meta tags for iMessage sharing",
+      "Genre mandatory on upload",
+      "Rate limit: max 10 uploads per 24 hours",
+      "Condense liked beats: show 5, 'Show More' to expand",
+      "Like button on Browse cards + track modal",
+      "Profile pictures in messaging inbox",
+      "Drumkits & Sample Packs rename",
+      "Browse cards simplified (no buttons until click)",
+      "Fixed snippet selector on mobile",
+      "Fixed auth lock issues with React Strict Mode",
+      "Black screen on load removed",
+    ]
+  },
+  {
     version: "1.5.0", date: "Mar 24, 2026", items: [
       "Card flip to view beat details + COP IT",
       "Browse grid mode in Discover",

@@ -50,6 +50,7 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
   const [savedBeats, setSavedBeats] = useState([]);
   const [savedLoading, setSavedLoading] = useState(true);
   const [uploadReactions, setUploadReactions] = useState({});
+  const [showAllLiked, setShowAllLiked] = useState(false);
   const [tasteMatches, setTasteMatches] = useState([]);
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [editingBeat, setEditingBeat] = useState(null);
@@ -758,9 +759,10 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
               No liked beats yet — start swiping!
             </div>
           );
+          const displayedTracks = showAllLiked ? likedTracks : likedTracks.slice(0, 5);
           return (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              {likedTracks.map(beat => {
+              {displayedTracks.map(beat => {
                 const isFree = !beat.price || beat.price === 0;
                 return (
                   <div
@@ -782,6 +784,28 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
                   </div>
                 );
               })}
+              {likedTracks.length > 5 && (
+                <button
+                  onClick={() => setShowAllLiked(!showAllLiked)}
+                  style={{
+                    background: 'none',
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    borderRadius: '8px',
+                    padding: '6px 8px',
+                    color: 'var(--cyan)',
+                    fontSize: '12px',
+                    fontFamily: 'var(--font-head)',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    marginTop: '4px',
+                    transition: 'border-color 0.15s',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'}
+                >
+                  {showAllLiked ? '↑ Show Less' : `↓ Show More (${likedTracks.length - 5})`}
+                </button>
+              )}
             </div>
           );
         })()}

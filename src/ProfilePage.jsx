@@ -759,25 +759,25 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
             </div>
           );
           return (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               {likedTracks.map(beat => {
                 const isFree = !beat.price || beat.price === 0;
                 return (
                   <div
                     key={beat.id}
                     onClick={() => setViewingLikedBeat(beat)}
-                    style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--glass-bg)', border: '1px solid var(--border)', borderRadius: '12px', padding: '10px', cursor: 'pointer', transition: 'border-color 0.15s' }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--glass-bg)', border: '1px solid var(--border)', borderRadius: '8px', padding: '6px 8px', cursor: 'pointer', transition: 'border-color 0.15s' }}
                     onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'}
                     onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
                   >
-                    <div style={{ width: 48, height: 48, borderRadius: '8px', background: beat.coverUrl ? `url(${beat.coverUrl}) center/cover` : 'rgba(255,255,255,0.08)', backgroundSize: 'cover', flexShrink: 0 }} />
+                    <div style={{ width: 40, height: 40, borderRadius: '6px', background: beat.coverUrl ? `url(${beat.coverUrl}) center/cover` : 'rgba(255,255,255,0.08)', backgroundSize: 'cover', flexShrink: 0 }} />
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontFamily: 'var(--font-head)', fontWeight: 600, fontSize: '14px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{beat.title}</div>
-                      <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', fontFamily: 'var(--font-body)', marginTop: '2px' }}>by {beat.artist}</div>
+                      <div style={{ fontFamily: 'var(--font-head)', fontWeight: 600, fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{beat.title}</div>
+                      <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', fontFamily: 'var(--font-body)', marginTop: '1px' }}>by {beat.artist}</div>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '3px', flexShrink: 0 }}>
-                      <span style={{ fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '13px', color: isFree ? 'var(--cyan)' : 'var(--green)' }}>{isFree ? 'FREE' : `$${beat.price}`}</span>
-                      <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', fontFamily: 'var(--font-body)' }}>{beat.genre}</span>
+                    <div style={{ display: 'flex', gap: '6px', flexShrink: 0, alignItems: 'center' }}>
+                      <span style={{ fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '12px', color: isFree ? 'var(--cyan)' : 'var(--green)' }}>{isFree ? 'FREE' : `$${beat.price}`}</span>
+                      <span style={{ fontSize: '9px', color: 'rgba(255,255,255,0.3)', fontFamily: 'var(--font-body)' }}>{beat.genre}</span>
                     </div>
                   </div>
                 );

@@ -477,28 +477,30 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
       {/* LEFT COLUMN: identity, stats, pinned, badges */}
       <div className="profile-left-col">
 
-      {/* Cover Image */}
-      <div
-        style={{
-          width: '100%',
-          height: '120px',
-          background: coverUrl ? `url(${coverUrl}) center/cover` : 'linear-gradient(135deg, rgba(0,245,255,0.05), rgba(191,95,255,0.05))',
-          borderRadius: '12px',
-          marginBottom: '12px',
-          cursor: 'pointer',
-          position: 'relative',
-          overflow: 'hidden',
-        }}
-        onClick={() => coverInputRef.current?.click()}
-        title="Change cover image"
-      >
-        {uploadingCover && (
-          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px' }}>
-            ⏳ Uploading...
-          </div>
-        )}
-        <input ref={coverInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleCoverChange} />
-      </div>
+      {/* Cover Image - only show if exists */}
+      {coverUrl && (
+        <div
+          style={{
+            width: '100%',
+            height: '120px',
+            background: `url(${coverUrl}) center/cover`,
+            borderRadius: '12px',
+            marginBottom: '12px',
+            cursor: 'pointer',
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+          onClick={() => coverInputRef.current?.click()}
+          title="Change cover image"
+        >
+          {uploadingCover && (
+            <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px' }}>
+              ⏳ Uploading...
+            </div>
+          )}
+        </div>
+      )}
+      <input ref={coverInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleCoverChange} />
 
       {/* Header */}
       <div className="profile-header">

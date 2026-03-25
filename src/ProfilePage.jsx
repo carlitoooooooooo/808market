@@ -38,8 +38,11 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
   const [profileExtra, setProfileExtra] = useState({ location: '', tagline: '', instagram: '', twitter: '', soundcloud: '', youtube: '', influenced_by: '', avatar_border: 'none', name_glow: 'none' });
   const [totalPlays, setTotalPlays] = useState(0);
   const [avatarUrl, setAvatarUrl] = useState(currentUser?.avatarUrl || null);
+  const [coverUrl, setCoverUrl] = useState(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
   const avatarInputRef = React.useRef(null);
+  const coverInputRef = React.useRef(null);
   const [showSnippetPicker, setShowSnippetPicker] = useState(false);
   const [snippetConfirmed, setSnippetConfirmed] = useState(null);
   const [pinnedId, setPinnedId] = useState(() => getPinnedTrack(currentUser?.username));
@@ -240,6 +243,17 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
     }).catch(() => {});
   }, [currentUser?.username]);
 
+  // Load cover image
+  useEffect(() => {
+    if (!currentUser?.username) return;
+    fetch(`${SUPABASE_URL}/rest/v1/profiles?username=eq.${encodeURIComponent(currentUser.username)}&select=cover_url`, {
+      headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}` }
+    }).then(r => r.json()).then(data => {
+      const url = Array.isArray(data) ? data[0]?.cover_url : data?.cover_url;
+      if (url) setCoverUrl(url);
+    }).catch(() => {});
+  }, [currentUser?.username]);
+
   useEffect(() => {
     if (!currentUser?.username) {
       setUploadsLoading(false);
@@ -364,6 +378,32 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
     setCropFile(file);
   }
 
+  async function handleCoverChange(e) {
+    const file = e.target.files[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    setUploadingCover(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const path = `${currentUser.id || currentUser.username}/cover.${ext}`;
+      const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/avatars/${path}`, {
+        method: 'POST',
+        headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}`, 'Content-Type': file.type, 'x-upsert': 'true' },
+        body: file,
+      });
+      if (uploadRes.ok) {
+        const url = `${SUPABASE_URL}/storage/v1/object/public/avatars/${path}?t=${Date.now()}`;
+        setCoverUrl(url);
+        // Save to profiles table
+        await fetch(`${SUPABASE_URL}/rest/v1/profiles?username=eq.${encodeURIComponent(currentUser.username)}`, {
+          method: 'PATCH',
+          headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cover_url: url }),
+        });
+      }
+    } catch (err) { console.error('Cover upload error:', err); }
+    finally { setUploadingCover(false); }
+  }
+
   async function handleCroppedAvatar(croppedFile) {
     setCropFile(null);
     setUploadingAvatar(true);
@@ -436,6 +476,29 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
     <div className="profile-page">
       {/* LEFT COLUMN: identity, stats, pinned, badges */}
       <div className="profile-left-col">
+
+      {/* Cover Image */}
+      <div
+        style={{
+          width: '100%',
+          height: '120px',
+          background: coverUrl ? `url(${coverUrl}) center/cover` : 'linear-gradient(135deg, rgba(0,245,255,0.05), rgba(191,95,255,0.05))',
+          borderRadius: '12px',
+          marginBottom: '12px',
+          cursor: 'pointer',
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+        onClick={() => coverInputRef.current?.click()}
+        title="Change cover image"
+      >
+        {uploadingCover && (
+          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px' }}>
+            ⏳ Uploading...
+          </div>
+        )}
+        <input ref={coverInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleCoverChange} />
+      </div>
 
       {/* Header */}
       <div className="profile-header">

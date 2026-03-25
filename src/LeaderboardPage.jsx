@@ -13,6 +13,7 @@ const RANK_STYLE = {
 export default function LeaderboardPage({ tracks, onVote, userVotes, onViewUser }) {
   const [selectedTrack, setSelectedTrack] = useState(null);
   const [subTab, setSubTab] = useState("beats");
+  const [timeRange, setTimeRange] = useState("all"); // "all", "week", "day"
 
   // Producers state
   const [producers, setProducers] = useState([]);

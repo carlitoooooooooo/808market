@@ -131,13 +131,13 @@ export default function SnippetSelector({ file, url, initialStart, onConfirm, on
       {/* Waveform + scrubber */}
       <div
         ref={barRef}
-        style={{ position: 'relative', height: '72px', background: 'rgba(255,255,255,0.04)', borderRadius: '10px', cursor: 'pointer', overflow: 'hidden', marginBottom: '12px', userSelect: 'none' }}
+        style={{ position: 'relative', height: '72px', background: 'rgba(255,255,255,0.04)', borderRadius: '10px', cursor: 'pointer', overflow: 'hidden', marginBottom: '12px', userSelect: 'none', touchAction: 'none' }}
         onMouseDown={(e) => { dragging.current = true; handleBarInteraction(e); }}
         onMouseMove={(e) => { if (dragging.current) handleBarInteraction(e); }}
         onMouseUp={() => { dragging.current = false; }}
         onMouseLeave={() => { dragging.current = false; }}
-        onTouchStart={(e) => { dragging.current = true; handleBarInteraction(e); }}
-        onTouchMove={(e) => { if (dragging.current) handleBarInteraction(e); e.preventDefault(); }}
+        onTouchStart={(e) => { dragging.current = true; handleBarInteraction(e); e.preventDefault(); }}
+        onTouchMove={(e) => { if (dragging.current) { handleBarInteraction(e); e.preventDefault(); } }}
         onTouchEnd={() => { dragging.current = false; }}
       >
         {/* Waveform bars */}

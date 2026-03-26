@@ -152,7 +152,7 @@ export default function LeaderboardPage({ tracks, onVote, userVotes, onViewUser 
                   className="leaderboard-rank"
                   style={rank <= 3 ? { color: rankStyle.color } : {}}
                 >
-                  {rank <= 3 ? rankStyle.label : `#${rank}`}
+                  {rank === 1 ? '👑' : (rank <= 3 ? rankStyle.label : `#${rank}`)}
                 </div>
 
                 <div
@@ -210,7 +210,7 @@ export default function LeaderboardPage({ tracks, onVote, userVotes, onViewUser 
                   className="leaderboard-rank"
                   style={rank <= 3 ? { color: rankStyle.color } : {}}
                 >
-                  {rank <= 3 ? rankStyle.label : `#${rank}`}
+                  {rank === 1 ? '👑' : (rank <= 3 ? rankStyle.label : `#${rank}`)}
                 </div>
 
                 {/* Avatar */}

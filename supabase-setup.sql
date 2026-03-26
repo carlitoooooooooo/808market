@@ -4,6 +4,10 @@ create table if not exists profiles (
   username text unique not null,
   bio text default '',
   avatar_color text default '#ff2d78',
+  avatar_url text default null,
+  role text default 'user',
+  is_beta_tester boolean default false,
+  blocked_users text[] default '{}',
   created_at timestamptz default now()
 );
 
@@ -56,12 +60,25 @@ create table if not exists reactions (
   unique(user_id, track_id, emoji)
 );
 
+-- Messages
+create table if not exists messages (
+  id uuid default gen_random_uuid() primary key,
+  thread_id text not null,
+  sender text not null,
+  recipient text not null,
+  body text not null,
+  read boolean default false,
+  is_admin_message boolean default false,
+  created_at timestamptz default now()
+);
+
 -- Enable Row Level Security
 alter table profiles enable row level security;
 alter table tracks enable row level security;
 alter table votes enable row level security;
 alter table comments enable row level security;
 alter table reactions enable row level security;
+alter table messages enable row level security;
 
 -- RLS Policies
 
@@ -90,6 +107,10 @@ create policy "Users can delete own comments" on comments for delete using (auth
 create policy "Public reactions" on reactions for select using (true);
 create policy "Auth users can react" on reactions for insert with check (auth.uid() is not null);
 create policy "Users can delete own reactions" on reactions for delete using (auth.uid() = user_id);
+
+-- Messages: auth users can read their own threads, insert messages
+create policy "Public messages" on messages for select using (true);
+create policy "Auth users can send messages" on messages for insert with check (auth.uid() is not null);
 
 -- Storage bucket for audio
 insert into storage.buckets (id, name, public) values ('audio', 'audio', true) on conflict do nothing;

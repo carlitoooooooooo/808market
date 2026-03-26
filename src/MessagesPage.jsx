@@ -104,16 +104,24 @@ function ChatThread({ otherUsername, onBack, currentUser }) {
           <div style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: '13px', paddingTop: '40px' }}>No messages yet. Say something! 👋</div>
         ) : messages.map(msg => {
           const isMe = msg.sender === currentUser.username;
+          const isAdmin = msg.is_admin_message || msg.recipient === 'mastercard';
+          
           return (
             <div key={msg.id} style={{ display: 'flex', justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
               <div style={{
                 maxWidth: '75%',
-                background: isMe ? 'linear-gradient(135deg, var(--cyan), var(--purple))' : 'rgba(255,255,255,0.08)',
-                color: isMe ? '#000' : '#fff',
+                background: isAdmin 
+                  ? 'rgba(255,215,0,0.1)' 
+                  : isMe 
+                    ? 'linear-gradient(135deg, var(--cyan), var(--purple))'
+                    : 'rgba(255,255,255,0.08)',
+                color: isAdmin ? '#ffd700' : isMe ? '#000' : '#fff',
                 borderRadius: isMe ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
+                borderLeft: isAdmin ? '3px solid #ffd700' : 'none',
                 padding: '10px 14px', fontSize: '14px',
                 fontFamily: 'var(--font-body)', lineHeight: 1.4,
               }}>
+                {isAdmin && <div style={{ fontSize: '10px', fontWeight: 700, marginBottom: '4px', opacity: 0.8 }}>🔧 ADMIN</div>}
                 {msg.body}
                 <div style={{ fontSize: '10px', opacity: 0.6, marginTop: '4px', textAlign: isMe ? 'right' : 'left' }}>
                   {timeAgo(msg.created_at)}

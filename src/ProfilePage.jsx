@@ -58,6 +58,7 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [editingBeat, setEditingBeat] = useState(null);
   const [viewingLikedBeat, setViewingLikedBeat] = useState(null);
+  const [viewingUpload, setViewingUpload] = useState(null);
 
   const [cropFile, setCropFile] = useState(null);
   const [followList, setFollowList] = useState(null); // { type: 'followers'|'following', users: [] }
@@ -685,7 +686,7 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
 
               return (
                 <div key={track.id} className="upload-track-card">
-                  <div className="upload-track-header">
+                  <div className="upload-track-header" style={{ cursor: 'pointer' }} onClick={() => setViewingUpload(track)}>
                     <div
                       className="upload-track-thumb"
                       style={{ backgroundImage: `url(${track.coverUrl})` }}
@@ -889,6 +890,16 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
         <TrackModal
           track={viewingLikedBeat}
           onClose={() => setViewingLikedBeat(null)}
+          userVotes={userVotes}
+          onVote={() => {}}
+          onViewUser={onViewUser}
+        />
+      )}
+
+      {viewingUpload && (
+        <TrackModal
+          track={viewingUpload}
+          onClose={() => setViewingUpload(null)}
           userVotes={userVotes}
           onVote={() => {}}
           onViewUser={onViewUser}

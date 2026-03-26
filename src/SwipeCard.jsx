@@ -82,6 +82,15 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
     setFlyDir(dir);
     setIsFlying(true);
     stopPlay();
+    
+    // Haptic feedback immediately on swipe
+    try {
+      const hapticEnabled = JSON.parse(localStorage.getItem('hapticEnabled') ?? 'true');
+      if (hapticEnabled && navigator.vibrate) {
+        navigator.vibrate(dir === "right" ? [30] : 10);
+      }
+    } catch (e) {}
+    
     const rect = cardRef.current?.getBoundingClientRect();
     setTimeout(() => {
       onSwipe(dir, track, rect);

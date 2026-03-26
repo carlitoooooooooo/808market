@@ -20,6 +20,21 @@ function getTopReaction(counts) {
   return top;
 }
 
+function isValidSpotifyUrl(url) {
+  if (!url || url.trim() === '') return true; // allow empty
+  try {
+    const urlObj = new URL(url.startsWith('http') ? url : `https://${url}`);
+    return urlObj.hostname.includes('spotify.com') && (
+      urlObj.pathname.includes('/user/') || 
+      urlObj.pathname.includes('/playlist/') ||
+      urlObj.pathname.startsWith('/artist') ||
+      urlObj.pathname.startsWith('/track')
+    );
+  } catch {
+    return false;
+  }
+}
+
 function getPinnedTrack(username) {
   try { return JSON.parse(localStorage.getItem(`ds_pinned_${username}`)); } catch { return null; }
 }
@@ -35,7 +50,7 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
   const [editing, setEditing] = useState(false);
   const [editBio, setEditBio] = useState(currentUser?.bio || "");
   const [editColor, setEditColor] = useState(currentUser?.avatarColor || AVATAR_COLORS[0]);
-  const [profileExtra, setProfileExtra] = useState({ location: '', tagline: '', instagram: '', twitter: '', soundcloud: '', youtube: '', influenced_by: '', avatar_border: 'none', name_glow: 'none' });
+  const [profileExtra, setProfileExtra] = useState({ location: '', tagline: '', instagram: '', twitter: '', soundcloud: '', youtube: '', spotify_url: '', influenced_by: '', avatar_border: 'none', name_glow: 'none' });
   const [totalPlays, setTotalPlays] = useState(0);
   const [avatarUrl, setAvatarUrl] = useState(currentUser?.avatarUrl || null);
   const [coverUrl, setCoverUrl] = useState(null);
@@ -209,11 +224,11 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
   // Load extra profile fields
   useEffect(() => {
     if (!currentUser?.username) return;
-    fetch(`${SUPABASE_URL}/rest/v1/profiles?username=eq.${encodeURIComponent(currentUser.username)}&select=location,tagline,instagram,twitter,soundcloud,youtube,influenced_by,avatar_border,name_glow`, {
+    fetch(`${SUPABASE_URL}/rest/v1/profiles?username=eq.${encodeURIComponent(currentUser.username)}&select=location,tagline,instagram,twitter,soundcloud,youtube,spotify_url,influenced_by,avatar_border,name_glow`, {
       headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` }
     }).then(r => r.json()).then(data => {
       const p = Array.isArray(data) ? data[0] : data;
-      if (p) setProfileExtra({ location: p.location||'', tagline: p.tagline||'', instagram: p.instagram||'', twitter: p.twitter||'', soundcloud: p.soundcloud||'', youtube: p.youtube||'', influenced_by: p.influenced_by||'', avatar_border: p.avatar_border||'none', name_glow: p.name_glow||'none' });
+      if (p) setProfileExtra({ location: p.location||'', tagline: p.tagline||'', instagram: p.instagram||'', twitter: p.twitter||'', soundcloud: p.soundcloud||'', youtube: p.youtube||'', spotify_url: p.spotify_url||'', influenced_by: p.influenced_by||'', avatar_border: p.avatar_border||'none', name_glow: p.name_glow||'none' });
     }).catch(() => {});
 
     // Load total plays from tracks
@@ -355,6 +370,11 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
   // tasteMatches loaded from real DB via useEffect
 
   function saveEdit() {
+    // Validate Spotify URL before saving
+    if (profileExtra.spotify_url && !isValidSpotifyUrl(profileExtra.spotify_url)) {
+      alert('Please enter a valid Spotify URL or leave it empty.');
+      return;
+    }
     setUserData("bio", editBio);
     setUserData("avatarColor", editColor);
     // Save extra fields to DB
@@ -571,12 +591,13 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
                   🎵 Influenced by: <span style={{ color: 'rgba(255,255,255,0.6)' }}>{profileExtra.influenced_by}</span>
                 </div>
               )}
-              {(profileExtra.instagram || profileExtra.twitter || profileExtra.soundcloud || profileExtra.youtube) && (
+              {(profileExtra.instagram || profileExtra.twitter || profileExtra.soundcloud || profileExtra.youtube || profileExtra.spotify_url) && (
                 <div style={{ display: 'flex', gap: '10px', marginTop: '6px', flexWrap: 'wrap' }}>
                   {profileExtra.instagram && <a href={`https://instagram.com/${profileExtra.instagram}`} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', textDecoration: 'none' }}>📸 Instagram</a>}
                   {profileExtra.twitter && <a href={`https://x.com/${profileExtra.twitter}`} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', textDecoration: 'none' }}>🐦 Twitter</a>}
                   {profileExtra.soundcloud && <a href={`https://soundcloud.com/${profileExtra.soundcloud}`} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', textDecoration: 'none' }}>☁️ SoundCloud</a>}
                   {profileExtra.youtube && <a href={`https://youtube.com/@${profileExtra.youtube}`} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', textDecoration: 'none' }}>▶️ YouTube</a>}
+                  {profileExtra.spotify_url && <a href={profileExtra.spotify_url} target="_blank" rel="noreferrer" style={{ background: '#1DB954', color: '#fff', padding: '4px 10px', borderRadius: '20px', fontSize: '13px', textDecoration: 'none', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>🎵 Spotify</a>}
                 </div>
               )}
             </>
@@ -1106,12 +1127,36 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
               { key: 'twitter', label: 'TWITTER / X', placeholder: 'handle (no @)' },
               { key: 'soundcloud', label: 'SOUNDCLOUD', placeholder: 'username' },
               { key: 'youtube', label: 'YOUTUBE', placeholder: 'channel name' },
-            ].map(f => (
-              <div key={f.key}>
-                <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>{f.label}</label>
-                <input className="auth-input" value={profileExtra[f.key]} onChange={e => setProfileExtra(prev => ({ ...prev, [f.key]: e.target.value }))} placeholder={f.placeholder} maxLength={80} />
-              </div>
-            ))}
+              { key: 'spotify_url', label: 'SPOTIFY PROFILE', placeholder: 'https://open.spotify.com/user/...' },
+            ].map(f => {
+              const isSpotifyUrl = f.key === 'spotify_url';
+              const hasError = isSpotifyUrl && profileExtra[f.key] && !isValidSpotifyUrl(profileExtra[f.key]);
+              return (
+                <div key={f.key}>
+                  <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>
+                    {f.label}
+                    {isSpotifyUrl && profileExtra[f.key] && (
+                      <span style={{ marginLeft: '8px', fontSize: '10px', color: hasError ? '#ff3366' : '#00ff88' }}>
+                        {hasError ? '❌ Invalid URL' : '✓ Valid'}
+                      </span>
+                    )}
+                  </label>
+                  <input 
+                    className="auth-input" 
+                    value={profileExtra[f.key]} 
+                    onChange={e => setProfileExtra(prev => ({ ...prev, [f.key]: e.target.value }))} 
+                    placeholder={f.placeholder} 
+                    maxLength={200}
+                    style={hasError ? { borderColor: '#ff3366' } : {}}
+                  />
+                  {isSpotifyUrl && hasError && (
+                    <div style={{ fontSize: '11px', color: '#ff3366', marginTop: '4px', fontFamily: 'var(--font-body)' }}>
+                      Must be a valid Spotify URL (profile, playlist, artist, or track)
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
           </div>{/* end edit-profile-box */}
         </div>

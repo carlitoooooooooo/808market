@@ -5,7 +5,14 @@ import { supabase } from "./supabase.js";
 export default function SettingsPage({ onClose }) {
   const { currentUser, logout } = useAuth();
 
-  const [section, setSection] = useState("account"); // "account" | "password"
+  const [section, setSection] = useState("account"); // "account" | "password" | "fun"
+  const [partyMode, setPartyMode] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('partyMode')) || false;
+    } catch {
+      return false;
+    }
+  });
 
   // Password change
   const [currentPw, setCurrentPw] = useState("");
@@ -44,8 +51,20 @@ export default function SettingsPage({ onClose }) {
     }
   }
 
+  function handlePartyModeToggle() {
+    const newValue = !partyMode;
+    setPartyMode(newValue);
+    localStorage.setItem('partyMode', JSON.stringify(newValue));
+    if (newValue) {
+      document.documentElement.classList.add('party-mode');
+    } else {
+      document.documentElement.classList.remove('party-mode');
+    }
+  }
+
   const SECTIONS = [
     { id: "account", label: "Account" },
+    { id: "fun", label: "🎉 Fun" },
     { id: "password", label: "Password" },
   ];
 
@@ -159,6 +178,42 @@ export default function SettingsPage({ onClose }) {
                 {pwLoading ? "Updating..." : "Update Password"}
               </button>
             </form>
+          )}
+
+          {section === "fun" && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '12px', fontFamily: 'var(--font-head)' }}>
+                  🎉 PARTY MODE
+                </label>
+                <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', marginBottom: '12px', fontFamily: 'var(--font-body)' }}>
+                  Turn on for full rainbow chaos. Beautiful, chaotic, fun.
+                </p>
+                <button
+                  onClick={handlePartyModeToggle}
+                  style={{
+                    background: partyMode ? 'linear-gradient(135deg, #ff3366, #ff9900, #00f5ff, #bf5fff)' : 'rgba(255,255,255,0.08)',
+                    border: '1px solid ' + (partyMode ? 'rgba(255,215,0,0.3)' : 'rgba(255,255,255,0.12)'),
+                    borderRadius: '10px',
+                    padding: '12px 16px',
+                    color: partyMode ? '#000' : '#fff',
+                    fontWeight: 700,
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    fontFamily: 'var(--font-head)',
+                    transition: 'all 0.3s',
+                  }}
+                  onMouseEnter={e => {
+                    if (!partyMode) e.currentTarget.style.background = 'rgba(255,255,255,0.12)';
+                  }}
+                  onMouseLeave={e => {
+                    if (!partyMode) e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
+                  }}
+                >
+                  {partyMode ? '✨ PARTY MODE ON ✨' : 'Turn On Party Mode'}
+                </button>
+              </div>
+            </div>
           )}
 
         </div>

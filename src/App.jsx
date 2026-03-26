@@ -143,6 +143,16 @@ export default function App() {
   const toastTimer = useRef(null);
   const notifTimer = useRef(null);
 
+  // Apply party mode on mount
+  useEffect(() => {
+    try {
+      const partyMode = JSON.parse(localStorage.getItem('partyMode'));
+      if (partyMode) {
+        document.documentElement.classList.add('party-mode');
+      }
+    } catch {}
+  }, []);
+
   // Load tracks via direct REST (bypasses Supabase JS client auth)
   useEffect(() => {
     async function loadTracks() {

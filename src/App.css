@@ -2776,6 +2776,38 @@ body {
 /* ===== DESKTOP LAYOUT (≥900px) ===== */
 
 
+/* ===== PARTY MODE ===== */
+html.party-mode {
+  --cyan: #ff3366;
+  --purple: #00f5ff;
+  --green: #00ff88;
+  animation: party-hue 3s linear infinite;
+}
+html.party-mode * {
+  animation: party-colors 4s linear infinite;
+}
+@keyframes party-hue {
+  0% { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+@keyframes party-colors {
+  0% { filter: brightness(1); }
+  50% { filter: brightness(1.1); }
+  100% { filter: brightness(1); }
+}
+html.party-mode .btn-primary,
+html.party-mode .btn-secondary,
+html.party-mode .auth-submit {
+  background: linear-gradient(45deg, #ff3366, #ff9900, #ffff00, #00ff88, #00f5ff, #bf5fff, #ff3366) !important;
+  background-size: 300% 300%;
+  animation: gradient-shift 3s ease infinite;
+}
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
 @media (min-width: 900px) {
   /* Remove mobile phone-width cap — let app fill the screen */
   .app {

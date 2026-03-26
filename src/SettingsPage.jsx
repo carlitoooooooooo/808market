@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useAuth } from "./AuthContext.jsx";
 import { supabase } from "./supabase.js";
+import { isSoundsEnabled, setSoundsEnabled, playNotificationSound, playMessageSound } from "./soundUtils.js";
 
 export default function SettingsPage({ onClose }) {
   const { currentUser, logout } = useAuth();
@@ -27,6 +28,7 @@ export default function SettingsPage({ onClose }) {
       return true;
     }
   });
+  const [soundsEnabled, setSoundsEnabledLocal] = useState(() => isSoundsEnabled());
 
   // Password change
   const [currentPw, setCurrentPw] = useState("");
@@ -94,6 +96,20 @@ export default function SettingsPage({ onClose }) {
       document.documentElement.classList.add('cursor-animation-enabled');
     } else {
       document.documentElement.classList.remove('cursor-animation-enabled');
+    }
+  }
+
+  function handleSoundsToggle() {
+    const newValue = !soundsEnabled;
+    setSoundsEnabledLocal(newValue);
+    setSoundsEnabled(newValue);
+  }
+
+  function playTestSound(type) {
+    if (type === 'notification') {
+      playNotificationSound('like');
+    } else if (type === 'message') {
+      playMessageSound();
     }
   }
 
@@ -310,6 +326,71 @@ export default function SettingsPage({ onClose }) {
                 >
                   {cursorAnimation ? '✓ Particles Enabled' : 'Enable Particles'}
                 </button>
+              </div>
+
+              {/* Notification Sounds */}
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '8px', fontFamily: 'var(--font-head)' }}>
+                  🔊 NOTIFICATION SOUNDS
+                </label>
+                <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', marginBottom: '12px', fontFamily: 'var(--font-body)' }}>
+                  Beeps for likes, comments, and messages
+                </p>
+                <button
+                  onClick={handleSoundsToggle}
+                  style={{
+                    background: soundsEnabled ? 'rgba(0,200,255,0.1)' : 'rgba(255,255,255,0.06)',
+                    border: soundsEnabled ? '1px solid rgba(0,200,255,0.3)' : '1px solid rgba(255,255,255,0.12)',
+                    borderRadius: '10px',
+                    padding: '12px 16px',
+                    color: '#fff',
+                    fontWeight: 600,
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    fontFamily: 'var(--font-head)',
+                    transition: 'all 0.3s',
+                    width: '100%',
+                    marginBottom: '8px',
+                  }}
+                >
+                  {soundsEnabled ? '✓ Sounds Enabled' : 'Enable Sounds'}
+                </button>
+                {soundsEnabled && (
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button
+                      onClick={() => playTestSound('notification')}
+                      style={{
+                        flex: 1,
+                        padding: '8px 12px',
+                        background: 'rgba(191,95,255,0.1)',
+                        border: '1px solid rgba(191,95,255,0.3)',
+                        borderRadius: '8px',
+                        color: '#fff',
+                        fontSize: '12px',
+                        cursor: 'pointer',
+                        fontFamily: 'var(--font-head)',
+                      }}
+                    >
+                      Test 🔔
+                    </button>
+                    <button
+                      onClick={() => playTestSound('message')}
+                      style={{
+                        flex: 1,
+                        padding: '8px 12px',
+                        background: 'rgba(0,255,136,0.1)',
+                        border: '1px solid rgba(0,255,136,0.3)',
+                        borderRadius: '8px',
+                        color: '#fff',
+                        fontSize: '12px',
+                        cursor: 'pointer',
+                        fontFamily: 'var(--font-head)',
+                      }}
+                    >
+                      Test 💬
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           )}

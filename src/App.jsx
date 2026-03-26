@@ -21,6 +21,7 @@ import AchievementPopup from "./AchievementPopup.jsx";
 import tracksData from "./tracks.js";
 import { supabase } from "./supabase.js";
 import { dbUpsert, dbSelect, dbUpdate, dbInsert } from "./dbHelper.js";
+import { resumeAudioContext, playMessageSound, playNotificationSound } from "./soundUtils.js";
 
 const TABS = [
   { id: "discover", label: "🎵 Discover" },
@@ -163,6 +164,31 @@ export default function App() {
       }
     } catch {}
   }, []);
+
+  // Handle foreground focus - resume audio and play sounds if unread notifications/messages
+  useEffect(() => {
+    function handleFocus() {
+      // Resume audio context on user interaction
+      resumeAudioContext();
+      
+      // If there are unread notifications or messages, play a reminder sound
+      if (currentUser && (unreadCount > 0)) {
+        // Delay slightly to make it less jarring
+        setTimeout(() => {
+          playNotificationSound('follow');
+        }, 300);
+      }
+    }
+
+    window.addEventListener('focus', handleFocus);
+    // Also trigger on click/touch to ensure audio context is ready
+    window.addEventListener('click', resumeAudioContext, { once: true });
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('click', resumeAudioContext);
+    };
+  }, [currentUser, unreadCount]);
 
   // Load tracks via direct REST (bypasses Supabase JS client auth)
   useEffect(() => {

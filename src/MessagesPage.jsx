@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "./AuthContext.jsx";
+import { playMessageSound } from "./soundUtils.js";
 
 const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
 const URL = 'https://bkapxykeryzxbqpgjgab.supabase.co';
@@ -31,9 +32,18 @@ function ChatThread({ otherUsername, onBack, currentUser }) {
       );
       const data = await res.json();
       if (Array.isArray(data)) {
-        setMessages(data);
-        // Mark received messages as read
+        // Check for new unread messages to play sound
         const unread = data.filter(m => m.recipient === currentUser.username && !m.read);
+        const prevUnreadCount = messages.filter(m => m.recipient === currentUser.username && !m.read).length;
+        
+        setMessages(data);
+        
+        // Play sound if new unread messages arrived
+        if (unread.length > prevUnreadCount && unread.length > 0) {
+          playMessageSound();
+        }
+        
+        // Mark received messages as read
         if (unread.length > 0) {
           fetch(`${URL}/rest/v1/messages?thread_id=eq.${encodeURIComponent(threadId)}&recipient=eq.${encodeURIComponent(currentUser.username)}`, {
             method: 'PATCH',

@@ -876,7 +876,8 @@ export default function SettingsPage({ onClose }) {
                   💝 CREDITS
                 </label>
                 <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: "10px", padding: "12px", fontSize: "12px", fontFamily: "var(--font-body)", lineHeight: 1.6, color: "rgba(255,255,255,0.8)" }}>
-                  <p>Built with ❤️ by the 808market team</p>
+                  <p>Developed by mastercard2k 🎹</p>
+                  <p style={{ marginTop: "8px" }}>Built with ❤️ by the 808market team</p>
                   <p style={{ marginTop: "8px" }}>Special thanks to all our producers and users for making this platform incredible.</p>
                 </div>
               </div>

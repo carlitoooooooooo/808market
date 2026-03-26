@@ -583,7 +583,7 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
           </div>
           {!editing && (
             <>
-              <div className="profile-bio">{currentUser.bio || "no bio yet..."}</div>
+              {currentUser.bio && <div className="profile-bio">{currentUser.bio}</div>}
               {profileExtra.tagline && <div style={{ fontSize: '12px', color: 'var(--cyan)', fontFamily: 'var(--font-body)', marginTop: '2px', fontStyle: 'italic' }}>{profileExtra.tagline}</div>}
               {profileExtra.location && <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-body)', marginTop: '2px' }}>📍 {profileExtra.location}</div>}
               {profileExtra.influenced_by && (

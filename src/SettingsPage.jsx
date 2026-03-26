@@ -6,11 +6,25 @@ export default function SettingsPage({ onClose }) {
   const { currentUser, logout } = useAuth();
 
   const [section, setSection] = useState("account"); // "account" | "password" | "fun"
-  const [partyMode, setPartyMode] = useState(() => {
+  const [theme, setTheme] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem('partyMode')) || false;
+      return localStorage.getItem('selectedTheme') || 'default';
     } catch {
-      return false;
+      return 'default';
+    }
+  });
+  const [hapticEnabled, setHapticEnabled] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('hapticEnabled') || 'true');
+    } catch {
+      return true;
+    }
+  });
+  const [cursorAnimation, setCursorAnimation] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('cursorAnimation') || 'true');
+    } catch {
+      return true;
     }
   });
 
@@ -51,14 +65,35 @@ export default function SettingsPage({ onClose }) {
     }
   }
 
-  function handlePartyModeToggle() {
-    const newValue = !partyMode;
-    setPartyMode(newValue);
-    localStorage.setItem('partyMode', JSON.stringify(newValue));
+  const THEME_PACKS = [
+    { id: 'default', name: 'Default', emoji: '🎵', colors: ['--cyan', '--purple', '--green'] },
+    { id: 'cyberpunk', name: 'Cyberpunk', emoji: '🤖', colors: ['#ff0080', '#00ff9f', '#ff00ff'] },
+    { id: 'synthwave', name: 'Synthwave', emoji: '🌅', colors: ['#ff006e', '#00f5ff', '#ffbe0b'] },
+    { id: 'ocean', name: 'Ocean', emoji: '🌊', colors: ['#0077be', '#00d4ff', '#5fb3d5'] },
+    { id: 'forest', name: 'Forest', emoji: '🌲', colors: ['#2d6a4f', '#40916c', '#95d5b2'] },
+    { id: 'sunset', name: 'Sunset', emoji: '🌅', colors: ['#ff006e', '#fb5607', '#ffbe0b'] },
+  ];
+
+  function handleThemeChange(themeId) {
+    setTheme(themeId);
+    localStorage.setItem('selectedTheme', themeId);
+    document.documentElement.setAttribute('data-theme', themeId);
+  }
+
+  function handleHapticToggle() {
+    const newValue = !hapticEnabled;
+    setHapticEnabled(newValue);
+    localStorage.setItem('hapticEnabled', JSON.stringify(newValue));
+  }
+
+  function handleCursorAnimationToggle() {
+    const newValue = !cursorAnimation;
+    setCursorAnimation(newValue);
+    localStorage.setItem('cursorAnimation', JSON.stringify(newValue));
     if (newValue) {
-      document.documentElement.classList.add('party-mode');
+      document.documentElement.classList.add('cursor-animation-enabled');
     } else {
-      document.documentElement.classList.remove('party-mode');
+      document.documentElement.classList.remove('cursor-animation-enabled');
     }
   }
 
@@ -181,36 +216,99 @@ export default function SettingsPage({ onClose }) {
           )}
 
           {section === "fun" && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              {/* Theme Packs */}
               <div>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '12px', fontFamily: 'var(--font-head)' }}>
-                  🎉 PARTY MODE
+                  🎨 THEME PACKS
                 </label>
                 <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', marginBottom: '12px', fontFamily: 'var(--font-body)' }}>
-                  Turn on for full rainbow chaos. Beautiful, chaotic, fun.
+                  Choose your vibe
+                </p>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
+                  {THEME_PACKS.map(t => (
+                    <button
+                      key={t.id}
+                      onClick={() => handleThemeChange(t.id)}
+                      style={{
+                        background: theme === t.id ? 'rgba(0,245,255,0.15)' : 'rgba(255,255,255,0.06)',
+                        border: theme === t.id ? '2px solid var(--cyan)' : '1px solid rgba(255,255,255,0.12)',
+                        borderRadius: '10px',
+                        padding: '12px',
+                        color: '#fff',
+                        fontWeight: 600,
+                        fontSize: '12px',
+                        cursor: 'pointer',
+                        fontFamily: 'var(--font-head)',
+                        transition: 'all 0.3s',
+                        textAlign: 'center',
+                      }}
+                      onMouseEnter={e => {
+                        if (theme !== t.id) e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
+                      }}
+                      onMouseLeave={e => {
+                        if (theme !== t.id) e.currentTarget.style.background = 'rgba(255,255,255,0.06)';
+                      }}
+                    >
+                      {t.emoji}<br/>{t.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Haptic Feedback */}
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '8px', fontFamily: 'var(--font-head)' }}>
+                  📳 HAPTIC FEEDBACK
+                </label>
+                <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', marginBottom: '12px', fontFamily: 'var(--font-body)' }}>
+                  Feel your votes
                 </p>
                 <button
-                  onClick={handlePartyModeToggle}
+                  onClick={handleHapticToggle}
                   style={{
-                    background: partyMode ? 'linear-gradient(135deg, #ff3366, #ff9900, #00f5ff, #bf5fff)' : 'rgba(255,255,255,0.08)',
-                    border: '1px solid ' + (partyMode ? 'rgba(255,215,0,0.3)' : 'rgba(255,255,255,0.12)'),
+                    background: hapticEnabled ? 'rgba(0,255,136,0.1)' : 'rgba(255,255,255,0.06)',
+                    border: hapticEnabled ? '1px solid rgba(0,255,136,0.3)' : '1px solid rgba(255,255,255,0.12)',
                     borderRadius: '10px',
                     padding: '12px 16px',
-                    color: partyMode ? '#000' : '#fff',
-                    fontWeight: 700,
+                    color: '#fff',
+                    fontWeight: 600,
                     fontSize: '14px',
                     cursor: 'pointer',
                     fontFamily: 'var(--font-head)',
                     transition: 'all 0.3s',
-                  }}
-                  onMouseEnter={e => {
-                    if (!partyMode) e.currentTarget.style.background = 'rgba(255,255,255,0.12)';
-                  }}
-                  onMouseLeave={e => {
-                    if (!partyMode) e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
+                    width: '100%',
                   }}
                 >
-                  {partyMode ? '✨ PARTY MODE ON ✨' : 'Turn On Party Mode'}
+                  {hapticEnabled ? '✓ Haptic Enabled' : 'Enable Haptic'}
+                </button>
+              </div>
+
+              {/* Cursor Animation */}
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '8px', fontFamily: 'var(--font-head)' }}>
+                  ✨ CURSOR PARTICLES
+                </label>
+                <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', marginBottom: '12px', fontFamily: 'var(--font-body)' }}>
+                  Trailing particle effects
+                </p>
+                <button
+                  onClick={handleCursorAnimationToggle}
+                  style={{
+                    background: cursorAnimation ? 'rgba(191,95,255,0.1)' : 'rgba(255,255,255,0.06)',
+                    border: cursorAnimation ? '1px solid rgba(191,95,255,0.3)' : '1px solid rgba(255,255,255,0.12)',
+                    borderRadius: '10px',
+                    padding: '12px 16px',
+                    color: '#fff',
+                    fontWeight: 600,
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    fontFamily: 'var(--font-head)',
+                    transition: 'all 0.3s',
+                    width: '100%',
+                  }}
+                >
+                  {cursorAnimation ? '✓ Particles Enabled' : 'Enable Particles'}
                 </button>
               </div>
             </div>

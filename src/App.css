@@ -3013,3 +3013,148 @@ html.party-mode .auth-submit {
     right: 0;
   }
 }
+
+/* ===== THEME PACKS ===== */
+:root[data-theme="cyberpunk"] {
+  --cyan: #ff0080;
+  --purple: #00ff9f;
+  --green: #ff00ff;
+}
+
+:root[data-theme="synthwave"] {
+  --cyan: #ff006e;
+  --purple: #00f5ff;
+  --green: #ffbe0b;
+}
+
+:root[data-theme="ocean"] {
+  --cyan: #0077be;
+  --purple: #5fb3d5;
+  --green: #00d4ff;
+}
+
+:root[data-theme="forest"] {
+  --cyan: #40916c;
+  --purple: #95d5b2;
+  --green: #2d6a4f;
+}
+
+:root[data-theme="sunset"] {
+  --cyan: #ff006e;
+  --purple: #ffbe0b;
+  --green: #fb5607;
+}
+
+/* ===== ACHIEVEMENT POPUP ===== */
+.achievement-popup-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+  animation: achievement-pop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  pointer-events: none;
+}
+
+@keyframes achievement-pop-in {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5) rotate(-10deg);
+  }
+  70% {
+    transform: translate(-50%, -50%) scale(1.1) rotate(5deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1) rotate(0deg);
+  }
+}
+
+.achievement-popup {
+  background: linear-gradient(135deg, rgba(0, 245, 255, 0.1) 0%, rgba(191, 95, 255, 0.1) 100%);
+  border: 2px solid var(--cyan);
+  border-radius: 20px;
+  padding: 20px 24px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 30px rgba(0, 245, 255, 0.3), 0 0 60px rgba(191, 95, 255, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 280px;
+  animation: achievement-glow 3s ease-in-out forwards;
+}
+
+@keyframes achievement-glow {
+  0%, 100% {
+    box-shadow: 0 0 30px rgba(0, 245, 255, 0.3), 0 0 60px rgba(191, 95, 255, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(0, 245, 255, 0.5), 0 0 80px rgba(191, 95, 255, 0.4);
+  }
+}
+
+.achievement-icon {
+  font-size: 48px;
+  animation: achievement-bounce 0.6s ease-out;
+}
+
+@keyframes achievement-bounce {
+  0% {
+    transform: scale(0) translateY(-20px);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+  }
+}
+
+.achievement-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.achievement-title {
+  font-family: var(--font-head);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--cyan);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.achievement-description {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* ===== CURSOR ANIMATION ===== */
+:root.cursor-animation-enabled {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><circle cx="16" cy="16" r="6" fill="%2300f5ff" opacity="0.8"/><circle cx="16" cy="16" r="10" fill="none" stroke="%2300f5ff" stroke-width="1" opacity="0.3"/></svg>') 16 16, auto;
+}
+
+.particle {
+  position: fixed;
+  pointer-events: none;
+  will-change: transform, opacity;
+  font-size: 10px;
+  z-index: 1000;
+}
+
+@keyframes particle-fade {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--tx), var(--ty)) scale(0);
+  }
+}
+
+:root.cursor-animation-enabled .particle {
+  animation: particle-fade 0.8s ease-out forwards;
+}

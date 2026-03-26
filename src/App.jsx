@@ -17,6 +17,7 @@ import MessagesPage from "./MessagesPage.jsx";
 import LandingPage from "./LandingPage.jsx";
 import AuthPrompt from "./AuthPrompt.jsx";
 import UserSearch from "./UserSearch.jsx";
+import AchievementPopup from "./AchievementPopup.jsx";
 import tracksData from "./tracks.js";
 import { supabase } from "./supabase.js";
 import { dbUpsert, dbSelect, dbUpdate, dbInsert } from "./dbHelper.js";
@@ -140,15 +141,25 @@ export default function App() {
   const [browseTrack, setBrowseTrack] = useState(null);
   const [followingList, setFollowingList] = useState([]); // usernames current user follows
   const [producerProfiles, setProducerProfiles] = useState({}); // username -> { name_glow, avatar_url, ... }
+  const [currentAchievement, setCurrentAchievement] = useState(null);
+  const [unlockedAchievements, setUnlockedAchievements] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('unlockedAchievements') || '[]');
+    } catch {
+      return [];
+    }
+  });
   const toastTimer = useRef(null);
   const notifTimer = useRef(null);
 
-  // Apply party mode on mount
+  // Apply theme on mount
   useEffect(() => {
     try {
-      const partyMode = JSON.parse(localStorage.getItem('partyMode'));
-      if (partyMode) {
-        document.documentElement.classList.add('party-mode');
+      const selectedTheme = localStorage.getItem('selectedTheme') || 'default';
+      document.documentElement.setAttribute('data-theme', selectedTheme);
+      const cursorAnim = JSON.parse(localStorage.getItem('cursorAnimation') || 'true');
+      if (cursorAnim) {
+        document.documentElement.classList.add('cursor-animation-enabled');
       }
     } catch {}
   }, []);
@@ -327,6 +338,59 @@ export default function App() {
     setShowAuthPrompt(true);
   }, []);
 
+  // Haptic feedback utility
+  const triggerHaptic = useCallback((pattern = "light") => {
+    try {
+      const hapticEnabled = JSON.parse(localStorage.getItem('hapticEnabled') || 'true');
+      if (!hapticEnabled || !navigator.vibrate) return;
+      
+      const patterns = {
+        light: 10,
+        medium: [30],
+        strong: [50, 50, 50],
+      };
+      navigator.vibrate(patterns[pattern] || patterns.light);
+    } catch (e) {
+      // Haptic not supported or disabled
+    }
+  }, []);
+
+  // Achievement checking and unlock
+  const checkAndUnlockAchievement = useCallback((achievementId) => {
+    if (unlockedAchievements.includes(achievementId)) return;
+    
+    const newUnlocked = [...unlockedAchievements, achievementId];
+    setUnlockedAchievements(newUnlocked);
+    localStorage.setItem('unlockedAchievements', JSON.stringify(newUnlocked));
+    setCurrentAchievement(achievementId);
+    triggerHaptic('strong');
+  }, [unlockedAchievements, triggerHaptic]);
+
+  // Check achievements after vote or profile update
+  const checkAchievements = useCallback(async (stats) => {
+    if (!currentUser) return;
+    
+    const cops = stats?.cops || 0;
+    const followers = stats?.followers || 0;
+    const nameGlow = stats?.name_glow || false;
+    
+    if (cops >= 50 && !unlockedAchievements.includes('cops_50')) {
+      checkAndUnlockAchievement('cops_50');
+    }
+    if (cops >= 100 && !unlockedAchievements.includes('cops_100')) {
+      checkAndUnlockAchievement('cops_100');
+    }
+    if (followers >= 100 && !unlockedAchievements.includes('followers_100')) {
+      checkAndUnlockAchievement('followers_100');
+    }
+    if (followers >= 500 && !unlockedAchievements.includes('followers_500')) {
+      checkAndUnlockAchievement('followers_500');
+    }
+    if (nameGlow && !unlockedAchievements.includes('name_glow')) {
+      checkAndUnlockAchievement('name_glow');
+    }
+  }, [currentUser, unlockedAchievements, checkAndUnlockAchievement]);
+
   const handleSwipe = useCallback(async (dir, track, cardRect) => {
     if (!currentUser) {
       // Guest — only allow passing, not liking
@@ -334,6 +398,9 @@ export default function App() {
       setQueue(prev => prev.filter(t => t.id !== track.id));
       return;
     }
+
+    // Haptic feedback on vote
+    triggerHaptic(dir === "right" ? "medium" : "light");
 
     // Optimistic update
     setUserVotes(prev => ({ ...prev, [track.id]: dir }));
@@ -786,6 +853,11 @@ export default function App() {
           }}
         />
       )}
+
+      <AchievementPopup
+        achievement={currentAchievement}
+        onAnimationEnd={() => setCurrentAchievement(null)}
+      />
     </div>
   );
 }

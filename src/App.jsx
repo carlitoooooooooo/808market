@@ -140,6 +140,7 @@ export default function App() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [discoverFeed, setDiscoverFeed] = useState("foryou"); // "foryou" | "following" | "browse"
   const [browseTrack, setBrowseTrack] = useState(null);
+  const [browseLimit, setBrowseLimit] = useState(50); // Max cards to show, increases with "Show More"
   const [followingList, setFollowingList] = useState([]); // usernames current user follows
   const [producerProfiles, setProducerProfiles] = useState({}); // username -> { name_glow, avatar_url, ... }
   const [currentAchievement, setCurrentAchievement] = useState(null);
@@ -649,7 +650,7 @@ export default function App() {
                   <div className="empty-queue"><div className="empty-queue__icon">⏳</div><div className="empty-queue__text">Loading beats...</div></div>
                 ) : (activeGenre === "ALL" ? tracks : tracks.filter(t => t.genre === activeGenre)).length === 0 ? (
                   <div className="empty-queue"><div className="empty-queue__icon">🎧</div><div className="empty-queue__text">No beats found</div></div>
-                ) : (activeGenre === "ALL" ? tracks : tracks.filter(t => t.genre === activeGenre)).map(track => {
+                ) : (activeGenre === "ALL" ? tracks : tracks.filter(t => t.genre === activeGenre)).slice(0, browseLimit).map(track => {
                   const isFree = !track.price || track.price === 0;
                   return (
                     <div key={track.id} className="browse-card" onClick={() => setBrowseTrack(track)}>
@@ -676,6 +677,31 @@ export default function App() {
                 userVotes={userVotes}
                 onViewUser={setViewingUser}
               />
+            )}
+
+            {/* Show More button for browse tab */}
+            {discoverFeed === "browse" && browseLimit < (activeGenre === "ALL" ? tracks : tracks.filter(t => t.genre === activeGenre)).length && (
+              <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'center', padding: '20px' }}>
+                <button 
+                  onClick={() => setBrowseLimit(prev => prev + 50)}
+                  style={{
+                    padding: '10px 20px',
+                    background: 'linear-gradient(135deg, #00f5ff, #bf5fff)',
+                    color: '#000',
+                    border: 'none',
+                    borderRadius: '20px',
+                    fontWeight: 700,
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    fontFamily: 'var(--font-head)',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
+                  onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                >
+                  📦 Show More ({browseLimit} / {(activeGenre === "ALL" ? tracks : tracks.filter(t => t.genre === activeGenre)).length})
+                </button>
+              </div>
             )}
 
             {discoverFeed !== "browse" && tracksLoading ? (

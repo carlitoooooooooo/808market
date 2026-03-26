@@ -949,17 +949,23 @@ body {
 
 /* Admin/Team Only Glows */
 .name-glow-crown {
-  background: linear-gradient(90deg, #ffd700, #ffed4e, #ffd700);
-  background-size: 200% auto;
+  background: linear-gradient(90deg, #ff3366, #ff9900, #ffed4e, #00ff88, #00f5ff, #bf5fff, #ff3366);
+  background-size: 300% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: nameGlowCrown 2s ease-in-out infinite;
-  filter: drop-shadow(0 0 8px rgba(255,215,0,0.6));
+  animation: nameGlowCrownWobble 1.2s ease-in-out infinite, nameGlowCrownShift 3s linear infinite;
+  filter: drop-shadow(0 0 6px rgba(255,215,0,0.4)) drop-shadow(0 0 4px rgba(0,245,255,0.3));
 }
-@keyframes nameGlowCrown {
-  0%, 100% { background-position: 0% center; }
-  50% { background-position: 100% center; }
+@keyframes nameGlowCrownWobble {
+  0%, 100% { transform: translateY(0px); }
+  25% { transform: translateY(-2px); }
+  50% { transform: translateY(2px); }
+  75% { transform: translateY(-1px); }
+}
+@keyframes nameGlowCrownShift {
+  0%   { background-position: 0% center; }
+  100% { background-position: 300% center; }
 }
 
 .name-glow-neon {

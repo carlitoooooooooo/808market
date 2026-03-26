@@ -187,6 +187,7 @@ function MP3Tab({ onSubmit, onCancel }) {
   const [showSnippetPicker, setShowSnippetPicker] = useState(false);
   const audioRef = useRef(null);
   const coverRef = useRef(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   const handleAudioChange = (e) => {
     const file = e.target.files[0];
@@ -196,6 +197,31 @@ function MP3Tab({ onSubmit, onCancel }) {
     setAudioFile(file);
     setError("");
     if (!title) setTitle(file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " "));
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (!file) return;
+    if (file.size > MAX_FILE_MB * 1024 * 1024) return setError(`Max ${MAX_FILE_MB}MB`);
+    if (!file.type.startsWith("audio/")) return setError("Select an audio file");
+    setError("");
+    setAudioFile(file);
+    setSnippetStart(0);
   };
 
   const handleCoverChange = (e) => {
@@ -282,11 +308,22 @@ function MP3Tab({ onSubmit, onCancel }) {
 
   return (
     <div>
-      <div className="upload-file-box" onClick={() => audioRef.current.click()}>
+      <div 
+        className="upload-file-box" 
+        onClick={() => audioRef.current.click()}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        style={{
+          background: isDragging ? 'rgba(0,245,255,0.15)' : undefined,
+          borderColor: isDragging ? 'var(--cyan)' : undefined,
+          transition: 'all 0.2s'
+        }}
+      >
         {audioFile ? (
           <div className="upload-file-selected">🎵 {audioFile.name} <span className="upload-file-size">({(audioFile.size/1024/1024).toFixed(1)}MB)</span></div>
         ) : (
-          <div><div className="upload-file-icon">🎵</div><div>Tap to select audio file</div><div className="upload-file-hint">MP3, WAV, AAC — max {MAX_FILE_MB}MB</div></div>
+          <div><div className="upload-file-icon">🎵</div><div>Tap to select or drag audio file</div><div className="upload-file-hint">MP3, WAV, AAC — max {MAX_FILE_MB}MB</div></div>
         )}
         <input ref={audioRef} type="file" accept="audio/mpeg,audio/mp3,audio/wav,audio/x-wav,audio/aac,audio/ogg,audio/flac,audio/m4a,audio/x-m4a,.mp3,.wav,.aac,.ogg,.flac,.m4a" style={{ display:"none" }} onChange={handleAudioChange} />
       </div>

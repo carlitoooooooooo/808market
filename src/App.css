@@ -947,6 +947,45 @@ body {
   100% { background-position: 300% center; }
 }
 
+/* Admin/Team Only Glows */
+.name-glow-crown {
+  background: linear-gradient(90deg, #ffd700, #ffed4e, #ffd700);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: nameGlowCrown 2s ease-in-out infinite;
+  filter: drop-shadow(0 0 8px rgba(255,215,0,0.6));
+}
+@keyframes nameGlowCrown {
+  0%, 100% { background-position: 0% center; }
+  50% { background-position: 100% center; }
+}
+
+.name-glow-neon {
+  color: #00ff88 !important;
+  text-shadow: 0 0 10px #00ff88, 0 0 20px rgba(0,255,136,0.6), 0 0 30px rgba(0,245,255,0.4);
+  animation: nameGlowNeon 1.5s ease-in-out infinite;
+}
+@keyframes nameGlowNeon {
+  0%, 100% { text-shadow: 0 0 10px #00ff88, 0 0 20px rgba(0,255,136,0.6), 0 0 30px rgba(0,245,255,0.4); }
+  50% { text-shadow: 0 0 20px #00ff88, 0 0 40px rgba(0,255,136,0.8), 0 0 60px rgba(0,245,255,0.6); }
+}
+
+.name-glow-hologram {
+  background: linear-gradient(90deg, #ff3366, #00f5ff, #bf5fff, #00ff88, #ff3366);
+  background-size: 300% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: nameGlowHologram 4s linear infinite;
+  filter: drop-shadow(0 0 8px rgba(0,245,255,0.5)) drop-shadow(0 0 4px rgba(191,95,255,0.3));
+}
+@keyframes nameGlowHologram {
+  0%   { background-position: 0% center; }
+  100% { background-position: 300% center; }
+}
+
 /* ===== AVATAR BORDER ANIMATIONS ===== */
 .avatar-border-cyan {
   border: 2px solid transparent !important;

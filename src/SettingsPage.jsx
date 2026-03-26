@@ -37,9 +37,9 @@ export default function SettingsPage({ onClose }) {
   });
   const [cursorAnimation, setCursorAnimation] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem('cursorAnimation') || 'true');
+      return JSON.parse(localStorage.getItem('cursorAnimation') || 'false');
     } catch {
-      return true;
+      return false;
     }
   });
   const [soundsEnabled, setSoundsEnabledLocal] = useState(() => isSoundsEnabled());

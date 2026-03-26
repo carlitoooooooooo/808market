@@ -4,6 +4,8 @@ import DrumkitSection from "./DrumkitSection.jsx";
 import { dbSelect, dbInsert, dbUpdate } from "./dbHelper.js";
 import { useAuth } from "./AuthContext.jsx";
 
+const TEAM_MEMBERS = ['avalions'];
+
 const SUPABASE_URL = 'https://bkapxykeryzxbqpgjgab.supabase.co';
 const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
 
@@ -238,7 +240,15 @@ export default function UserProfilePage({ username, onClose, onOpenModal, userVo
                       letterSpacing: '1px', textTransform: 'uppercase',
                     }}>ADMIN</span>
                   )}
-                  {profile?.is_beta_tester && profile?.role !== 'admin' && (
+                  {TEAM_MEMBERS.includes(profile?.username) && profile?.role !== 'admin' && (
+                    <span style={{
+                      background: 'linear-gradient(135deg, #00ff88, #00f5ff)',
+                      color: '#000', fontSize: '10px', fontFamily: "'Space Grotesk', sans-serif",
+                      fontWeight: 700, padding: '3px 10px', borderRadius: '20px',
+                      letterSpacing: '1px', textTransform: 'uppercase',
+                    }}>TEAM</span>
+                  )}
+                  {profile?.is_beta_tester && profile?.role !== 'admin' && !TEAM_MEMBERS.includes(profile?.username) && (
                     <span style={{
                       background: 'linear-gradient(135deg, #ff9900, #ff3366)',
                       color: '#fff', fontSize: '9px', fontFamily: "'Space Grotesk', sans-serif",

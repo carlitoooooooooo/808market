@@ -3,6 +3,8 @@ import { useAuth, AVATAR_COLORS } from "./AuthContext.jsx";
 import { BADGES } from "./badges.js";
 // MOCK_USERS removed — using real DB data for taste match
 import SnippetPicker from "./SnippetPicker.jsx";
+
+const TEAM_MEMBERS = ['avalions'];
 import { supabase } from "./supabase.js";
 import EditBeatModal from "./EditBeatModal.jsx";
 import ImageCropper from "./ImageCropper.jsx";
@@ -555,7 +557,16 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
                 flexShrink: 0, whiteSpace: 'nowrap',
               }}>ADMIN</span>
             )}
-            {currentUser.isBetaTester && currentUser.role !== 'admin' && (
+            {TEAM_MEMBERS.includes(currentUser.username) && currentUser.role !== 'admin' && (
+              <span style={{
+                background: 'linear-gradient(135deg, #00ff88, #00f5ff)',
+                color: '#000', fontSize: '10px', fontFamily: 'var(--font-head)',
+                fontWeight: 700, padding: '3px 10px', borderRadius: '20px',
+                letterSpacing: '1px', textTransform: 'uppercase',
+                flexShrink: 0, whiteSpace: 'nowrap',
+              }}>TEAM</span>
+            )}
+            {currentUser.isBetaTester && currentUser.role !== 'admin' && !TEAM_MEMBERS.includes(currentUser.username) && (
               <span style={{
                 background: 'linear-gradient(135deg, #ff9900, #ff3366)',
                 color: '#fff', fontSize: '9px', fontFamily: 'var(--font-head)',

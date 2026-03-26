@@ -263,7 +263,7 @@ export default function UserProfilePage({ username, onClose, onOpenModal, userVo
                     {profile.twitter && <a href={`https://x.com/${profile.twitter}`} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', textDecoration: 'none' }}>🐦 Twitter</a>}
                     {profile.soundcloud && <a href={`https://soundcloud.com/${profile.soundcloud}`} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', textDecoration: 'none' }}>☁️ SoundCloud</a>}
                     {profile.youtube && <a href={`https://youtube.com/@${profile.youtube}`} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', textDecoration: 'none' }}>▶️ YouTube</a>}
-                    {profile.spotify_url && <a href={profile.spotify_url} target="_blank" rel="noreferrer" style={{ background: '#1DB954', color: '#fff', padding: '3px 8px', borderRadius: '20px', fontSize: '12px', textDecoration: 'none', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>🎵 Spotify</a>}
+                    {profile.spotify_url && <a href={profile.spotify_url} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', textDecoration: 'none' }}>🎵 Spotify</a>}
                   </div>
                 )}
               </div>

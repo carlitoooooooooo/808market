@@ -597,7 +597,7 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
                   {profileExtra.twitter && <a href={`https://x.com/${profileExtra.twitter}`} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', textDecoration: 'none' }}>🐦 Twitter</a>}
                   {profileExtra.soundcloud && <a href={`https://soundcloud.com/${profileExtra.soundcloud}`} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', textDecoration: 'none' }}>☁️ SoundCloud</a>}
                   {profileExtra.youtube && <a href={`https://youtube.com/@${profileExtra.youtube}`} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', textDecoration: 'none' }}>▶️ YouTube</a>}
-                  {profileExtra.spotify_url && <a href={profileExtra.spotify_url} target="_blank" rel="noreferrer" style={{ background: '#1DB954', color: '#fff', padding: '4px 10px', borderRadius: '20px', fontSize: '13px', textDecoration: 'none', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>🎵 Spotify</a>}
+                  {profileExtra.spotify_url && <a href={profileExtra.spotify_url} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', textDecoration: 'none' }}>🎵 Spotify</a>}
                 </div>
               )}
             </>

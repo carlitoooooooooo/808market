@@ -185,11 +185,11 @@ export default function SettingsPage({ onClose }) {
   }, [section]);
 
   async function loadCreatorData() {
-    if (!currentUser?.id) return;
+    if (!currentUser?.username) return;
     setCreatorLoading(true);
     try {
       const res = await fetch(
-        `${URL}/rest/v1/tracks?uploaded_by=eq.${encodeURIComponent(currentUser.id)}&select=*`,
+        `${URL}/rest/v1/tracks?uploaded_by_username=eq.${encodeURIComponent(currentUser.username)}&select=*`,
         { headers: { apikey: ANON, Authorization: `Bearer ${ANON}` } }
       );
       const tracks = await res.json();

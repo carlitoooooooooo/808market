@@ -2695,12 +2695,19 @@ body {
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 20px;
   width: 100%;
-  max-width: 460px;
+  max-width: 520px;
   max-height: 85vh;
   overflow-y: auto;
   scrollbar-width: none;
   display: flex;
   flex-direction: column;
+}
+@media (max-width: 599px) {
+  .settings-modal {
+    max-width: 100%;
+    border-radius: 0;
+    max-height: 100vh;
+  }
 }
 .settings-modal::-webkit-scrollbar { display: none; }
 .settings-header {

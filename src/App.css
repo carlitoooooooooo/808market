@@ -2739,12 +2739,16 @@ body {
   border-bottom-color: var(--cyan);
 }
 .settings-body {
-  padding: 20px;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
 }
 .settings-field {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
+  margin-bottom: 12px;
 }
 .settings-label {
   font-family: var(--font-head);

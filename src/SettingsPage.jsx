@@ -306,12 +306,12 @@ export default function SettingsPage({ onClose }) {
   ];
 
   const SECTIONS = [
-    { id: "account", label: "Account" },
-    { id: "creator", label: "👨‍💻 Creator Tools" },
-    { id: "privacy", label: "🔒 Privacy & Safety" },
+    { id: "account", label: "👤 Account" },
+    { id: "creator", label: "🛠️ Tools" },
+    { id: "privacy", label: "🔒 Privacy" },
     { id: "fun", label: "🎉 Fun" },
-    { id: "password", label: "Password" },
-    { id: "about", label: "ℹ️ About & Help" },
+    { id: "password", label: "🔑 Password" },
+    { id: "about", label: "ℹ️ Help" },
   ];
 
   return (

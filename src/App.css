@@ -2727,7 +2727,10 @@ body {
   gap: 2px;
   padding: 12px 20px 0;
   border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  scrollbar-width: none;
 }
+.settings-tabs::-webkit-scrollbar { display: none; }
 .settings-tab {
   background: none;
   border: none;
@@ -2736,9 +2739,17 @@ body {
   font-family: var(--font-head);
   font-size: 13px;
   font-weight: 600;
-  padding: 6px 14px 10px;
+  padding: 6px 12px 10px;
   cursor: pointer;
   transition: color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+@media (max-width: 599px) {
+  .settings-tab {
+    font-size: 12px;
+    padding: 6px 10px 10px;
+  }
 }
 .settings-tab:hover { color: var(--text); }
 .settings-tab--active {
@@ -2750,12 +2761,29 @@ body {
   display: flex;
   flex-direction: column;
   gap: 28px;
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.settings-body::-webkit-scrollbar { display: none; }
+@media (max-width: 599px) {
+  .settings-body {
+    padding: 20px 16px;
+    gap: 20px;
+    padding-bottom: 40px;
+  }
 }
 .settings-field {
   display: flex;
   flex-direction: column;
   gap: 8px;
   margin-bottom: 12px;
+}
+@media (max-width: 599px) {
+  .settings-field {
+    gap: 10px;
+    margin-bottom: 16px;
+  }
 }
 .settings-label {
   font-family: var(--font-head);

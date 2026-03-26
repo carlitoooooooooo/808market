@@ -2599,6 +2599,9 @@ body {
   flex-direction: column;
   height: 100%;
   overflow: hidden;
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
 }
 .chat-thread__header {
   display: flex;

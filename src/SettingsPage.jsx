@@ -710,8 +710,8 @@ export default function SettingsPage({ onClose }) {
                       Royalty Split
                     </label>
                     <div style={{ background: "rgba(0,245,255,0.05)", border: "1px solid rgba(0,245,255,0.2)", borderRadius: "10px", padding: "14px", fontSize: "13px", fontFamily: "var(--font-body)", lineHeight: 1.6 }}>
-                      <div><strong>808market:</strong> 30%</div>
-                      <div><strong>You:</strong> 70%</div>
+                      <div><strong>808market:</strong> 15%</div>
+                      <div><strong>You:</strong> 85%</div>
                     </div>
                   </div>
 

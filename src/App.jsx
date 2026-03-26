@@ -158,7 +158,7 @@ export default function App() {
     try {
       const selectedTheme = localStorage.getItem('selectedTheme') || 'default';
       document.documentElement.setAttribute('data-theme', selectedTheme);
-      const cursorAnim = JSON.parse(localStorage.getItem('cursorAnimation') || 'true');
+      const cursorAnim = JSON.parse(localStorage.getItem('cursorAnimation') || 'false');
       if (cursorAnim) {
         document.documentElement.classList.add('cursor-animation-enabled');
       }

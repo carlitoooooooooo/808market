@@ -226,11 +226,11 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
   // Load extra profile fields
   useEffect(() => {
     if (!currentUser?.username) return;
-    fetch(`${SUPABASE_URL}/rest/v1/profiles?username=eq.${encodeURIComponent(currentUser.username)}&select=location,tagline,instagram,twitter,soundcloud,youtube,spotify_url,influenced_by,avatar_border,name_glow`, {
+    fetch(`${SUPABASE_URL}/rest/v1/profiles?username=eq.${encodeURIComponent(currentUser.username)}&select=location,tagline,instagram,twitter,soundcloud,youtube,spotify_url,influenced_by,avatar_border,name_glow,profile_bg`, {
       headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` }
     }).then(r => r.json()).then(data => {
       const p = Array.isArray(data) ? data[0] : data;
-      if (p) setProfileExtra({ location: p.location||'', tagline: p.tagline||'', instagram: p.instagram||'', twitter: p.twitter||'', soundcloud: p.soundcloud||'', youtube: p.youtube||'', spotify_url: p.spotify_url||'', influenced_by: p.influenced_by||'', avatar_border: p.avatar_border||'none', name_glow: p.name_glow||'none' });
+      if (p) setProfileExtra({ location: p.location||'', tagline: p.tagline||'', instagram: p.instagram||'', twitter: p.twitter||'', soundcloud: p.soundcloud||'', youtube: p.youtube||'', spotify_url: p.spotify_url||'', influenced_by: p.influenced_by||'', avatar_border: p.avatar_border||'none', name_glow: p.name_glow||'none', profile_bg: p.profile_bg||'none' });
     }).catch(() => {});
 
     // Load total plays from tracks

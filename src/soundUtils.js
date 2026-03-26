@@ -60,9 +60,9 @@ export function setNotificationSoundType(type) {
  */
 export function getNotificationVolume() {
   try {
-    return parseInt(localStorage.getItem(SOUND_VOLUME_KEY) || '25', 10);
+    return parseInt(localStorage.getItem(SOUND_VOLUME_KEY) || '0', 10);
   } catch {
-    return 25;
+    return 0;
   }
 }
 

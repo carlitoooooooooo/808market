@@ -877,30 +877,7 @@ export default function SettingsPage({ onClose }) {
               </div>
 
               {/* Links */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
-                <a
-                  href="https://discord.gg/clawd"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    padding: "12px",
-                    background: "rgba(88,101,242,0.1)",
-                    border: "1px solid rgba(88,101,242,0.3)",
-                    borderRadius: "10px",
-                    color: "#5865F2",
-                    fontWeight: 600,
-                    fontSize: "12px",
-                    cursor: "pointer",
-                    fontFamily: "var(--font-head)",
-                    textAlign: "center",
-                    textDecoration: "none",
-                    transition: "all 0.3s",
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.background = "rgba(88,101,242,0.2)"}
-                  onMouseLeave={e => e.currentTarget.style.background = "rgba(88,101,242,0.1)"}
-                >
-                  💬 Discord
-                </a>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "10px" }}>
                 <a
                   href="/about"
                   style={{

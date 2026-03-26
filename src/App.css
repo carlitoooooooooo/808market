@@ -3022,20 +3022,35 @@ html.party-mode .auth-submit {
     justify-content: center;
     padding-top: 32px;
     background: rgba(0,0,0,0.85) !important;
+    overflow-y: auto;
+    scrollbar-width: none;
   }
+  .edit-profile-overlay::-webkit-scrollbar { display: none; }
   .edit-profile-box {
     width: 540px;
-    max-height: calc(100vh - 64px - 48px);
+    max-height: calc(100vh - 64px);
     background: #0a0a0a;
     border-radius: 16px;
     border: 1px solid rgba(255,255,255,0.12);
     overflow-y: auto;
     scrollbar-width: none;
-    padding-bottom: 24px;
+    padding-bottom: 40px;
     display: flex;
     flex-direction: column;
   }
   .edit-profile-box::-webkit-scrollbar { display: none; }
+  @media (max-width: 599px) {
+    .edit-profile-overlay {
+      align-items: stretch;
+      padding-top: 0;
+    }
+    .edit-profile-box {
+      width: 100%;
+      max-height: 100vh;
+      border-radius: 0;
+      padding-bottom: 60px;
+    }
+  }
   .edit-profile-header {
     border-radius: 16px 16px 0 0;
     background: #0a0a0a !important;

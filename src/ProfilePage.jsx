@@ -384,7 +384,13 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
       method: 'PATCH',
       headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}`, 'Content-Type': 'application/json' },
       body: JSON.stringify(profileExtra),
-    }).catch(() => {});
+    }).then(r => {
+      if (!r.ok) {
+        console.error('Failed to save profile:', r.status, r.statusText);
+      }
+    }).catch(err => {
+      console.error('Profile save error:', err);
+    });
     setEditing(false);
   }
 

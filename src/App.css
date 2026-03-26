@@ -1160,21 +1160,20 @@ body {
 .track-modal::-webkit-scrollbar { display: none; }
 
 .modal-close {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  z-index: 200;
-  /* taken out of flex flow so it doesn't push track-modal down */
-  background: rgba(10,10,15,0.85);
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 300;
+  background: rgba(10,10,15,0.95);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid var(--border);
   border-radius: 50%;
   color: var(--text);
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1182,6 +1181,15 @@ body {
   pointer-events: all;
 }
 .modal-close:hover { background: rgba(255,255,255,0.18); }
+@media (max-width: 599px) {
+  .modal-close {
+    top: 14px;
+    right: 14px;
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+}
 
 .track-modal__cover {
   width: 100%;

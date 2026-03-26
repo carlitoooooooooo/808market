@@ -2533,6 +2533,11 @@ body {
   padding: 12px 12px 100px;
   overflow-y: auto;
 }
+@media (min-width: 1400px) {
+  .browse-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
 .browse-card {
   background: var(--glass-bg);
   border: 1px solid var(--border);

@@ -111,7 +111,7 @@ function TagInput({ tags, setTags, disabled }) {
 }
 
 // Shared beat info fields
-function BeatInfoFields({ title, setTitle, artist, setArtist, genre, setGenre, bpm, setBpm, beatKey, setBeatKey, licenseType, setLicenseType, price, setPrice, paymentLink, setPaymentLink, disabled }) {
+function BeatInfoFields({ title, setTitle, artist, setArtist, genre, setGenre, bpm, setBpm, beatKey, setBeatKey, licenseType, setLicenseType, price, setPrice, disabled }) {
   return (
     <>
       <div className="sc-upload__field">
@@ -171,7 +171,6 @@ function MP3Tab({ onSubmit, onCancel }) {
   const [beatKey, setBeatKey] = useState("");
   const [licenseType, setLicenseType] = useState("lease");
   const [price, setPrice] = useState("");
-  const [paymentLink, setPaymentLink] = useState("");
   const [producerNotes, setProducerNotes] = useState("");
   const [tags, setTags] = useState([]);
   const [audioFile, setAudioFile] = useState(null);
@@ -275,7 +274,6 @@ function MP3Tab({ onSubmit, onCancel }) {
         price: priceNum,
         license_type: licenseType,
         beat_key: beatKey,
-        payment_link: paymentLink.trim(),
         producer_notes: producerNotes.trim(),
       };
       const trackRes = await fetch(`${SUPABASE_URL}/rest/v1/tracks`, {
@@ -297,7 +295,7 @@ function MP3Tab({ onSubmit, onCancel }) {
         bpm: track.bpm || 0, coverUrl: track.cover_url, audioUrl: track.audio_url, snippetStart: 0,
         tags: track.tags || [], uploadedBy: track.uploaded_by_username,
         listedAt: track.listed_at, cops: 0, passes: 0,
-        price: priceNum, licenseType, beatKey, paymentLink: paymentLink.trim(),
+        price: priceNum, licenseType, beatKey,
       });
     } catch (err) {
       setError(err.message);
@@ -405,13 +403,6 @@ function MP3Tab({ onSubmit, onCancel }) {
         </div>
       </div>
 
-      {parseFloat(price) > 0 && (
-        <div className="sc-upload__field">
-          <label className="sc-upload__label">PAYMENT LINK</label>
-          <input className="sc-upload__input" type="text" value={paymentLink} onChange={e => setPaymentLink(e.target.value)} placeholder="Cashapp/PayPal/Beatstars link..." disabled={uploading} />
-        </div>
-      )}
-
       <div className="sc-upload__field">
         <label className="sc-upload__label">PRODUCER NOTES (OPTIONAL)</label>
         <textarea
@@ -457,7 +448,6 @@ function SoundCloudTab({ onSubmit, onCancel }) {
   const [beatKey, setBeatKey] = useState("");
   const [licenseType, setLicenseType] = useState("lease");
   const [price, setPrice] = useState("");
-  const [paymentLink, setPaymentLink] = useState("");
   const [producerNotes, setProducerNotes] = useState("");
   const [tags, setTags] = useState([]);
   const [preview, setPreview] = useState(false);
@@ -502,7 +492,6 @@ function SoundCloudTab({ onSubmit, onCancel }) {
         price: priceNum,
         license_type: licenseType,
         beat_key: beatKey,
-        payment_link: paymentLink.trim(),
         producer_notes: producerNotes.trim(),
       };
       const scRes = await fetch(`${SUPABASE_URL}/rest/v1/tracks`, {
@@ -525,7 +514,7 @@ function SoundCloudTab({ onSubmit, onCancel }) {
         soundcloudUrl: url, embedUrl, isSoundCloud: true,
         snippetStart: 0, tags: track.tags || [],
         uploadedBy: track.uploaded_by_username, listedAt: track.listed_at, cops: 0, passes: 0,
-        price: priceNum, licenseType, beatKey, paymentLink: paymentLink.trim(),
+        price: priceNum, licenseType, beatKey,
       });
     } catch (err) {
       setError(err.message);
@@ -588,12 +577,6 @@ function SoundCloudTab({ onSubmit, onCancel }) {
                 </select>
               </div>
             </div>
-            {parseFloat(price) > 0 && (
-              <div className="sc-upload__field">
-                <label className="sc-upload__label">PAYMENT LINK</label>
-                <input className="sc-upload__input" type="text" value={paymentLink} onChange={e => setPaymentLink(e.target.value)} placeholder="Cashapp/PayPal/Beatstars link..." />
-              </div>
-            )}
             <div className="sc-upload__field">
               <label className="sc-upload__label">PRODUCER NOTES (OPTIONAL)</label>
               <textarea

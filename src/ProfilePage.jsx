@@ -52,7 +52,7 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
   const [editing, setEditing] = useState(false);
   const [editBio, setEditBio] = useState(currentUser?.bio || "");
   const [editColor, setEditColor] = useState(currentUser?.avatarColor || AVATAR_COLORS[0]);
-  const [profileExtra, setProfileExtra] = useState({ location: '', tagline: '', instagram: '', twitter: '', soundcloud: '', youtube: '', spotify_url: '', influenced_by: '', avatar_border: 'none', name_glow: 'none' });
+  const [profileExtra, setProfileExtra] = useState({ location: '', tagline: '', instagram: '', twitter: '', soundcloud: '', youtube: '', spotify_url: '', influenced_by: '', avatar_border: 'none', name_glow: 'none', profile_bg: 'none' });
   const [totalPlays, setTotalPlays] = useState(0);
   const [avatarUrl, setAvatarUrl] = useState(currentUser?.avatarUrl || null);
   const [coverUrl, setCoverUrl] = useState(null);
@@ -496,7 +496,12 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
   const totalCopsReceived = myUploads.reduce((sum, t) => sum + (t.cops || 0), 0);
 
   return (
-    <div className="profile-page">
+    <div className="profile-page" style={{
+      background: profileExtra.profile_bg === 'gradient-cyan' ? 'linear-gradient(135deg, rgba(0,245,255,0.05), transparent)' :
+                  profileExtra.profile_bg === 'gradient-purple' ? 'linear-gradient(135deg, rgba(191,95,255,0.05), transparent)' :
+                  profileExtra.profile_bg === 'gradient-rainbow' ? 'linear-gradient(135deg, rgba(255,51,102,0.05), rgba(255,153,0,0.05), rgba(0,245,255,0.05))' :
+                  'transparent'
+    }}>
       {/* LEFT COLUMN: identity, stats, pinned, badges */}
       <div className="profile-left-col">
 
@@ -1107,6 +1112,32 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
                       </div>
                     </div>
                   )}
+                </div>
+              )}
+            </div>
+
+            {/* Profile Background picker */}
+            <div>
+              <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '10px', textTransform: 'uppercase' }}>
+                Profile Background {totalPlays < 500 && currentUser.role !== 'admin' && !TEAM_MEMBERS.includes(currentUser.username) && <span style={{ color: '#ff3366' }}>🔒 {500 - totalPlays} plays to unlock</span>}
+              </label>
+              {totalPlays < 500 && currentUser.role !== 'admin' && !TEAM_MEMBERS.includes(currentUser.username) ? (
+                <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '10px 14px', fontSize: '13px', color: 'rgba(255,255,255,0.3)', fontFamily: 'var(--font-body)' }}>
+                  🔒 Unlock at 500 total plays
+                </div>
+              ) : (
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  {[
+                    { value: 'none', label: 'None', style: { background: '#0a0a0a', color: '#fff' } },
+                    { value: 'gradient-cyan', label: 'Cyan Fade', style: { background: 'linear-gradient(135deg, rgba(0,245,255,0.1), transparent)', color: '#00f5ff' } },
+                    { value: 'gradient-purple', label: 'Purple Fade', style: { background: 'linear-gradient(135deg, rgba(191,95,255,0.1), transparent)', color: '#bf5fff' } },
+                    { value: 'gradient-rainbow', label: '🌈 Rainbow', style: { background: 'linear-gradient(135deg, rgba(255,51,102,0.1), rgba(255,153,0,0.1), rgba(0,245,255,0.1))', color: '#fff' } },
+                  ].map(b => (
+                    <button key={b.value} type="button" onClick={() => setProfileExtra(prev => ({ ...prev, profile_bg: b.value }))}
+                      style={{ ...b.style, border: `2px solid ${profileExtra.profile_bg === b.value ? '#fff' : 'transparent'}`, borderRadius: '20px', padding: '4px 12px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-head)' }}>
+                      {b.label}
+                    </button>
+                  ))}
                 </div>
               )}
             </div>

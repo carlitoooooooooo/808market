@@ -275,13 +275,13 @@ export default function SettingsPage({ onClose }) {
       const threadId = [currentUser.username, "mastercard"].sort().join("__");
       const bugReport = `🐛 BUG REPORT\n\nTitle: ${bugTitle}\n\nDescription: ${bugDescription}`;
       
-      const res = await fetch(`${URL}/rest/v1/direct_messages`, {
+      const res = await fetch(`${URL}/rest/v1/messages`, {
         method: 'POST',
         headers: { apikey: ANON, Authorization: `Bearer ${ANON}`, 'Content-Type': 'application/json', Prefer: 'return=representation' },
         body: JSON.stringify({
           thread_id: threadId,
-          sender_username: currentUser.username,
-          recipient_username: "mastercard",
+          sender: currentUser.username,
+          recipient: "mastercard",
           body: bugReport,
           read: false,
         }),

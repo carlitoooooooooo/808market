@@ -387,9 +387,13 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
     }).then(r => {
       if (!r.ok) {
         console.error('Failed to save profile:', r.status, r.statusText);
+        alert('Failed to save profile. Check console for details.');
+      } else {
+        console.log('Profile saved successfully');
       }
     }).catch(err => {
       console.error('Profile save error:', err);
+      alert('Error saving profile: ' + err.message);
     });
     setEditing(false);
   }

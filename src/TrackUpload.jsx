@@ -153,12 +153,7 @@ function BeatInfoFields({ title, setTitle, artist, setArtist, genre, setGenre, b
           </select>
         </div>
       </div>
-      {price > 0 && (
-        <div className="sc-upload__field">
-          <label className="sc-upload__label">PAYMENT LINK</label>
-          <input className="sc-upload__input" type="text" value={paymentLink} onChange={e => setPaymentLink(e.target.value)} placeholder="Cashapp/PayPal/Beatstars link..." disabled={disabled} />
-        </div>
-      )}
+
     </>
   );
 }

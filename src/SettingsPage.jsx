@@ -705,11 +705,6 @@ export default function SettingsPage({ onClose }) {
                     <div className="settings-value" style={{ fontSize: "24px", fontWeight: 700 }}>{uploadCount}</div>
                   </div>
 
-                  <div className="settings-field">
-                    <label className="settings-label">Total Beats Revenue</label>
-                    <div className="settings-value" style={{ fontSize: "24px", fontWeight: 700 }}>${totalBeatsRevenue.toFixed(2)}</div>
-                  </div>
-
                   <div style={{ borderTop: "1px solid var(--border)", paddingTop: "16px" }}>
                     <label style={{ display: "block", fontSize: "13px", fontWeight: 600, marginBottom: "12px", fontFamily: "var(--font-head)" }}>
                       Royalty Split

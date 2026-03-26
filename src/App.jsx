@@ -21,7 +21,7 @@ import AchievementPopup from "./AchievementPopup.jsx";
 import tracksData from "./tracks.js";
 import { supabase } from "./supabase.js";
 import { dbUpsert, dbSelect, dbUpdate, dbInsert } from "./dbHelper.js";
-import { resumeAudioContext, playMessageSound, playNotificationSound } from "./soundUtils.js";
+import { resumeAudioContext, playMessageSound, playNotificationSound, isAutoMuteEnabled } from "./soundUtils.js";
 
 const TABS = [
   { id: "discover", label: "🎵 Discover" },
@@ -172,6 +172,7 @@ export default function App() {
       resumeAudioContext();
       
       // If there are unread notifications or messages, play a reminder sound
+      // (unless auto-mute is enabled, in which case the sound function will handle it)
       if (currentUser && (unreadCount > 0)) {
         // Delay slightly to make it less jarring
         setTimeout(() => {

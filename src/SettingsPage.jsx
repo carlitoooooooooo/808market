@@ -1,7 +1,18 @@
 import React, { useState } from "react";
 import { useAuth } from "./AuthContext.jsx";
 import { supabase } from "./supabase.js";
-import { isSoundsEnabled, setSoundsEnabled, playNotificationSound, playMessageSound } from "./soundUtils.js";
+import { 
+  isSoundsEnabled, 
+  setSoundsEnabled, 
+  playNotificationSound, 
+  playMessageSound,
+  getNotificationSoundType,
+  setNotificationSoundType,
+  getNotificationVolume,
+  setNotificationVolume,
+  isAutoMuteEnabled,
+  setAutoMute
+} from "./soundUtils.js";
 
 export default function SettingsPage({ onClose }) {
   const { currentUser, logout } = useAuth();
@@ -29,6 +40,9 @@ export default function SettingsPage({ onClose }) {
     }
   });
   const [soundsEnabled, setSoundsEnabledLocal] = useState(() => isSoundsEnabled());
+  const [soundType, setSoundTypeLocal] = useState(() => getNotificationSoundType());
+  const [soundVolume, setSoundVolumeLocal] = useState(() => getNotificationVolume());
+  const [autoMute, setAutoMuteLocal] = useState(() => isAutoMuteEnabled());
 
   // Password change
   const [currentPw, setCurrentPw] = useState("");
@@ -105,6 +119,23 @@ export default function SettingsPage({ onClose }) {
     setSoundsEnabled(newValue);
   }
 
+  function handleSoundTypeChange(type) {
+    setSoundTypeLocal(type);
+    setNotificationSoundType(type);
+  }
+
+  function handleVolumeChange(newVolume) {
+    const clamped = Math.max(0, Math.min(100, newVolume));
+    setSoundVolumeLocal(clamped);
+    setNotificationVolume(clamped);
+  }
+
+  function handleAutoMuteToggle() {
+    const newValue = !autoMute;
+    setAutoMuteLocal(newValue);
+    setAutoMute(newValue);
+  }
+
   function playTestSound(type) {
     if (type === 'notification') {
       playNotificationSound('like');
@@ -112,6 +143,13 @@ export default function SettingsPage({ onClose }) {
       playMessageSound();
     }
   }
+
+  const SOUND_TYPES = [
+    { id: 'retro-beep', name: 'Retro Beep', emoji: '📡' },
+    { id: 'coin-ding', name: 'Coin Ding', emoji: '🪙' },
+    { id: 'chime', name: 'Chime', emoji: '🔔' },
+    { id: 'sci-fi-blip', name: 'Sci-Fi Blip', emoji: '🛸' },
+  ];
 
   const SECTIONS = [
     { id: "account", label: "Account" },
@@ -334,8 +372,10 @@ export default function SettingsPage({ onClose }) {
                   🔊 NOTIFICATION SOUNDS
                 </label>
                 <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', marginBottom: '12px', fontFamily: 'var(--font-body)' }}>
-                  Beeps for likes, comments, and messages
+                  Customize notification beeps and alerts
                 </p>
+                
+                {/* Master Enable/Disable */}
                 <button
                   onClick={handleSoundsToggle}
                   style={{
@@ -350,46 +390,142 @@ export default function SettingsPage({ onClose }) {
                     fontFamily: 'var(--font-head)',
                     transition: 'all 0.3s',
                     width: '100%',
-                    marginBottom: '8px',
+                    marginBottom: '16px',
                   }}
                 >
                   {soundsEnabled ? '✓ Sounds Enabled' : 'Enable Sounds'}
                 </button>
+
                 {soundsEnabled && (
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <button
-                      onClick={() => playTestSound('notification')}
-                      style={{
-                        flex: 1,
-                        padding: '8px 12px',
-                        background: 'rgba(191,95,255,0.1)',
-                        border: '1px solid rgba(191,95,255,0.3)',
-                        borderRadius: '8px',
-                        color: '#fff',
-                        fontSize: '12px',
-                        cursor: 'pointer',
-                        fontFamily: 'var(--font-head)',
-                      }}
-                    >
-                      Test 🔔
-                    </button>
-                    <button
-                      onClick={() => playTestSound('message')}
-                      style={{
-                        flex: 1,
-                        padding: '8px 12px',
-                        background: 'rgba(0,255,136,0.1)',
-                        border: '1px solid rgba(0,255,136,0.3)',
-                        borderRadius: '8px',
-                        color: '#fff',
-                        fontSize: '12px',
-                        cursor: 'pointer',
-                        fontFamily: 'var(--font-head)',
-                      }}
-                    >
-                      Test 💬
-                    </button>
-                  </div>
+                  <>
+                    {/* Sound Type Selection */}
+                    <div style={{ marginBottom: '16px' }}>
+                      <label style={{ fontSize: '11px', fontWeight: 600, color: 'rgba(255,255,255,0.6)', marginBottom: '8px', display: 'block', textTransform: 'uppercase' }}>
+                        Sound Type
+                      </label>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                        {SOUND_TYPES.map(st => (
+                          <button
+                            key={st.id}
+                            onClick={() => handleSoundTypeChange(st.id)}
+                            style={{
+                              background: soundType === st.id ? 'rgba(0,245,255,0.15)' : 'rgba(255,255,255,0.06)',
+                              border: soundType === st.id ? '2px solid var(--cyan)' : '1px solid rgba(255,255,255,0.12)',
+                              borderRadius: '8px',
+                              padding: '10px 12px',
+                              color: '#fff',
+                              fontWeight: 500,
+                              fontSize: '11px',
+                              cursor: 'pointer',
+                              fontFamily: 'var(--font-head)',
+                              transition: 'all 0.2s',
+                              textAlign: 'center',
+                            }}
+                            onMouseEnter={e => {
+                              if (soundType !== st.id) e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
+                            }}
+                            onMouseLeave={e => {
+                              if (soundType !== st.id) e.currentTarget.style.background = 'rgba(255,255,255,0.06)';
+                            }}
+                          >
+                            {st.emoji}<br/>{st.name}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Volume Slider */}
+                    <div style={{ marginBottom: '16px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                        <label style={{ fontSize: '11px', fontWeight: 600, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase' }}>
+                          Volume
+                        </label>
+                        <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--cyan)' }}>{soundVolume}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={soundVolume}
+                        onChange={(e) => handleVolumeChange(parseInt(e.target.value, 10))}
+                        style={{
+                          width: '100%',
+                          height: '6px',
+                          borderRadius: '3px',
+                          background: 'rgba(255,255,255,0.1)',
+                          outline: 'none',
+                          cursor: 'pointer',
+                          accentColor: 'var(--cyan)',
+                        }}
+                      />
+                    </div>
+
+                    {/* Auto-Mute Toggle */}
+                    <div style={{ marginBottom: '16px' }}>
+                      <label style={{ fontSize: '11px', fontWeight: 600, color: 'rgba(255,255,255,0.6)', marginBottom: '8px', display: 'block', textTransform: 'uppercase' }}>
+                        Auto-Mute
+                      </label>
+                      <button
+                        onClick={handleAutoMuteToggle}
+                        style={{
+                          background: autoMute ? 'rgba(191,95,255,0.1)' : 'rgba(255,255,255,0.06)',
+                          border: autoMute ? '1px solid rgba(191,95,255,0.3)' : '1px solid rgba(255,255,255,0.12)',
+                          borderRadius: '8px',
+                          padding: '10px 12px',
+                          color: '#fff',
+                          fontWeight: 500,
+                          fontSize: '12px',
+                          cursor: 'pointer',
+                          fontFamily: 'var(--font-head)',
+                          transition: 'all 0.2s',
+                          width: '100%',
+                        }}
+                      >
+                        {autoMute ? '✓ Mute when tab focused' : 'Mute when tab focused'}
+                      </button>
+                      <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', marginTop: '6px', fontFamily: 'var(--font-body)' }}>
+                        {autoMute ? 'Sounds disabled while this tab is active' : 'Sounds play even if tab is active'}
+                      </p>
+                    </div>
+
+                    {/* Test Buttons */}
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button
+                        onClick={() => playTestSound('notification')}
+                        style={{
+                          flex: 1,
+                          padding: '8px 12px',
+                          background: 'rgba(191,95,255,0.1)',
+                          border: '1px solid rgba(191,95,255,0.3)',
+                          borderRadius: '8px',
+                          color: '#fff',
+                          fontSize: '12px',
+                          cursor: 'pointer',
+                          fontFamily: 'var(--font-head)',
+                          fontWeight: 500,
+                        }}
+                      >
+                        Test 🔔
+                      </button>
+                      <button
+                        onClick={() => playTestSound('message')}
+                        style={{
+                          flex: 1,
+                          padding: '8px 12px',
+                          background: 'rgba(0,255,136,0.1)',
+                          border: '1px solid rgba(0,255,136,0.3)',
+                          borderRadius: '8px',
+                          color: '#fff',
+                          fontSize: '12px',
+                          cursor: 'pointer',
+                          fontFamily: 'var(--font-head)',
+                          fontWeight: 500,
+                        }}
+                      >
+                        Test 💬
+                      </button>
+                    </div>
+                  </>
                 )}
               </div>
             </div>

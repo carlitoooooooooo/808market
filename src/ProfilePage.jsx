@@ -1086,6 +1086,27 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
                       })}
                     </div>
                   </div>
+                  {/* Admin/Team Only */}
+                  {(currentUser.role === 'admin' || TEAM_MEMBERS.includes(currentUser.username)) && (
+                    <div>
+                      <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px' }}>
+                        👑 ADMIN/TEAM ONLY
+                      </div>
+                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                        {[
+                          { value: 'crown', label: '👑 Crown', style: { background: 'linear-gradient(135deg, #ffd700, #ffed4e)', color: '#000' } },
+                          { value: 'neon', label: '⚡ Neon', style: { background: 'linear-gradient(135deg, #00ff88, #00f5ff, #bf5fff)', color: '#000' } },
+                          { value: 'hologram', label: '✨ Hologram', style: { background: 'linear-gradient(135deg, #ff3366, #00f5ff, #bf5fff, #00ff88)', color: '#fff' } },
+                        ].map(g => (
+                          <button key={g.value} type="button"
+                            onClick={() => setProfileExtra(prev => ({ ...prev, name_glow: g.value }))}
+                            style={{ ...g.style, border: `2px solid ${profileExtra.name_glow === g.value ? '#fff' : 'transparent'}`, borderRadius: '20px', padding: '4px 12px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-head)' }}>
+                            {g.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

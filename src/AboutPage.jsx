@@ -2,6 +2,32 @@ import { useState } from "react";
 
 const CHANGELOG = [
   {
+    version: "1.7.0", date: "Mar 25, 2026", items: [
+      "🎨 Theme packs: Cyberpunk, Synthwave, Ocean, Forest, Sunset",
+      "🎉 Party Mode: rainbow chaos UI toggle",
+      "🔊 Notification & message sounds with selection menu (4 types)",
+      "🔊 Sound volume slider (0-100%) and auto-mute when focused",
+      "📳 Haptic feedback on swipes (light/medium/strong)",
+      "✨ Cursor animation toggle",
+      "🏆 Achievement popups: unlock milestones (50 cops, 100 followers, name glow, etc.)",
+      "🛠️ Creator Tools tab: upload count, revenue, royalty split (15/85)",
+      "🔒 Privacy tab: hide activity status toggle",
+      "ℹ️ Help tab: version, credits, changelog, bug report form",
+      "🐛 Bug reporting: submit issues directly to admin inbox",
+      "🎵 Spotify profile link integration",
+      "👑 Team badge for team members (@avalions)",
+      "💬 Profile pictures in messages with clickable avatars",
+      "📋 Cover image upload (unlocked at 50 cops or team)",
+      "✨ Name glow access for team members",
+      "👁️ Leaderboard crowns for #1 beat & producer",
+      "💬 Chat width constraints (600px max on desktop)",
+      "🔄 Browse grid 4 columns on large desktop (1400px+)",
+      "⚙️ Settings UI improvements: spacing, mobile optimization",
+      "🎯 Better edit profile modal scrolling on mobile",
+      "📝 Bio shows nothing when empty (no placeholder text)",
+    ]
+  },
+  {
     version: "1.6.0", date: "Mar 25, 2026", items: [
       "Target artists feature: select who beats are made for (Drake, Future, etc.)",
       "Artists discovery tab in Discover",

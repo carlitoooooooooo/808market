@@ -275,23 +275,28 @@ export default function SettingsPage({ onClose }) {
       const threadId = [currentUser.username, "mastercard"].sort().join("__");
       const bugReport = `🐛 BUG REPORT\n\nTitle: ${bugTitle}\n\nDescription: ${bugDescription}`;
       
-      await fetch(`${URL}/rest/v1/messages`, {
+      const res = await fetch(`${URL}/rest/v1/direct_messages`, {
         method: 'POST',
         headers: { apikey: ANON, Authorization: `Bearer ${ANON}`, 'Content-Type': 'application/json', Prefer: 'return=representation' },
         body: JSON.stringify({
           thread_id: threadId,
-          sender: currentUser.username,
-          recipient: "mastercard",
+          sender_username: currentUser.username,
+          recipient_username: "mastercard",
           body: bugReport,
           read: false,
-          is_admin_message: true,
         }),
       });
+      
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+      }
+      
       setBugMsg({ type: "success", text: "Bug report sent! 🙏" });
       setBugTitle("");
       setBugDescription("");
       setTimeout(() => setBugMsg(null), 3000);
     } catch (err) {
+      console.error("Bug report error:", err);
       setBugMsg({ type: "error", text: "Failed to send bug report. Try again." });
     } finally {
       setBugLoading(false);

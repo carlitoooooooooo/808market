@@ -987,7 +987,7 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
             {/* Cover image button - unlock at 50 cops */}
             {(() => {
               const totalCopsReceived = myUploads.reduce((sum, track) => sum + (track.cops || 0), 0);
-              const locked = totalCopsReceived < 50 && currentUser.role !== 'admin';
+              const locked = totalCopsReceived < 50 && currentUser.role !== 'admin' && !TEAM_MEMBERS.includes(currentUser.username);
               return (
                 <button
                   onClick={() => !locked && coverInputRef.current?.click()}
@@ -1017,7 +1017,7 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
               <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>
                 Name Glow
               </label>
-              {myUploads.length < 5 && currentUser.role !== 'admin' ? (
+              {myUploads.length < 5 && currentUser.role !== 'admin' && !TEAM_MEMBERS.includes(currentUser.username) ? (
                 <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '10px 14px', fontSize: '13px', color: 'rgba(255,255,255,0.3)', fontFamily: 'var(--font-body)' }}>
                   🔒 Upload {5 - myUploads.length} more beat{5 - myUploads.length !== 1 ? 's' : ''} to unlock name glow
                 </div>

@@ -154,7 +154,7 @@ function ChatThread({ otherUsername, onBack, currentUser }) {
 }
 
 // ── Inbox ─────────────────────────────────────────────────────────
-export default function MessagesPage({ initialThread, onUnreadChange }) {
+export default function MessagesPage({ initialThread, onUnreadChange, onViewUser }) {
   const { currentUser } = useAuth();
   const [threads, setThreads] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -191,7 +191,20 @@ export default function MessagesPage({ initialThread, onUnreadChange }) {
       const sorted = Object.values(threadMap).sort((a, b) =>
         new Date(b.lastMsg.created_at) - new Date(a.lastMsg.created_at)
       );
-      setThreads(sorted);
+      
+      // Load avatar data for each thread
+      const enriched = await Promise.all(sorted.map(async (t) => {
+        try {
+          const profileRes = await fetch(`${URL}/rest/v1/profiles?username=eq.${encodeURIComponent(t.other)}&select=avatar_url,avatar_color`, { headers: { apikey: ANON, Authorization: `Bearer ${ANON}` } });
+          const profiles = await profileRes.json();
+          if (Array.isArray(profiles) && profiles[0]) {
+            return { ...t, avatarUrl: profiles[0].avatar_url, avatarColor: profiles[0].avatar_color };
+          }
+        } catch {}
+        return t;
+      }));
+      
+      setThreads(enriched);
 
       const totalUnread = sorted.reduce((s, t) => s + t.unread, 0);
       onUnreadChange?.(totalUnread);
@@ -290,8 +303,11 @@ export default function MessagesPage({ initialThread, onUnreadChange }) {
           onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.04)'}
           onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
         >
-          <div style={{ width: 46, height: 46, borderRadius: '50%', background: 'var(--purple)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '18px', color: '#000', flexShrink: 0 }}>
-            {t.other[0].toUpperCase()}
+          <div 
+            style={{ width: 46, height: 46, borderRadius: '50%', background: t.avatarColor || 'var(--purple)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '18px', color: '#000', flexShrink: 0, overflow: 'hidden', cursor: 'pointer' }}
+            onClick={(e) => { e.stopPropagation(); onViewUser && onViewUser(t.other); }}
+          >
+            {t.avatarUrl ? <img src={t.avatarUrl} alt={t.other} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : t.other[0].toUpperCase()}
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3px' }}>

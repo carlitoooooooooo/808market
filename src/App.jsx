@@ -813,6 +813,7 @@ export default function App() {
               key={messageThread}
               initialThread={messageThread}
               onUnreadChange={setUnreadMessages}
+              onViewUser={(username) => setViewingUser(username)}
             />
           </div>
           {/* Spacer for bottom nav on mobile */}

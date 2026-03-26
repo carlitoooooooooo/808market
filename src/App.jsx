@@ -369,14 +369,20 @@ export default function App() {
   const triggerHaptic = useCallback((pattern = "light") => {
     try {
       const hapticEnabled = JSON.parse(localStorage.getItem('hapticEnabled') || 'true');
-      if (!hapticEnabled || !navigator.vibrate) return;
+      if (!hapticEnabled) return;
       
       const patterns = {
         light: 10,
         medium: [30],
         strong: [50, 50, 50],
       };
-      navigator.vibrate(patterns[pattern] || patterns.light);
+      const vibrationPattern = patterns[pattern] || patterns.light;
+      
+      if (navigator.vibrate) {
+        navigator.vibrate(vibrationPattern);
+      } else if (navigator.webkitVibrate) {
+        navigator.webkitVibrate(vibrationPattern);
+      }
     } catch (e) {
       // Haptic not supported or disabled
     }

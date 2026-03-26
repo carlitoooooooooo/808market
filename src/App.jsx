@@ -656,7 +656,7 @@ export default function App() {
                       <div className="browse-card__cover" style={{ backgroundImage: `url(${track.coverUrl})` }} />
                       <div className="browse-card__info">
                         <div className="browse-card__title">{track.title}</div>
-                        <div className={`browse-card__artist${producerProfiles[track.uploadedBy]?.name_glow && producerProfiles[track.uploadedBy].name_glow !== 'none' ? ` name-glow-${producerProfiles[track.uploadedBy].name_glow}` : ''}`}>@{track.artist}</div>
+                        <div className={`browse-card__artist${producerProfiles[track.uploadedBy]?.name_glow && producerProfiles[track.uploadedBy].name_glow !== 'none' && (producerProfiles[track.uploadedBy]?.role === 'admin' || ['avalions'].includes(track.uploadedBy)) ? ` name-glow-${producerProfiles[track.uploadedBy].name_glow}` : ''}`}>@{track.artist}</div>
                         <div className="browse-card__meta">
                           <span className="genre-tag" style={{ fontSize: '9px', padding: '1px 6px' }}>{track.genre}</span>
                           <span style={{ fontSize: '11px', fontWeight: 700, fontFamily: 'var(--font-head)', color: isFree ? 'var(--cyan)' : 'var(--green)' }}>{isFree ? 'FREE' : `$${track.price}`}</span>

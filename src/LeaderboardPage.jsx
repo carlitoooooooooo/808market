@@ -14,6 +14,8 @@ export default function LeaderboardPage({ tracks, onVote, userVotes, onViewUser 
   const [selectedTrack, setSelectedTrack] = useState(null);
   const [subTab, setSubTab] = useState("beats");
   const [timeRange, setTimeRange] = useState("all"); // "all", "week", "day"
+  const [beatsLimit, setBeatsLimit] = useState(50);
+  const [producersLimit, setProducersLimit] = useState(50);
 
   // Producers state
   const [producers, setProducers] = useState([]);
@@ -134,7 +136,7 @@ export default function LeaderboardPage({ tracks, onVote, userVotes, onViewUser 
       <div className={`leaderboard-mobile-beats ${subTab !== "beats" ? "leaderboard-mobile-hidden" : ""}`}>
         <div className="leaderboard-col-header">🔥 Top Beats — Fan Favorites ❤️</div>
         <div className="leaderboard-list">
-          {sorted.map((track, idx) => {
+          {sorted.slice(0, beatsLimit).map((track, idx) => {
             const rank = idx + 1;
             const rankStyle = RANK_STYLE[rank] || {};
             const cops = track.cops || 0;
@@ -176,6 +178,29 @@ export default function LeaderboardPage({ tracks, onVote, userVotes, onViewUser 
             );
           })}
         </div>
+        {beatsLimit < sorted.length && (
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '20px' }}>
+            <button 
+              onClick={() => setBeatsLimit(prev => prev + 50)}
+              style={{
+                padding: '10px 20px',
+                background: 'linear-gradient(135deg, #00f5ff, #bf5fff)',
+                color: '#000',
+                border: 'none',
+                borderRadius: '20px',
+                fontWeight: 700,
+                fontSize: '14px',
+                cursor: 'pointer',
+                fontFamily: 'var(--font-head)',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
+              onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+            >
+              📦 Show More ({beatsLimit} / {sorted.length})
+            </button>
+          </div>
+        )}
       </div>
 
       {/* ── TOP PRODUCERS ── */}
@@ -190,7 +215,7 @@ export default function LeaderboardPage({ tracks, onVote, userVotes, onViewUser 
             <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-dim)', fontFamily: "'Space Grotesk', sans-serif", fontSize: '14px' }}>
               No producers yet
             </div>
-          ) : producers.map((p, idx) => {
+          ) : producers.slice(0, producersLimit).map((p, idx) => {
             const rank = idx + 1;
             const rankStyle = RANK_STYLE[rank] || {};
             const initial = (p.username || '?')[0].toUpperCase();
@@ -262,6 +287,29 @@ export default function LeaderboardPage({ tracks, onVote, userVotes, onViewUser 
             );
           })}
         </div>
+        {producersLimit < producers.length && (
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '20px' }}>
+            <button 
+              onClick={() => setProducersLimit(prev => prev + 50)}
+              style={{
+                padding: '10px 20px',
+                background: 'linear-gradient(135deg, #00f5ff, #bf5fff)',
+                color: '#000',
+                border: 'none',
+                borderRadius: '20px',
+                fontWeight: 700,
+                fontSize: '14px',
+                cursor: 'pointer',
+                fontFamily: 'var(--font-head)',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
+              onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+            >
+              👥 Show More ({producersLimit} / {producers.length})
+            </button>
+          </div>
+        )}
       </div>
 
       </div> {/* end leaderboard-desktop-grid */}

@@ -380,16 +380,21 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
     setUserData("bio", editBio);
     setUserData("avatarColor", editColor);
     // Save extra fields to DB
+    console.log('Saving profileExtra:', profileExtra);
     fetch(`${SUPABASE_URL}/rest/v1/profiles?username=eq.${encodeURIComponent(currentUser.username)}`, {
       method: 'PATCH',
       headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}`, 'Content-Type': 'application/json' },
       body: JSON.stringify(profileExtra),
     }).then(r => {
+      console.log('Response status:', r.status);
       if (!r.ok) {
-        console.error('Failed to save profile:', r.status, r.statusText);
-        alert('Failed to save profile. Check console for details.');
+        return r.text().then(text => {
+          console.error('Failed to save profile:', r.status, r.statusText, text);
+          alert('Failed to save profile. Status: ' + r.status);
+        });
       } else {
         console.log('Profile saved successfully');
+        alert('Profile saved!');
       }
     }).catch(err => {
       console.error('Profile save error:', err);

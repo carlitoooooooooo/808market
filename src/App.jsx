@@ -501,19 +501,6 @@ export default function App() {
       <main className="app-main">
         {activeTab === "discover" && (
           <div className="discover-view">
-            {/* Animated background elements */}
-            <div className="discover-bg-animation">
-              {/* Floating music notes and spaceships */}
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={`note-${i}`} className={`floating-note floating-note--${i % 3}`} style={{ '--delay': `${i * 1.5}s`, '--duration': `${25 + i * 3}s`, '--left': `${(i * 15) % 100}%` }}>
-                  {['🎵', '🎶', '🚀'][i % 3]}
-                </div>
-              ))}
-              {/* Shooting stars */}
-              {Array.from({ length: 4 }).map((_, i) => (
-                <div key={`star-${i}`} className="shooting-star" style={{ '--delay': `${i * 4}s`, '--top': `${(i * 25) % 80}%` }} />
-              ))}
-            </div>
             {/* For You / Following / Browse toggle */}
             {currentUser && (
               <div className="feed-toggle">

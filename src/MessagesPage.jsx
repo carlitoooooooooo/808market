@@ -104,7 +104,8 @@ function ChatThread({ otherUsername, onBack, currentUser }) {
           <div style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: '13px', paddingTop: '40px' }}>No messages yet. Say something! 👋</div>
         ) : messages.map(msg => {
           const isMe = msg.sender === currentUser.username;
-          const isAdmin = msg.is_admin_message || msg.recipient === 'mastercard';
+          const isBugReport = msg.is_admin_message || (msg.body && msg.body.startsWith('🐛 BUG REPORT'));
+          const isAdmin = isBugReport && msg.recipient === 'mastercard';
           
           return (
             <div key={msg.id} style={{ display: 'flex', justifyContent: isMe ? 'flex-end' : 'flex-start' }}>

@@ -117,6 +117,9 @@ function BeatInfoFields({ title, setTitle, artist, setArtist, genre, setGenre, b
       <div className="sc-upload__field">
         <label className="sc-upload__label">BEAT TITLE</label>
         <input className="sc-upload__input" type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="Beat name..." disabled={disabled} />
+        <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', marginTop: '6px', fontFamily: "var(--font-body)" }}>
+          💡 Please don't include key, BPM, or your producer name in the title — use the appropriate fields instead
+        </div>
       </div>
       <div className="sc-upload__field">
         <label className="sc-upload__label">PRODUCER NAME</label>

@@ -331,13 +331,36 @@ export default function App() {
       const sessionId = params.get('session_id');
       const trackId = params.get('track_id');
       history.replaceState(null, '', '/');
+
+      // Try API first, fall back to direct Supabase lookup
+      const fallback = () => {
+        if (!trackId) return;
+        fetch(`https://bkapxykeryzxbqpgjgab.supabase.co/rest/v1/tracks?id=eq.${trackId}&select=id,title,audio_url,artist,license_type`, {
+          headers: {
+            apikey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA',
+            Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA',
+          }
+        })
+        .then(r => r.json())
+        .then(data => {
+          const track = Array.isArray(data) ? data[0] : data;
+          if (track?.audio_url) {
+            setPurchaseModal({ success: true, trackTitle: track.title, artist: track.artist, audioUrl: track.audio_url, licenseType: track.license_type });
+          }
+        })
+        .catch(() => {});
+      };
+
       if (sessionId) {
         fetch(`/api/get-purchase?session_id=${sessionId}&track_id=${trackId}`)
           .then(r => r.json())
           .then(data => {
             if (data.success) setPurchaseModal(data);
+            else fallback();
           })
-          .catch(() => {});
+          .catch(() => fallback());
+      } else if (trackId) {
+        fallback();
       }
     }
   }, []);

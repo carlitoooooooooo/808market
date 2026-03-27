@@ -6,9 +6,10 @@ const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
 const CRON_SECRET = process.env.CRON_SECRET; // Set a random secret to protect this endpoint
 
 export default async function handler(req, res) {
-  // Protect this endpoint — only callable by cron or with secret
+  // Protect this endpoint — allow Vercel cron (checks Authorization header) or manual call with CRON_SECRET
   const authHeader = req.headers['authorization'];
-  if (CRON_SECRET && authHeader !== `Bearer ${CRON_SECRET}`) {
+  const isVercelCron = req.headers['x-vercel-cron'] === '1';
+  if (!isVercelCron && CRON_SECRET && authHeader !== `Bearer ${CRON_SECRET}`) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 

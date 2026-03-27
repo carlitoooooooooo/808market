@@ -23,7 +23,7 @@ export default function SnippetSelector({ file, url, initialStart, onConfirm, on
 
     audio.addEventListener('loadedmetadata', () => {
       setDuration(audio.duration);
-      setSnippetStart(0);
+      setSnippetStart(Math.min(initialStart || 0, Math.max(0, audio.duration - SNIPPET_DURATION)));
       setLoading(false);
     });
 
@@ -32,22 +32,25 @@ export default function SnippetSelector({ file, url, initialStart, onConfirm, on
       cancelAnimationFrame(rafRef.current);
     });
 
-    // Generate simple waveform from samples
+    // Generate waveform
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
     const bufferPromise = file ? file.arrayBuffer() : fetch(objectUrl).then(r => r.arrayBuffer());
-    bufferPromise.then(buf => ctx.decodeAudioData(buf)).then(decoded => {
-      const data = decoded.getChannelData(0);
-      const bars = 60;
-      const step = Math.floor(data.length / bars);
-      const samples = Array.from({ length: bars }, (_, i) => {
-        let max = 0;
-        for (let j = 0; j < step; j++) max = Math.max(max, Math.abs(data[i * step + j] || 0));
-        return max;
+    bufferPromise
+      .then(buf => ctx.decodeAudioData(buf))
+      .then(decoded => {
+        const data = decoded.getChannelData(0);
+        const bars = 60;
+        const step = Math.floor(data.length / bars);
+        const samples = Array.from({ length: bars }, (_, i) => {
+          let max = 0;
+          for (let j = 0; j < step; j++) max = Math.max(max, Math.abs(data[i * step + j] || 0));
+          return max;
+        });
+        setWaveform(samples);
+      })
+      .catch(() => {
+        setWaveform(Array.from({ length: 60 }, () => Math.random() * 0.6 + 0.2));
       });
-      setWaveform(samples);
-    }).catch(() => {
-      setWaveform(Array.from({ length: 60 }, () => Math.random() * 0.6 + 0.2));
-    });
 
     return () => {
       audio.pause();
@@ -58,9 +61,9 @@ export default function SnippetSelector({ file, url, initialStart, onConfirm, on
 
   const tick = useCallback(() => {
     if (!audioRef.current) return;
-    setPlayhead(audioRef.current.currentTime);
-    // Auto-stop at end of snippet
-    if (audioRef.current.currentTime >= snippetStart + SNIPPET_DURATION) {
+    const t = audioRef.current.currentTime;
+    setPlayhead(t);
+    if (t >= snippetStart + SNIPPET_DURATION) {
       audioRef.current.pause();
       setPlaying(false);
       return;
@@ -83,24 +86,30 @@ export default function SnippetSelector({ file, url, initialStart, onConfirm, on
     }
   };
 
-  // Restart preview when snippet changes
+  // Restart preview from new start when snippet changes while playing
   useEffect(() => {
     if (playing && audioRef.current) {
       audioRef.current.currentTime = snippetStart;
     }
   }, [snippetStart]);
 
-  const getSnippetPct = () => (snippetStart / Math.max(duration - SNIPPET_DURATION, 1));
-  const snippetWidthPct = duration > 0 ? (SNIPPET_DURATION / duration) * 100 : 20;
+  // All positions as % of full duration — consistent coordinate system
+  const toBarPct = (seconds) => duration > 0 ? (seconds / duration) * 100 : 0;
+  const snippetLeftPct = toBarPct(snippetStart);
+  const snippetWidthPct = toBarPct(SNIPPET_DURATION);
+  const snippetRightPct = snippetLeftPct + snippetWidthPct;
+  const playheadPct = toBarPct(playhead);
 
   const handleBarInteraction = (e) => {
     if (!barRef.current || duration === 0) return;
     const rect = barRef.current.getBoundingClientRect();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    const rawStart = pct * duration;
     const maxStart = Math.max(0, duration - SNIPPET_DURATION);
-    const newStart = pct * duration;
-    setSnippetStart(Math.min(newStart, maxStart));
+    // Center snippet on click position, clamped to valid range
+    const centeredStart = rawStart - SNIPPET_DURATION / 2;
+    setSnippetStart(Math.max(0, Math.min(centeredStart, maxStart)));
   };
 
   const fmt = (s) => {
@@ -117,21 +126,25 @@ export default function SnippetSelector({ file, url, initialStart, onConfirm, on
     );
   }
 
-  const snippetEndPct = Math.min(100, (getSnippetPct() * 100) + snippetWidthPct);
-
   return (
     <div style={{ padding: '20px' }}>
       <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: '16px', marginBottom: '6px' }}>
         Select your 15s preview
       </div>
       <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', marginBottom: '20px', fontFamily: "'Inter', sans-serif" }}>
-        Drag the highlighted section to pick which part plays
+        Drag to pick which part plays as the preview
       </div>
 
       {/* Waveform + scrubber */}
       <div
         ref={barRef}
-        style={{ position: 'relative', height: '72px', background: 'rgba(255,255,255,0.04)', borderRadius: '10px', cursor: 'pointer', overflow: 'hidden', marginBottom: '12px', userSelect: 'none', touchAction: 'none' }}
+        style={{
+          position: 'relative', height: '72px',
+          background: 'rgba(255,255,255,0.04)',
+          borderRadius: '10px', cursor: 'pointer',
+          overflow: 'hidden', marginBottom: '12px',
+          userSelect: 'none', touchAction: 'none'
+        }}
         onMouseDown={(e) => { dragging.current = true; handleBarInteraction(e); }}
         onMouseMove={(e) => { if (dragging.current) handleBarInteraction(e); }}
         onMouseUp={() => { dragging.current = false; }}
@@ -143,14 +156,14 @@ export default function SnippetSelector({ file, url, initialStart, onConfirm, on
         {/* Waveform bars */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '2px', height: '100%', padding: '8px 6px' }}>
           {waveform.map((amp, i) => {
-            const pct = (i / waveform.length) * 100;
-            const inSnippet = pct >= getSnippetPct() * 100 && pct < snippetEndPct;
+            const barPct = (i / waveform.length) * 100;
+            const inSnippet = barPct >= snippetLeftPct && barPct < snippetRightPct;
             return (
               <div key={i} style={{
                 flex: 1, borderRadius: '2px',
                 height: `${Math.max(8, amp * 100)}%`,
                 background: inSnippet ? '#00f5ff' : 'rgba(255,255,255,0.15)',
-                transition: 'background 0.1s',
+                transition: 'background 0.08s',
               }} />
             );
           })}
@@ -159,9 +172,9 @@ export default function SnippetSelector({ file, url, initialStart, onConfirm, on
         {/* Snippet window overlay */}
         <div style={{
           position: 'absolute', top: 0, bottom: 0,
-          left: `${getSnippetPct() * 100}%`,
+          left: `${snippetLeftPct}%`,
           width: `${snippetWidthPct}%`,
-          background: 'rgba(0,245,255,0.1)',
+          background: 'rgba(0,245,255,0.08)',
           border: '2px solid #00f5ff',
           borderRadius: '4px',
           pointerEvents: 'none',
@@ -171,7 +184,7 @@ export default function SnippetSelector({ file, url, initialStart, onConfirm, on
         {duration > 0 && (
           <div style={{
             position: 'absolute', top: 0, bottom: 0,
-            left: `${(playhead / duration) * 100}%`,
+            left: `${playheadPct}%`,
             width: '2px', background: '#fff',
             pointerEvents: 'none',
           }} />
@@ -182,7 +195,7 @@ export default function SnippetSelector({ file, url, initialStart, onConfirm, on
       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: "'Inter', sans-serif", marginBottom: '16px' }}>
         <span>{fmt(0)}</span>
         <span style={{ color: '#00f5ff', fontWeight: 600 }}>
-          Preview: {fmt(snippetStart)} — {fmt(Math.min(snippetStart + SNIPPET_DURATION, duration))}
+          {fmt(snippetStart)} — {fmt(Math.min(snippetStart + SNIPPET_DURATION, duration))}
         </span>
         <span>{fmt(duration)}</span>
       </div>
@@ -203,7 +216,10 @@ export default function SnippetSelector({ file, url, initialStart, onConfirm, on
 
       {/* Actions */}
       <div style={{ display: 'flex', gap: '10px' }}>
-        <button onClick={onCancel} style={{ flex: 1, padding: '12px', background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '10px', color: '#fff', fontFamily: "'Inter', sans-serif", cursor: 'pointer' }}>
+        <button
+          onClick={onCancel}
+          style={{ flex: 1, padding: '12px', background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '10px', color: '#fff', fontFamily: "'Inter', sans-serif", cursor: 'pointer' }}
+        >
           Back
         </button>
         <button

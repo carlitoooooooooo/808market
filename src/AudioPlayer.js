@@ -1,5 +1,5 @@
 /**
- * AudioPlayer — wraps HTMLAudioElement for 15-second snippet playback.
+ * AudioPlayer — wraps HTMLAudioElement for 30-second snippet playback.
  * Uses HTMLAudioElement (widely supported) instead of Web Audio API
  * to avoid cross-origin fetch restrictions on audio files.
  */
@@ -7,7 +7,7 @@ export default class AudioPlayer {
   constructor(audioUrl, snippetStart = 0) {
     this.audioUrl = audioUrl;
     this.snippetStart = snippetStart;
-    this.snippetDuration = 15;
+    this.snippetDuration = 30;
     this._timeUpdateCb = null;
     this._endedCb = null;
     this._audio = null;

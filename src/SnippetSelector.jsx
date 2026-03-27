@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 
-const SNIPPET_DURATION = 15;
+const SNIPPET_DURATION = 30;
 
 export default function SnippetSelector({ file, url, initialStart, onConfirm, onCancel }) {
   const [duration, setDuration] = useState(0);

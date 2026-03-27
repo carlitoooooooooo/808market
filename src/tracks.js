@@ -61,7 +61,7 @@ const tracks = [
     bpm: 112,
     coverUrl: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=600&q=80",
     audioUrl: AUDIO_URLS[3],
-    snippetStart: 15,
+    snippetStart: 0,
     hards: 934,
     trash: 44,
     uploadedBy: "yxng_eko",

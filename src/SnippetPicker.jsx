@@ -2,7 +2,7 @@ import React, { useState, useRef, useCallback } from "react";
 
 const BAR_COUNT = 40;
 const TOTAL_DURATION = 120; // seconds (fake total track duration)
-const SNIPPET_DURATION = 15; // seconds
+const SNIPPET_DURATION = 30; // seconds
 
 // Pre-generate waveform heights
 const BAR_HEIGHTS = Array.from({ length: BAR_COUNT }, (_, i) => {
@@ -75,7 +75,7 @@ export default function SnippetPicker({ onClose, onConfirm }) {
 
         <div className="snippet-picker__header">
           <div className="snippet-picker__title">PICK YOUR SNIPPET</div>
-          <div className="snippet-picker__sub">drag to select 15-second preview</div>
+          <div className="snippet-picker__sub">drag to select 30-second preview</div>
         </div>
 
         <div className="snippet-picker__waveform-wrap">
@@ -142,7 +142,7 @@ export default function SnippetPicker({ onClose, onConfirm }) {
 
         <div className="snippet-picker__time-display">
           <span className="snippet-time">{formatTime(startSec)}</span>
-          <span className="snippet-duration">— 15 sec —</span>
+          <span className="snippet-duration">- 30 sec -</span>
           <span className="snippet-time">{formatTime(endSec)}</span>
         </div>
 

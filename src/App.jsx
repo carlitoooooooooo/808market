@@ -853,7 +853,7 @@ export default function App() {
               ) : null;
             })()}
 
-            {discoverFeed !== "browse" && tracksLoading ? (
+            {discoverFeed !== "browse" && (tracksLoading ? (
               <div className="empty-queue">
                 <div className="empty-queue__icon">⏳</div>
                 <div className="empty-queue__text">Loading beats...</div>
@@ -916,7 +916,7 @@ export default function App() {
                   />
                 ))}
               </div>
-            )}
+            ))}
 
             {discoverFeed !== "browse" && !tracksLoading && !tracksError && filteredQueue.length > 0 && (
               <div className="discover-swipe-hint">

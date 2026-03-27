@@ -323,6 +323,26 @@ export default function App() {
     }
   }, [tracks]);
 
+  // Activity status: update last_seen every 2 minutes while app is open
+  useEffect(() => {
+    if (!currentUser?.username) return;
+    const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
+    const hideActivity = JSON.parse(localStorage.getItem('hideActivityStatus') || 'false');
+    if (hideActivity) return; // don't update if user hides their status
+
+    const ping = () => {
+      fetch(`https://bkapxykeryzxbqpgjgab.supabase.co/rest/v1/profiles?username=eq.${encodeURIComponent(currentUser.username)}`, {
+        method: 'PATCH',
+        headers: { apikey: ANON, Authorization: `Bearer ${ANON}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ last_seen: new Date().toISOString() }),
+      }).catch(() => {});
+    };
+
+    ping(); // ping immediately on load
+    const interval = setInterval(ping, 2 * 60 * 1000); // then every 2 min
+    return () => clearInterval(interval);
+  }, [currentUser?.username]);
+
   // Stripe Connect return handler
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);

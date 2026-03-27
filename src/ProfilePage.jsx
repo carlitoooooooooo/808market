@@ -623,6 +623,9 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
         <div className="profile-info">
           <div className={`profile-username ${profileExtra.name_glow !== 'none' ? `name-glow-${profileExtra.name_glow}` : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             {currentUser.username}
+            {!JSON.parse(localStorage.getItem('hideActivityStatus') || 'false') && (
+              <span title="You appear online" style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#00ff88', boxShadow: '0 0 6px #00ff88', display: 'inline-block', flexShrink: 0 }} />
+            )}
             {currentUser.role?.toLowerCase() === 'admin' && (
               <span style={{
                 background: 'linear-gradient(135deg, #00f5ff, #bf5fff)',

@@ -309,6 +309,14 @@ export default function SettingsPage({ onClose }) {
     const newValue = !hideActivityStatus;
     setHideActivityStatus(newValue);
     localStorage.setItem('hideActivityStatus', JSON.stringify(newValue));
+    // Save to DB
+    if (currentUser?.username) {
+      fetch(`${URL}/rest/v1/profiles?username=eq.${encodeURIComponent(currentUser.username)}`, {
+        method: 'PATCH',
+        headers: { apikey: ANON, Authorization: `Bearer ${ANON}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ hide_activity: newValue }),
+      }).catch(() => {});
+    }
   }
 
   function handleMuteNotificationsToggle() {

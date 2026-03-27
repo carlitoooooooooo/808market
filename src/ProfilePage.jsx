@@ -692,29 +692,26 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
               )}
             </>
           )}
+          {/* Edit button only shown inline — form is a full-screen modal */}
         </div>
+        {!editing && (
+          <div style={{ display: 'flex', gap: '6px' }}>
+            <button className="profile-edit-btn" onClick={() => setEditing(true)} title="Edit profile">✏️</button>
+            <button className="profile-edit-btn profile-settings-btn" onClick={onOpenSettings} title="Settings">⚙️</button>
+            <button className="profile-edit-btn" title="Share profile" onClick={async () => {
+              const url = `https://808market.app/u/${currentUser.username}`;
+              try {
+                if (navigator.share) {
+                  await navigator.share({ title: `${currentUser.username} on 808market`, url });
+                } else {
+                  await navigator.clipboard.writeText(url);
+                  alert('Profile link copied!');
+                }
+              } catch {}
+            }}>📤</button>
+          </div>
+        )}
       </div>
-
-      {/* Action buttons */}
-      {!editing && (
-        <div style={{ display: 'flex', gap: '8px', marginTop: '12px', marginBottom: '16px', flexWrap: 'wrap', alignItems: 'center', width: '100%' }}>
-          <button className="profile-edit-btn" onClick={() => setEditing(true)} style={{ display: 'flex', alignItems: 'center', gap: '6px', width: 'auto', padding: '0 14px', fontSize: '13px', fontFamily: 'var(--font-head)', fontWeight: 600 }}>
-            ✏️ Edit Profile
-          </button>
-          <button className="profile-edit-btn profile-settings-btn" onClick={onOpenSettings} title="Settings">⚙️</button>
-          <button className="profile-edit-btn" title="Share profile" onClick={async () => {
-            const url = `https://808market.app/u/${currentUser.username}`;
-            try {
-              if (navigator.share) {
-                await navigator.share({ title: `${currentUser.username} on 808market`, url });
-              } else {
-                await navigator.clipboard.writeText(url);
-                alert('Profile link copied!');
-              }
-            } catch {}
-          }}>📤</button>
-        </div>
-      )}
 
       {/* Stats */}
       <div className="profile-stats">

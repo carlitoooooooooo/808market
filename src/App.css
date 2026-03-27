@@ -848,10 +848,8 @@ body {
   display: flex;
   align-items: flex-start;
   gap: 14px;
-  margin-bottom: 0;
-}
-.profile-action-row + .profile-stats {
-  margin-top: 16px;
+  margin-bottom: 20px;
+  position: relative;
 }
 .profile-avatar {
   width: 64px;
@@ -1088,13 +1086,13 @@ body {
   justify-content: center;
 }
 .profile-edit-btn:hover { background: var(--bg3); }
-.profile-action-row {
+.profile-header > div:last-child {
   display: flex;
   flex-direction: row;
-  gap: 8px;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
-  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
 .profile-stats {

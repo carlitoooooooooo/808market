@@ -1053,7 +1053,7 @@ body {
   flex-wrap: wrap;
   align-items: center;
   gap: 6px;
-  padding-right: 0;
+  padding-right: 120px; /* clear the buttons on the right */
 }
 /* Prevent role/beta pills from being squeezed or text-broken */
 .profile-username > span {

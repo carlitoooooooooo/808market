@@ -1053,7 +1053,7 @@ body {
   flex-wrap: wrap;
   align-items: center;
   gap: 6px;
-  padding-right: 50px; /* clear the absolute buttons */
+  padding-right: 0;
 }
 /* Prevent role/beta pills from being squeezed or text-broken */
 .profile-username > span {
@@ -1086,13 +1086,12 @@ body {
   justify-content: center;
 }
 .profile-edit-btn:hover { background: var(--bg3); }
-.profile-header > div:last-child {
-  position: absolute;
-  top: 0;
-  right: 0;
+.profile-action-row {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  flex-direction: row;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
 }
 
 .profile-stats {

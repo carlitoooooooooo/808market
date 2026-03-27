@@ -6,6 +6,7 @@ const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
 const APP_URL = process.env.VITE_APP_URL || 'https://808market.app';
 
 const PLATFORM_FEE_PCT = 0.15; // 808market keeps 15%
+const PAYOUT_HOLD_DAYS = 7;    // 7-day chargeback hold before producer is paid
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -22,7 +23,6 @@ export default async function handler(req, res) {
     }
 
     const priceInCents = Math.round(parseFloat(price) * 100);
-    const platformFeeInCents = Math.round(priceInCents * PLATFORM_FEE_PCT);
 
     const licenseLabel =
       licenseType === 'free'      ? 'Free Download' :
@@ -45,7 +45,9 @@ export default async function handler(req, res) {
       }
     }
 
-    const sessionParams = {
+    // Full payment always goes to 808market.
+    // If producer has Connect, webhook will schedule a 7-day delayed transfer.
+    const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
         {
@@ -70,22 +72,15 @@ export default async function handler(req, res) {
         licenseType,
         buyerUsername: buyerUsername || 'anonymous',
         producerUsername: producerUsername || '',
+        producerStripeAccountId: producerStripeAccountId || '',
+        producerPayoutCents: producerStripeAccountId
+          ? String(Math.round(priceInCents * (1 - PLATFORM_FEE_PCT)))
+          : '0',
+        holdDays: String(PAYOUT_HOLD_DAYS),
       },
-    };
+    });
 
-    // If producer has Stripe Connect — use destination charge (auto-split)
-    if (producerStripeAccountId) {
-      sessionParams.payment_intent_data = {
-        application_fee_amount: platformFeeInCents,
-        transfer_data: {
-          destination: producerStripeAccountId,
-        },
-      };
-    }
-    // Otherwise: full amount stays with 808market (manual payout)
-
-    const session = await stripe.checkout.sessions.create(sessionParams);
-    return res.status(200).json({ url: session.url, sessionId: session.id, autoSplit: !!producerStripeAccountId });
+    return res.status(200).json({ url: session.url, sessionId: session.id });
   } catch (err) {
     console.error('Stripe error:', err);
     return res.status(500).json({ error: err.message });

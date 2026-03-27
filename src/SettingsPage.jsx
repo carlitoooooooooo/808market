@@ -753,6 +753,29 @@ export default function SettingsPage({ onClose }) {
                 <div style={{ textAlign: "center", color: "var(--text-dim)", fontSize: "13px", padding: "20px" }}>Loading...</div>
               ) : (
                 <>
+                  {/* Stripe Connect alert banner */}
+                  {!stripeConnected && uploadCount > 0 && (
+                    <div style={{
+                      background: "rgba(255,200,0,0.08)",
+                      border: "1px solid rgba(255,200,0,0.35)",
+                      borderRadius: "12px",
+                      padding: "14px 16px",
+                      display: "flex",
+                      gap: "12px",
+                      alignItems: "flex-start",
+                    }}>
+                      <span style={{ fontSize: "20px", flexShrink: 0 }}>⚠️</span>
+                      <div>
+                        <div style={{ fontFamily: "var(--font-head)", fontSize: "13px", fontWeight: 700, color: "#ffc800", marginBottom: "4px" }}>
+                          You're not set up to receive payouts
+                        </div>
+                        <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.55)", fontFamily: "var(--font-body)", lineHeight: 1.5 }}>
+                          Connect Stripe below so you automatically receive 85% of every sale. Until then, sales go to 808market and are paid out manually.
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="settings-field">
                     <label className="settings-label">Total Uploads</label>
                     <div className="settings-value" style={{ fontSize: "24px", fontWeight: 700 }}>{uploadCount}</div>

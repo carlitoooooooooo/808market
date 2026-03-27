@@ -209,6 +209,38 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
     }).catch(() => {});
   }, [currentUser?.username, myUploads.length >= 5]);
 
+  // Send Stripe connect notification if producer has beats but no Stripe connected
+  useEffect(() => {
+    if (!currentUser?.username || myUploads.length === 0) return;
+    const notifKey = `stripeNotifSent_${currentUser.username}`;
+    if (localStorage.getItem(notifKey)) return; // already sent this session
+
+    // Check if they have stripe_account_id
+    fetch(`${SUPABASE_URL}/rest/v1/profiles?username=eq.${encodeURIComponent(currentUser.username)}&select=stripe_account_id`, {
+      headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` }
+    }).then(r => r.json()).then(data => {
+      const stripeId = data?.[0]?.stripe_account_id;
+      if (stripeId) return; // already connected
+      localStorage.setItem(notifKey, '1');
+      // Check if notif already exists
+      fetch(`${SUPABASE_URL}/rest/v1/notifications?user_username=eq.${encodeURIComponent(currentUser.username)}&type=eq.stripe_connect&select=id`, {
+        headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` }
+      }).then(r => r.json()).then(existing => {
+        if (Array.isArray(existing) && existing.length > 0) return;
+        fetch(`${SUPABASE_URL}/rest/v1/notifications`, {
+          method: 'POST',
+          headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}`, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+          body: JSON.stringify({
+            user_username: currentUser.username,
+            type: 'stripe_connect',
+            from_username: '808market',
+            message: '💳 Set up Stripe to get paid automatically! Go to Settings → Tools → Connect Stripe to receive 85% of every sale directly to your bank.',
+          }),
+        }).catch(() => {});
+      }).catch(() => {});
+    }).catch(() => {});
+  }, [currentUser?.username, myUploads.length]);
+
   // Load purchases
   useEffect(() => {
     if (!currentUser?.username) { setPurchasesLoading(false); return; }

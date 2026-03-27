@@ -17,6 +17,88 @@ import {
 const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
 const URL = 'https://bkapxykeryzxbqpgjgab.supabase.co';
 
+function BulkPriceEditor({ username }) {
+  const [beats, setBeats] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [prices, setPrices] = useState({});
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  const load = () => {
+    if (!username) return;
+    setLoading(true);
+    fetch(`${URL}/rest/v1/tracks?uploaded_by_username=eq.${encodeURIComponent(username)}&select=id,title,price,license_type&order=listed_at.desc`, {
+      headers: { apikey: ANON, Authorization: `Bearer ${ANON}` }
+    }).then(r => r.json()).then(data => {
+      if (Array.isArray(data)) {
+        setBeats(data);
+        const p = {};
+        data.forEach(b => { p[b.id] = b.price ?? ''; });
+        setPrices(p);
+      }
+      setLoading(false);
+    }).catch(() => setLoading(false));
+  };
+
+  const handleOpen = () => { setOpen(true); load(); };
+
+  const handleSave = async () => {
+    setSaving(true);
+    const updates = beats.filter(b => String(prices[b.id]) !== String(b.price ?? ''));
+    await Promise.all(updates.map(b =>
+      fetch(`${URL}/rest/v1/tracks?id=eq.${b.id}`, {
+        method: 'PATCH',
+        headers: { apikey: ANON, Authorization: `Bearer ${ANON}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ price: prices[b.id] === '' ? 0 : parseFloat(prices[b.id]) }),
+      }).catch(() => {})
+    ));
+    setSaving(false);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+    // Update local beats state
+    setBeats(prev => prev.map(b => ({ ...b, price: prices[b.id] === '' ? 0 : parseFloat(prices[b.id]) })));
+  };
+
+  if (!open) return (
+    <button onClick={handleOpen} style={{ width: "100%", padding: "12px", background: "rgba(0,245,255,0.1)", border: "1px solid rgba(0,245,255,0.3)", borderRadius: "12px", color: "var(--cyan)", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: "var(--font-head)" }}>
+      📝 Bulk Edit Prices
+    </button>
+  );
+
+  return (
+    <div>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
+        <span style={{ fontFamily: "var(--font-head)", fontSize: "13px", fontWeight: 600 }}>📝 Bulk Edit Prices</span>
+        <button onClick={() => setOpen(false)} style={{ background: "none", border: "none", color: "var(--text-dim)", cursor: "pointer", fontSize: "13px" }}>✕ Close</button>
+      </div>
+      {loading ? <div style={{ color: "var(--text-dim)", fontSize: "13px" }}>Loading...</div> : (
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px", maxHeight: "300px", overflowY: "auto" }}>
+          {beats.map(b => (
+            <div key={b.id} style={{ display: "flex", alignItems: "center", gap: "10px", background: "rgba(255,255,255,0.04)", borderRadius: "10px", padding: "10px 12px" }}>
+              <div style={{ flex: 1, fontSize: "13px", fontFamily: "var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{b.title}</div>
+              <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                <span style={{ color: "var(--text-dim)", fontSize: "12px" }}>$</span>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={prices[b.id] ?? ''}
+                  onChange={e => setPrices(prev => ({ ...prev, [b.id]: e.target.value }))}
+                  style={{ width: "60px", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "8px", padding: "6px 8px", color: "#fff", fontSize: "13px", outline: "none" }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+      <button onClick={handleSave} disabled={saving} style={{ marginTop: "12px", width: "100%", padding: "11px", background: saved ? "rgba(0,255,136,0.15)" : "linear-gradient(135deg, #00f5ff, #bf5fff)", border: "none", borderRadius: "10px", color: saved ? "var(--green)" : "#000", fontWeight: 700, fontSize: "14px", cursor: "pointer", fontFamily: "var(--font-head)" }}>
+        {saving ? "Saving..." : saved ? "✓ Saved!" : "Save All Changes"}
+      </button>
+    </div>
+  );
+}
+
 export default function SettingsPage({ onClose }) {
   const { currentUser, logout } = useAuth();
 
@@ -839,15 +921,7 @@ export default function SettingsPage({ onClose }) {
                   </div>
 
                   <div style={{ borderTop: "1px solid var(--border)", paddingTop: "16px" }}>
-                    <button
-                      onClick={() => alert("Bulk edit feature coming soon!")}
-                      style={{
-                        width: "100%", padding: "12px", background: "rgba(0,245,255,0.1)",
-                        border: "1px solid rgba(0,245,255,0.3)", borderRadius: "12px",
-                        color: "var(--cyan)", fontSize: "14px", fontWeight: 600,
-                        cursor: "pointer", fontFamily: "var(--font-head)",
-                      }}
-                    >📝 Bulk Edit Beats (Coming Soon)</button>
+                    <BulkPriceEditor username={currentUser?.username} />
                   </div>
                 </>
               )}

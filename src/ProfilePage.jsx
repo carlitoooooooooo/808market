@@ -52,7 +52,7 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
   const [editing, setEditing] = useState(false);
   const [editBio, setEditBio] = useState(currentUser?.bio || "");
   const [editColor, setEditColor] = useState(currentUser?.avatarColor || AVATAR_COLORS[0]);
-  const [profileExtra, setProfileExtra] = useState({ location: '', tagline: '', instagram: '', twitter: '', soundcloud: '', youtube: '', spotify_url: '', influenced_by: '', avatar_border: 'none', name_glow: 'none', profile_bg: 'none' });
+  const [profileExtra, setProfileExtra] = useState({ location: '', tagline: '', instagram: '', twitter: '', soundcloud: '', youtube: '', spotify_url: '', influenced_by: '', avatar_border: 'none', name_glow: 'none', profile_bg: 'none', bio_link: '', bio_link_label: '' });
   const [totalPlays, setTotalPlays] = useState(0);
   const [avatarUrl, setAvatarUrl] = useState(currentUser?.avatarUrl || null);
   const [coverUrl, setCoverUrl] = useState(null);
@@ -271,11 +271,11 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
   // Load extra profile fields
   useEffect(() => {
     if (!currentUser?.username) return;
-    fetch(`${SUPABASE_URL}/rest/v1/profiles?username=eq.${encodeURIComponent(currentUser.username)}&select=location,tagline,instagram,twitter,soundcloud,youtube,spotify_url,influenced_by,avatar_border,name_glow,profile_bg`, {
+    fetch(`${SUPABASE_URL}/rest/v1/profiles?username=eq.${encodeURIComponent(currentUser.username)}&select=location,tagline,instagram,twitter,soundcloud,youtube,spotify_url,influenced_by,avatar_border,name_glow,profile_bg,bio_link,bio_link_label`, {
       headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` }
     }).then(r => r.json()).then(data => {
       const p = Array.isArray(data) ? data[0] : data;
-      if (p) setProfileExtra({ location: p.location||'', tagline: p.tagline||'', instagram: p.instagram||'', twitter: p.twitter||'', soundcloud: p.soundcloud||'', youtube: p.youtube||'', spotify_url: p.spotify_url||'', influenced_by: p.influenced_by||'', avatar_border: p.avatar_border||'none', name_glow: p.name_glow||'none', profile_bg: p.profile_bg||'none' });
+      if (p) setProfileExtra({ location: p.location||'', tagline: p.tagline||'', instagram: p.instagram||'', twitter: p.twitter||'', soundcloud: p.soundcloud||'', youtube: p.youtube||'', spotify_url: p.spotify_url||'', influenced_by: p.influenced_by||'', avatar_border: p.avatar_border||'none', name_glow: p.name_glow||'none', profile_bg: p.profile_bg||'none', bio_link: p.bio_link||'', bio_link_label: p.bio_link_label||'' });
     }).catch(() => {});
 
     // Load total plays from tracks
@@ -680,13 +680,14 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
                   🎵 Influenced by: <span style={{ color: 'rgba(255,255,255,0.6)' }}>{profileExtra.influenced_by}</span>
                 </div>
               )}
-              {(profileExtra.instagram || profileExtra.twitter || profileExtra.soundcloud || profileExtra.youtube || profileExtra.spotify_url) && (
+              {(profileExtra.instagram || profileExtra.twitter || profileExtra.soundcloud || profileExtra.youtube || profileExtra.spotify_url || profileExtra.bio_link) && (
                 <div style={{ display: 'flex', gap: '10px', marginTop: '6px', flexWrap: 'wrap' }}>
                   {profileExtra.instagram && <a href={`https://instagram.com/${profileExtra.instagram}`} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', textDecoration: 'none' }}>📸 Instagram</a>}
                   {profileExtra.twitter && <a href={`https://x.com/${profileExtra.twitter}`} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', textDecoration: 'none' }}>🐦 Twitter</a>}
                   {profileExtra.soundcloud && <a href={`https://soundcloud.com/${profileExtra.soundcloud}`} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', textDecoration: 'none' }}>☁️ SoundCloud</a>}
                   {profileExtra.youtube && <a href={`https://youtube.com/@${profileExtra.youtube}`} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', textDecoration: 'none' }}>▶️ YouTube</a>}
                   {profileExtra.spotify_url && <a href={profileExtra.spotify_url} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', textDecoration: 'none' }}>🎵 Spotify</a>}
+                  {profileExtra.bio_link && <a href={profileExtra.bio_link.startsWith('http') ? profileExtra.bio_link : `https://${profileExtra.bio_link}`} target="_blank" rel="noreferrer" style={{ color: 'var(--cyan)', fontSize: '13px', textDecoration: 'none', fontWeight: 600 }}>🔗 {profileExtra.bio_link_label || 'Link'}</a>}
                 </div>
               )}
             </>
@@ -1357,6 +1358,27 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
                 </div>
               );
             })}
+          {/* Bio Link */}
+          <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '20px', marginTop: '4px' }}>
+            <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '10px', textTransform: 'uppercase' }}>
+              🔗 Custom Bio Link
+            </label>
+            <input
+              className="auth-input"
+              value={profileExtra.bio_link}
+              onChange={e => setProfileExtra(prev => ({ ...prev, bio_link: e.target.value }))}
+              placeholder="https://yoursite.com"
+              maxLength={200}
+              style={{ marginBottom: '8px' }}
+            />
+            <input
+              className="auth-input"
+              value={profileExtra.bio_link_label}
+              onChange={e => setProfileExtra(prev => ({ ...prev, bio_link_label: e.target.value }))}
+              placeholder="Label (e.g. My Website, Linktree...)"
+              maxLength={50}
+            />
+          </div>
           </div>
           </div>{/* end edit-profile-box */}
         </div>

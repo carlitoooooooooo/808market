@@ -274,13 +274,14 @@ export default function UserProfilePage({ username, onClose, onOpenModal, userVo
                 {profile?.tagline && <div style={{ fontSize: '12px', color: 'var(--cyan)', fontFamily: "'Inter', sans-serif", marginTop: '2px', fontStyle: 'italic' }}>{profile.tagline}</div>}
                 {profile?.location && <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', fontFamily: "'Inter', sans-serif", marginTop: '2px' }}>📍 {profile.location}</div>}
                 {profile?.influenced_by && <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', fontFamily: "'Inter', sans-serif", marginTop: '2px' }}>🎵 Influenced by: <span style={{ color: 'rgba(255,255,255,0.6)' }}>{profile.influenced_by}</span></div>}
-                {(profile?.instagram || profile?.twitter || profile?.soundcloud || profile?.youtube || profile?.spotify_url) && (
+                {(profile?.instagram || profile?.twitter || profile?.soundcloud || profile?.youtube || profile?.spotify_url || profile?.bio_link) && (
                   <div style={{ display: 'flex', gap: '10px', marginTop: '6px', flexWrap: 'wrap' }}>
                     {profile.instagram && <a href={`https://instagram.com/${profile.instagram}`} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', textDecoration: 'none' }}>📸 Instagram</a>}
                     {profile.twitter && <a href={`https://x.com/${profile.twitter}`} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', textDecoration: 'none' }}>🐦 Twitter</a>}
                     {profile.soundcloud && <a href={`https://soundcloud.com/${profile.soundcloud}`} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', textDecoration: 'none' }}>☁️ SoundCloud</a>}
                     {profile.youtube && <a href={`https://youtube.com/@${profile.youtube}`} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', textDecoration: 'none' }}>▶️ YouTube</a>}
                     {profile.spotify_url && <a href={profile.spotify_url} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', textDecoration: 'none' }}>🎵 Spotify</a>}
+                    {profile.bio_link && <a href={profile.bio_link.startsWith('http') ? profile.bio_link : `https://${profile.bio_link}`} target="_blank" rel="noreferrer" style={{ color: 'var(--cyan)', fontSize: '12px', textDecoration: 'none', fontWeight: 600 }}>🔗 {profile.bio_link_label || 'Link'}</a>}
                   </div>
                 )}
               </div>

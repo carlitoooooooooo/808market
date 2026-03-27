@@ -141,6 +141,9 @@ export default function App() {
   const [discoverFeed, setDiscoverFeed] = useState("foryou"); // "foryou" | "following" | "browse"
   const [browseTrack, setBrowseTrack] = useState(null);
   const [browseLimit, setBrowseLimit] = useState(50); // Max cards to show, increases with "Show More"
+  const [browseSearch, setBrowseSearch] = useState('');
+  const [browseBpmMin, setBrowseBpmMin] = useState('');
+  const [browseBpmMax, setBrowseBpmMax] = useState('');
   const [followingList, setFollowingList] = useState([]); // usernames current user follows
   const [producerProfiles, setProducerProfiles] = useState({}); // username -> { name_glow, avatar_url, ... }
   const [currentAchievement, setCurrentAchievement] = useState(null);
@@ -721,14 +724,69 @@ export default function App() {
               ))}
             </div>
 
+            {/* ── Browse search + BPM filter ── */}
+            {discoverFeed === "browse" && (
+              <div style={{ display: 'flex', gap: '8px', padding: '0 0 12px', flexWrap: 'wrap' }}>
+                <input
+                  type="text"
+                  placeholder="🔍 Search beats or producers..."
+                  value={browseSearch}
+                  onChange={e => { setBrowseSearch(e.target.value); setBrowseLimit(50); }}
+                  style={{
+                    flex: '1 1 200px', padding: '9px 14px', background: 'rgba(255,255,255,0.06)',
+                    border: '1px solid rgba(255,255,255,0.12)', borderRadius: '20px',
+                    color: '#fff', fontSize: '13px', fontFamily: 'var(--font-body)', outline: 'none',
+                    minWidth: '150px'
+                  }}
+                />
+                <input
+                  type="number"
+                  placeholder="BPM min"
+                  value={browseBpmMin}
+                  onChange={e => { setBrowseBpmMin(e.target.value); setBrowseLimit(50); }}
+                  style={{
+                    width: '90px', padding: '9px 12px', background: 'rgba(255,255,255,0.06)',
+                    border: '1px solid rgba(255,255,255,0.12)', borderRadius: '20px',
+                    color: '#fff', fontSize: '13px', fontFamily: 'var(--font-body)', outline: 'none'
+                  }}
+                />
+                <input
+                  type="number"
+                  placeholder="BPM max"
+                  value={browseBpmMax}
+                  onChange={e => { setBrowseBpmMax(e.target.value); setBrowseLimit(50); }}
+                  style={{
+                    width: '90px', padding: '9px 12px', background: 'rgba(255,255,255,0.06)',
+                    border: '1px solid rgba(255,255,255,0.12)', borderRadius: '20px',
+                    color: '#fff', fontSize: '13px', fontFamily: 'var(--font-body)', outline: 'none'
+                  }}
+                />
+                {(browseSearch || browseBpmMin || browseBpmMax) && (
+                  <button onClick={() => { setBrowseSearch(''); setBrowseBpmMin(''); setBrowseBpmMax(''); setBrowseLimit(50); }}
+                    style={{ padding: '9px 14px', background: 'rgba(255,51,102,0.15)', border: '1px solid rgba(255,51,102,0.3)', borderRadius: '20px', color: '#ff3366', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-head)' }}>
+                    ✕ Clear
+                  </button>
+                )}
+              </div>
+            )}
+
             {/* ── Browse grid ── */}
             {discoverFeed === "browse" && (
               <div className="browse-grid">
-                {tracksLoading ? (
-                  <div className="empty-queue"><div className="empty-queue__icon">⏳</div><div className="empty-queue__text">Loading beats...</div></div>
-                ) : (activeGenre === "ALL" ? tracks : tracks.filter(t => t.genre === activeGenre)).length === 0 ? (
-                  <div className="empty-queue"><div className="empty-queue__icon">🎧</div><div className="empty-queue__text">No beats found</div></div>
-                ) : (activeGenre === "ALL" ? tracks : tracks.filter(t => t.genre === activeGenre)).slice(0, browseLimit).map(track => {
+                {(() => {
+                  const q = browseSearch.toLowerCase().trim();
+                  const bpmMin = browseBpmMin ? parseInt(browseBpmMin) : null;
+                  const bpmMax = browseBpmMax ? parseInt(browseBpmMax) : null;
+                  const filtered = (activeGenre === "ALL" ? tracks : tracks.filter(t => t.genre === activeGenre))
+                    .filter(t => {
+                      if (q && !t.title?.toLowerCase().includes(q) && !t.artist?.toLowerCase().includes(q) && !(t.uploadedBy || '').toLowerCase().includes(q)) return false;
+                      if (bpmMin && t.bpm < bpmMin) return false;
+                      if (bpmMax && t.bpm > bpmMax) return false;
+                      return true;
+                    });
+                  if (tracksLoading) return <div className="empty-queue"><div className="empty-queue__icon">⏳</div><div className="empty-queue__text">Loading beats...</div></div>;
+                  if (filtered.length === 0) return <div className="empty-queue"><div className="empty-queue__icon">🎧</div><div className="empty-queue__text">No beats found</div></div>;
+                  return filtered.slice(0, browseLimit).map(track => {
                   const isFree = !track.price || track.price === 0;
                   return (
                     <div key={track.id} className="browse-card" onClick={() => setBrowseTrack(track)}>
@@ -743,7 +801,8 @@ export default function App() {
                       </div>
                     </div>
                   );
-                })}
+                  });
+                })()}
               </div>
             )}
 
@@ -758,7 +817,18 @@ export default function App() {
             )}
 
             {/* Show More button for browse tab */}
-            {discoverFeed === "browse" && browseLimit < (activeGenre === "ALL" ? tracks : tracks.filter(t => t.genre === activeGenre)).length && (
+            {discoverFeed === "browse" && (() => {
+              const q = browseSearch.toLowerCase().trim();
+              const bpmMin = browseBpmMin ? parseInt(browseBpmMin) : null;
+              const bpmMax = browseBpmMax ? parseInt(browseBpmMax) : null;
+              const filtered = (activeGenre === "ALL" ? tracks : tracks.filter(t => t.genre === activeGenre))
+                .filter(t => {
+                  if (q && !t.title?.toLowerCase().includes(q) && !t.artist?.toLowerCase().includes(q) && !(t.uploadedBy || '').toLowerCase().includes(q)) return false;
+                  if (bpmMin && t.bpm < bpmMin) return false;
+                  if (bpmMax && t.bpm > bpmMax) return false;
+                  return true;
+                });
+              return browseLimit < filtered.length ? (
               <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'center', padding: '20px' }}>
                 <button 
                   onClick={() => setBrowseLimit(prev => prev + 50)}
@@ -777,10 +847,11 @@ export default function App() {
                   onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
                   onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
                 >
-                  📦 Show More ({browseLimit} / {(activeGenre === "ALL" ? tracks : tracks.filter(t => t.genre === activeGenre)).length})
+                  📦 Show More ({browseLimit} / {filtered.length})
                 </button>
               </div>
-            )}
+              ) : null;
+            })()}
 
             {discoverFeed !== "browse" && tracksLoading ? (
               <div className="empty-queue">

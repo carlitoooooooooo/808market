@@ -1091,7 +1091,6 @@ body {
   flex-direction: row;
   gap: 6px;
   align-self: flex-start;
-  margin-left: auto;
   flex-shrink: 0;
 }
 

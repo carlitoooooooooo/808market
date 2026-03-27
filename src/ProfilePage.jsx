@@ -692,25 +692,25 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
               )}
             </>
           )}
-          {/* Edit button only shown inline — form is a full-screen modal */}
+          {/* Action buttons below bio */}
+          {!editing && (
+            <div style={{ display: 'flex', gap: '6px', marginTop: '10px' }}>
+              <button className="profile-edit-btn" onClick={() => setEditing(true)} title="Edit profile">✏️</button>
+              <button className="profile-edit-btn profile-settings-btn" onClick={onOpenSettings} title="Settings">⚙️</button>
+              <button className="profile-edit-btn" title="Share profile" onClick={async () => {
+                const url = `https://808market.app/u/${currentUser.username}`;
+                try {
+                  if (navigator.share) {
+                    await navigator.share({ title: `${currentUser.username} on 808market`, url });
+                  } else {
+                    await navigator.clipboard.writeText(url);
+                    alert('Profile link copied!');
+                  }
+                } catch {}
+              }}>📤</button>
+            </div>
+          )}
         </div>
-        {!editing && (
-          <div style={{ display: 'flex', gap: '6px' }}>
-            <button className="profile-edit-btn" onClick={() => setEditing(true)} title="Edit profile">✏️</button>
-            <button className="profile-edit-btn profile-settings-btn" onClick={onOpenSettings} title="Settings">⚙️</button>
-            <button className="profile-edit-btn" title="Share profile" onClick={async () => {
-              const url = `https://808market.app/u/${currentUser.username}`;
-              try {
-                if (navigator.share) {
-                  await navigator.share({ title: `${currentUser.username} on 808market`, url });
-                } else {
-                  await navigator.clipboard.writeText(url);
-                  alert('Profile link copied!');
-                }
-              } catch {}
-            }}>📤</button>
-          </div>
-        )}
       </div>
 
       {/* Stats */}

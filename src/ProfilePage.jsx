@@ -695,10 +695,10 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
         </div>
       </div>
 
-      {/* Action buttons — outside header to avoid overlap */}
+      {/* Action buttons */}
       {!editing && (
-        <div className="profile-action-row">
-          <button className="profile-edit-btn" onClick={() => setEditing(true)} title="Edit profile" style={{ display: 'flex', alignItems: 'center', gap: '6px', width: 'auto', padding: '0 14px', fontSize: '13px', fontFamily: 'var(--font-head)', fontWeight: 600 }}>
+        <div style={{ display: 'flex', gap: '8px', marginTop: '12px', marginBottom: '16px', flexWrap: 'wrap', alignItems: 'center', width: '100%' }}>
+          <button className="profile-edit-btn" onClick={() => setEditing(true)} style={{ display: 'flex', alignItems: 'center', gap: '6px', width: 'auto', padding: '0 14px', fontSize: '13px', fontFamily: 'var(--font-head)', fontWeight: 600 }}>
             ✏️ Edit Profile
           </button>
           <button className="profile-edit-btn profile-settings-btn" onClick={onOpenSettings} title="Settings">⚙️</button>

@@ -692,28 +692,29 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
               )}
             </>
           )}
-          {/* Action buttons */}
-          {!editing && (
-            <div className="profile-action-row">
-              <button className="profile-edit-btn" onClick={() => setEditing(true)} title="Edit profile" style={{ display: 'flex', alignItems: 'center', gap: '6px', width: 'auto', padding: '0 14px', fontSize: '13px', fontFamily: 'var(--font-head)', fontWeight: 600 }}>
-                ✏️ Edit Profile
-              </button>
-              <button className="profile-edit-btn profile-settings-btn" onClick={onOpenSettings} title="Settings">⚙️</button>
-              <button className="profile-edit-btn" title="Share profile" onClick={async () => {
-                const url = `https://808market.app/u/${currentUser.username}`;
-                try {
-                  if (navigator.share) {
-                    await navigator.share({ title: `${currentUser.username} on 808market`, url });
-                  } else {
-                    await navigator.clipboard.writeText(url);
-                    alert('Profile link copied!');
-                  }
-                } catch {}
-              }}>📤</button>
-            </div>
-          )}
         </div>
       </div>
+
+      {/* Action buttons — outside header to avoid overlap */}
+      {!editing && (
+        <div className="profile-action-row">
+          <button className="profile-edit-btn" onClick={() => setEditing(true)} title="Edit profile" style={{ display: 'flex', alignItems: 'center', gap: '6px', width: 'auto', padding: '0 14px', fontSize: '13px', fontFamily: 'var(--font-head)', fontWeight: 600 }}>
+            ✏️ Edit Profile
+          </button>
+          <button className="profile-edit-btn profile-settings-btn" onClick={onOpenSettings} title="Settings">⚙️</button>
+          <button className="profile-edit-btn" title="Share profile" onClick={async () => {
+            const url = `https://808market.app/u/${currentUser.username}`;
+            try {
+              if (navigator.share) {
+                await navigator.share({ title: `${currentUser.username} on 808market`, url });
+              } else {
+                await navigator.clipboard.writeText(url);
+                alert('Profile link copied!');
+              }
+            } catch {}
+          }}>📤</button>
+        </div>
+      )}
 
       {/* Stats */}
       <div className="profile-stats">

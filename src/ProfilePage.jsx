@@ -555,13 +555,23 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
   // Total cops received on all uploads
   const totalCopsReceived = myUploads.reduce((sum, t) => sum + (t.cops || 0), 0);
 
+  const PROFILE_BG_STYLES = {
+    'none': 'transparent',
+    'gradient-cyan': 'linear-gradient(160deg, rgba(0,245,255,0.08) 0%, transparent 60%)',
+    'gradient-purple': 'linear-gradient(160deg, rgba(191,95,255,0.08) 0%, transparent 60%)',
+    'gradient-rainbow': 'linear-gradient(160deg, rgba(255,51,102,0.07) 0%, rgba(255,153,0,0.05) 30%, rgba(0,245,255,0.07) 70%, transparent 100%)',
+    'gradient-gold': 'linear-gradient(160deg, rgba(255,215,0,0.08) 0%, transparent 60%)',
+    'gradient-red': 'linear-gradient(160deg, rgba(255,51,102,0.08) 0%, transparent 60%)',
+    'gradient-green': 'linear-gradient(160deg, rgba(0,255,136,0.08) 0%, transparent 60%)',
+    'gradient-blue': 'linear-gradient(160deg, rgba(30,100,255,0.10) 0%, transparent 60%)',
+    'gradient-pink': 'linear-gradient(160deg, rgba(255,100,200,0.08) 0%, transparent 60%)',
+    'gradient-sunset': 'linear-gradient(160deg, rgba(255,80,0,0.08) 0%, rgba(255,200,0,0.06) 50%, transparent 100%)',
+    'gradient-midnight': 'linear-gradient(160deg, rgba(20,0,60,0.6) 0%, rgba(0,0,20,0.4) 100%)',
+    'gradient-ocean': 'linear-gradient(160deg, rgba(0,80,180,0.10) 0%, rgba(0,200,200,0.06) 60%, transparent 100%)',
+  };
+
   return (
-    <div className="profile-page" style={{
-      background: profileExtra.profile_bg === 'gradient-cyan' ? 'linear-gradient(135deg, rgba(0,245,255,0.05), transparent)' :
-                  profileExtra.profile_bg === 'gradient-purple' ? 'linear-gradient(135deg, rgba(191,95,255,0.05), transparent)' :
-                  profileExtra.profile_bg === 'gradient-rainbow' ? 'linear-gradient(135deg, rgba(255,51,102,0.05), rgba(255,153,0,0.05), rgba(0,245,255,0.05))' :
-                  'transparent'
-    }}>
+    <div className="profile-page" style={{ background: PROFILE_BG_STYLES[profileExtra.profile_bg] || 'transparent' }}>
       {/* LEFT COLUMN: identity, stats, pinned, badges */}
       <div className="profile-left-col">
 
@@ -1244,10 +1254,18 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
               ) : (
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                   {[
-                    { value: 'none', label: 'None', style: { background: '#0a0a0a', color: '#fff' } },
-                    { value: 'gradient-cyan', label: 'Cyan Fade', style: { background: 'linear-gradient(135deg, rgba(0,245,255,0.1), transparent)', color: '#00f5ff' } },
-                    { value: 'gradient-purple', label: 'Purple Fade', style: { background: 'linear-gradient(135deg, rgba(191,95,255,0.1), transparent)', color: '#bf5fff' } },
-                    { value: 'gradient-rainbow', label: '🌈 Rainbow', style: { background: 'linear-gradient(135deg, rgba(255,51,102,0.1), rgba(255,153,0,0.1), rgba(0,245,255,0.1))', color: '#fff' } },
+                    { value: 'none',             label: 'None',      style: { background: '#111', color: 'rgba(255,255,255,0.5)' } },
+                    { value: 'gradient-cyan',    label: 'Cyan',      style: { background: 'linear-gradient(135deg, rgba(0,245,255,0.15), transparent)', color: '#00f5ff' } },
+                    { value: 'gradient-purple',  label: 'Purple',    style: { background: 'linear-gradient(135deg, rgba(191,95,255,0.15), transparent)', color: '#bf5fff' } },
+                    { value: 'gradient-rainbow', label: '🌈 Rainbow',style: { background: 'linear-gradient(135deg, rgba(255,51,102,0.12), rgba(255,153,0,0.1), rgba(0,245,255,0.12))', color: '#fff' } },
+                    { value: 'gradient-gold',    label: '✨ Gold',   style: { background: 'linear-gradient(135deg, rgba(255,215,0,0.15), transparent)', color: '#ffd700' } },
+                    { value: 'gradient-red',     label: 'Red',       style: { background: 'linear-gradient(135deg, rgba(255,51,102,0.15), transparent)', color: '#ff3366' } },
+                    { value: 'gradient-green',   label: 'Green',     style: { background: 'linear-gradient(135deg, rgba(0,255,136,0.15), transparent)', color: '#00ff88' } },
+                    { value: 'gradient-blue',    label: 'Blue',      style: { background: 'linear-gradient(135deg, rgba(30,100,255,0.18), transparent)', color: '#4080ff' } },
+                    { value: 'gradient-pink',    label: 'Pink',      style: { background: 'linear-gradient(135deg, rgba(255,100,200,0.15), transparent)', color: '#ff64c8' } },
+                    { value: 'gradient-sunset',  label: '🌅 Sunset', style: { background: 'linear-gradient(135deg, rgba(255,80,0,0.15), rgba(255,200,0,0.1))', color: '#ff8c00' } },
+                    { value: 'gradient-midnight',label: '🌙 Midnight',style: { background: 'linear-gradient(135deg, rgba(40,0,80,0.6), rgba(0,0,30,0.5))', color: '#9060ff' } },
+                    { value: 'gradient-ocean',   label: '🌊 Ocean',  style: { background: 'linear-gradient(135deg, rgba(0,80,180,0.18), rgba(0,200,200,0.1))', color: '#00c8c8' } },
                   ].map(b => (
                     <button key={b.value} type="button" onClick={() => setProfileExtra(prev => ({ ...prev, profile_bg: b.value }))}
                       style={{ ...b.style, border: `2px solid ${profileExtra.profile_bg === b.value ? '#fff' : 'transparent'}`, borderRadius: '20px', padding: '4px 12px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-head)' }}>

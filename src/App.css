@@ -124,6 +124,7 @@ body {
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
+  padding-bottom: 80px;
 }
 .app-main::-webkit-scrollbar { display: none; }
 

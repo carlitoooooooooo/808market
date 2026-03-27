@@ -692,9 +692,10 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
               )}
             </>
           )}
+          {/* Edit button only shown inline — form is a full-screen modal */}
         </div>
         {!editing && (
-          <div style={{ display: 'flex', gap: '6px', flexShrink: 0, alignSelf: 'flex-start' }}>
+          <div style={{ display: 'flex', gap: '6px' }}>
             <button className="profile-edit-btn" onClick={() => setEditing(true)} title="Edit profile">✏️</button>
             <button className="profile-edit-btn profile-settings-btn" onClick={onOpenSettings} title="Settings">⚙️</button>
             <button className="profile-edit-btn" title="Share profile" onClick={async () => {

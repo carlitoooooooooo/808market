@@ -1,11 +1,5 @@
 {
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
-  ],
-  "crons": [
-    {
-      "path": "/api/process-payouts",
-      "schedule": "0 10 * * *"
-    }
   ]
 }

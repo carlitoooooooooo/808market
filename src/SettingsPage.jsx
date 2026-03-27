@@ -379,7 +379,7 @@ export default function SettingsPage({ onClose }) {
         {/* Header */}
         <div className="settings-header">
           <span style={{ fontFamily: "var(--font-head)", fontWeight: 700, fontSize: "16px" }}>Settings</span>
-          <button onClick={onClose} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.4)", fontSize: "20px", cursor: "pointer", lineHeight: 1 }}>✕</button>
+          <button onClick={onClose} style={{ background: "rgba(255,255,255,0.08)", border: "none", color: "#fff", fontSize: "16px", cursor: "pointer", lineHeight: 1, width: "32px", height: "32px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>✕</button>
         </div>
 
         {/* Sub-nav */}

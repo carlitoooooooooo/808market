@@ -2565,7 +2565,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 60px 16px 16px;
+  padding: 80px 16px 16px;
   border-bottom: 1px solid rgba(255,255,255,0.08);
   position: sticky;
   top: 0;
@@ -2760,6 +2760,24 @@ body {
     max-width: 100%;
     border-radius: 0;
     max-height: 100vh;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .settings-modal .settings-header {
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+  .settings-modal .settings-tabs {
+    flex-shrink: 0;
+  }
+  .settings-modal .settings-body {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 }
 .settings-modal::-webkit-scrollbar { display: none; }

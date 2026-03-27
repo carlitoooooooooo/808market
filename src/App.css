@@ -1086,13 +1086,7 @@ body {
   justify-content: center;
 }
 .profile-edit-btn:hover { background: var(--bg3); }
-.profile-header > div:last-child {
-  display: flex;
-  flex-direction: row;
-  gap: 6px;
-  align-self: flex-start;
-  flex-shrink: 0;
-}
+
 
 .profile-stats {
   display: flex;

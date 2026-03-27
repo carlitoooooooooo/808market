@@ -26,7 +26,7 @@ function formatTime(secs) {
 }
 
 export default function SnippetPicker({ onClose, onConfirm }) {
-  // windowStart is a fraction 0..1 of where the 15s window starts
+  // windowStart is a fraction 0..1 of where the 30s window starts
   const maxStart = TOTAL_DURATION - SNIPPET_DURATION;
   const [startSec, setStartSec] = useState(0);
   const isDragging = useRef(false);

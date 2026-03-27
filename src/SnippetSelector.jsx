@@ -129,7 +129,7 @@ export default function SnippetSelector({ file, url, initialStart, onConfirm, on
   return (
     <div style={{ padding: '20px' }}>
       <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: '16px', marginBottom: '6px' }}>
-        Select your 15s preview
+        Select your 30s preview
       </div>
       <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', marginBottom: '20px', fontFamily: "'Inter', sans-serif" }}>
         Drag to pick which part plays as the preview

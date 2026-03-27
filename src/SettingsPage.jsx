@@ -51,6 +51,10 @@ export default function SettingsPage({ onClose }) {
   const [uploadCount, setUploadCount] = useState(0);
   const [totalBeatsRevenue, setTotalBeatsRevenue] = useState(0);
   const [creatorLoading, setCreatorLoading] = useState(false);
+  const [stripeAccountId, setStripeAccountId] = useState(() => currentUser?.stripeAccountId || null);
+  const [stripeConnected, setStripeConnected] = useState(false);
+  const [stripeConnecting, setStripeConnecting] = useState(false);
+  const [stripeChecked, setStripeChecked] = useState(false);
 
   // Privacy & Safety state
   const [hideActivityStatus, setHideActivityStatus] = useState(() => {
@@ -181,6 +185,7 @@ export default function SettingsPage({ onClose }) {
   useEffect(() => {
     if (section === "creator") {
       loadCreatorData();
+      loadStripeStatus();
     }
   }, [section]);
 
@@ -195,12 +200,60 @@ export default function SettingsPage({ onClose }) {
       const tracks = await res.json();
       if (Array.isArray(tracks)) {
         setUploadCount(tracks.length);
-        // Sum revenue from paid tracks (assuming price field exists or use placeholder)
         const revenue = tracks.reduce((sum, t) => sum + (t.price || 0), 0);
         setTotalBeatsRevenue(revenue);
       }
     } catch {}
     setCreatorLoading(false);
+  }
+
+  async function loadStripeStatus() {
+    if (!currentUser?.username || stripeChecked) return;
+    try {
+      // Load stripe_account_id from profiles
+      const res = await fetch(
+        `${URL}/rest/v1/profiles?username=eq.${encodeURIComponent(currentUser.username)}&select=stripe_account_id`,
+        { headers: { apikey: ANON, Authorization: `Bearer ${ANON}` } }
+      );
+      const data = await res.json();
+      const accountId = data?.[0]?.stripe_account_id;
+      if (accountId) {
+        setStripeAccountId(accountId);
+        // Check if fully connected
+        const statusRes = await fetch(`/api/connect-status?account_id=${accountId}`);
+        const status = await statusRes.json();
+        setStripeConnected(status.connected === true);
+      }
+    } catch {}
+    setStripeChecked(true);
+  }
+
+  async function handleStripeConnect() {
+    if (!currentUser?.username) return;
+    setStripeConnecting(true);
+    try {
+      const res = await fetch('/api/connect-onboard', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: currentUser.username, existingAccountId: stripeAccountId }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        // Save accountId to Supabase before redirecting
+        if (data.accountId && data.accountId !== stripeAccountId) {
+          await fetch(`${URL}/rest/v1/profiles?username=eq.${encodeURIComponent(currentUser.username)}`, {
+            method: 'PATCH',
+            headers: { apikey: ANON, Authorization: `Bearer ${ANON}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ stripe_account_id: data.accountId }),
+          });
+          setStripeAccountId(data.accountId);
+        }
+        window.location.href = data.url;
+      }
+    } catch (err) {
+      alert('Failed to start Stripe onboarding: ' + err.message);
+    }
+    setStripeConnecting(false);
   }
 
   // Load blocked users
@@ -713,6 +766,45 @@ export default function SettingsPage({ onClose }) {
                       <div><strong>808market:</strong> 15%</div>
                       <div><strong>You:</strong> 85%</div>
                     </div>
+                  </div>
+
+                  {/* Stripe Connect */}
+                  <div style={{ borderTop: "1px solid var(--border)", paddingTop: "16px" }}>
+                    <label style={{ display: "block", fontSize: "13px", fontWeight: 600, marginBottom: "6px", fontFamily: "var(--font-head)" }}>
+                      💳 Stripe Payouts
+                    </label>
+                    <div style={{ fontSize: "12px", color: "var(--text-dim)", marginBottom: "14px", fontFamily: "var(--font-body)", lineHeight: 1.5 }}>
+                      Connect your bank account to receive your 85% automatically after every sale.
+                    </div>
+                    {stripeConnected ? (
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px", background: "rgba(0,255,136,0.07)", border: "1px solid rgba(0,255,136,0.25)", borderRadius: "10px", padding: "12px 14px" }}>
+                        <span style={{ fontSize: "18px" }}>✅</span>
+                        <div>
+                          <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--green)", fontFamily: "var(--font-head)" }}>Stripe Connected</div>
+                          <div style={{ fontSize: "11px", color: "var(--text-dim)", fontFamily: "var(--font-body)" }}>Payouts go directly to your bank after each sale</div>
+                        </div>
+                        <button
+                          onClick={handleStripeConnect}
+                          style={{ marginLeft: "auto", padding: "6px 12px", background: "transparent", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "8px", color: "var(--text-dim)", fontSize: "11px", cursor: "pointer", fontFamily: "var(--font-head)" }}
+                        >
+                          Manage
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={handleStripeConnect}
+                        disabled={stripeConnecting}
+                        style={{
+                          width: "100%", padding: "13px", borderRadius: "12px",
+                          background: stripeConnecting ? "rgba(255,255,255,0.05)" : "linear-gradient(135deg, #635bff, #00f5ff)",
+                          border: "none", color: stripeConnecting ? "var(--text-dim)" : "#fff",
+                          fontSize: "14px", fontWeight: 700, cursor: stripeConnecting ? "not-allowed" : "pointer",
+                          fontFamily: "var(--font-head)", transition: "all 0.2s"
+                        }}
+                      >
+                        {stripeConnecting ? "Opening Stripe..." : "💳 Connect Stripe — Get Paid"}
+                      </button>
+                    )}
                   </div>
 
                   <div style={{ borderTop: "1px solid var(--border)", paddingTop: "16px" }}>

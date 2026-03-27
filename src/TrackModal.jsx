@@ -306,6 +306,7 @@ export default function TrackModal({ track, onClose, onVote, userVotes, onViewUs
           price: track.price,
           licenseType: track.licenseType,
           buyerUsername: currentUser?.username || 'anonymous',
+          producerUsername: track.uploadedBy || track.artist,
         }),
       });
       const data = await res.json();

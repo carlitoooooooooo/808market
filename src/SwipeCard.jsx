@@ -186,6 +186,7 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
           price: track.price,
           licenseType: track.licenseType,
           buyerUsername: currentUser?.username || 'anonymous',
+          producerUsername: track.uploadedBy || track.artist,
         }),
       });
       const data = await res.json();

@@ -323,6 +323,22 @@ export default function App() {
     }
   }, [tracks]);
 
+  // Stripe Connect return handler
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const connectStatus = params.get('connect');
+    if (connectStatus === 'success') {
+      history.replaceState(null, '', '/');
+      setToast({ message: '✅ Stripe connected! You\'ll now receive payouts automatically.', visible: true });
+      setTimeout(() => setToast(t => ({ ...t, visible: false })), 5000);
+    } else if (connectStatus === 'refresh') {
+      // Onboarding wasn't completed — re-open settings
+      history.replaceState(null, '', '/');
+      setToast({ message: '⚠️ Stripe setup incomplete. Open Settings → Tools to finish.', visible: true });
+      setTimeout(() => setToast(t => ({ ...t, visible: false })), 6000);
+    }
+  }, []);
+
   // Purchase success handler
   const [purchaseModal, setPurchaseModal] = useState(null); // { trackTitle, artist, audioUrl, licenseType }
   useEffect(() => {

@@ -323,6 +323,25 @@ export default function App() {
     }
   }, [tracks]);
 
+  // Purchase success handler
+  const [purchaseModal, setPurchaseModal] = useState(null); // { trackTitle, artist, audioUrl, licenseType }
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('purchase') === 'success') {
+      const sessionId = params.get('session_id');
+      const trackId = params.get('track_id');
+      history.replaceState(null, '', '/');
+      if (sessionId) {
+        fetch(`/api/get-purchase?session_id=${sessionId}&track_id=${trackId}`)
+          .then(r => r.json())
+          .then(data => {
+            if (data.success) setPurchaseModal(data);
+          })
+          .catch(() => {});
+      }
+    }
+  }, []);
+
   // Deep link: /u/:username
   useEffect(() => {
     const match = window.location.pathname.match(/^\/u\/([^/]+)/);
@@ -918,6 +937,50 @@ export default function App() {
         achievement={currentAchievement}
         onAnimationEnd={() => setCurrentAchievement(null)}
       />
+
+      {/* Purchase Success Modal */}
+      {purchaseModal && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 9999,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px'
+        }}>
+          <div style={{
+            background: 'var(--surface)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px',
+            padding: '32px 28px', maxWidth: '420px', width: '100%', textAlign: 'center'
+          }}>
+            <div style={{ fontSize: '48px', marginBottom: '12px' }}>🎉</div>
+            <div style={{ fontFamily: 'var(--font-head)', fontSize: '20px', fontWeight: 700, color: 'var(--text)', marginBottom: '8px' }}>
+              Purchase Complete!
+            </div>
+            <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', marginBottom: '6px' }}>
+              {purchaseModal.trackTitle} — {purchaseModal.artist}
+            </div>
+            <div style={{ color: 'var(--cyan)', fontSize: '12px', fontFamily: 'var(--font-head)', marginBottom: '24px' }}>
+              {purchaseModal.licenseType === 'exclusive' ? 'Exclusive License' : purchaseModal.licenseType === 'lease' ? 'Non-Exclusive Lease' : 'License'}
+            </div>
+            <a
+              href={purchaseModal.audioUrl}
+              download={`${purchaseModal.trackTitle} - ${purchaseModal.artist}.mp3`}
+              onClick={() => setTimeout(() => setPurchaseModal(null), 1000)}
+              style={{
+                display: 'block', padding: '14px 20px',
+                background: 'linear-gradient(135deg, #00f5ff, #bf5fff)',
+                color: '#000', borderRadius: '12px', fontWeight: 700,
+                fontSize: '15px', fontFamily: 'var(--font-head)',
+                textDecoration: 'none', marginBottom: '12px'
+              }}
+            >
+              ⬇️ Download Beat
+            </a>
+            <button
+              onClick={() => setPurchaseModal(null)}
+              style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: '13px' }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

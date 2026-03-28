@@ -2611,8 +2611,8 @@ body {
 .edit-profile-overlay {
   position: fixed;
   inset: 0;
-  background: #000;
-  z-index: 400;
+  background: rgba(0,0,0,0.92);
+  z-index: 9999;
   overflow-y: scroll;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
@@ -3156,9 +3156,9 @@ html.party-mode .auth-submit {
   .edit-profile-header { top: 0; }
   .edit-profile-overlay {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: center;
-    padding-top: 32px;
+    padding: 40px 20px;
     background: rgba(0,0,0,0.85) !important;
     overflow-y: auto;
     scrollbar-width: none;

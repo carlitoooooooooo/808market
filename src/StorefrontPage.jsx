@@ -22,7 +22,20 @@ const dbPost = (path, body) => fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
 }).then(r => r.json());
 
 const ACCENT_COLORS = ['#00f5ff', '#bf5fff', '#ff3366', '#00ff88', '#ffd700', '#ff9900', '#ff64c8', '#4080ff'];
-const BG_COLORS = ['#0a0a0a', '#080818', '#0a0808', '#080a08', '#12080a', '#08100a'];
+const BG_OPTIONS = [
+  { value: '#0a0a0a', label: 'Black', preview: '#0a0a0a', text: '#666' },
+  { value: '#080818', label: 'Midnight', preview: 'linear-gradient(135deg, #080818, #12103a)', text: '#6060cc' },
+  { value: '#0a0818', label: 'Deep Purple', preview: 'linear-gradient(135deg, #0a0818, #1a0a2e)', text: '#8040cc' },
+  { value: '#080f18', label: 'Navy', preview: 'linear-gradient(135deg, #080f18, #0a1a30)', text: '#4080cc' },
+  { value: '#080f0c', label: 'Forest', preview: 'linear-gradient(135deg, #080f0c, #0a1e12)', text: '#40aa60' },
+  { value: '#120808', label: 'Crimson', preview: 'linear-gradient(135deg, #120808, #2a0a0a)', text: '#cc4040' },
+  { value: '#120c06', label: 'Ember', preview: 'linear-gradient(135deg, #120c06, #2a1806)', text: '#cc8040' },
+  { value: '#0f0a12', label: 'Plum', preview: 'linear-gradient(135deg, #0f0a12, #1e0a2a)', text: '#aa50cc' },
+  { value: '#060f12', label: 'Teal', preview: 'linear-gradient(135deg, #060f12, #081e24)', text: '#40aacc' },
+  { value: '#0a100a', label: 'Jungle', preview: 'linear-gradient(135deg, #0a100a, #141e10)', text: '#60cc60' },
+  { value: '#12100a', label: 'Gold', preview: 'linear-gradient(135deg, #12100a, #241e08)', text: '#ccaa40' },
+  { value: '#10080f', label: 'Rose', preview: 'linear-gradient(135deg, #10080f, #20081e)', text: '#cc50aa' },
+];
 
 function SectionHeader({ label, accent }) {
   return (
@@ -228,6 +241,7 @@ function StorefrontEditor({ storefront, username, beats, onSave, onClose }) {
   const [aboutBio, setAboutBio] = useState(storefront?.about_bio || '');
   const [accent, setAccent] = useState(storefront?.accent_color || '#00f5ff');
   const [bg, setBg] = useState(storefront?.bg_color || '#0a0a0a');
+  // ensure bg is always a valid option value
   const [cardStyle, setCardStyle] = useState(storefront?.card_style || 'default');
   const [fontStyle, setFontStyle] = useState(storefront?.font_style || 'default');
   const [sectionOrder, setSectionOrder] = useState(() => {
@@ -358,8 +372,17 @@ function StorefrontEditor({ storefront, username, beats, onSave, onClose }) {
         {/* Background */}
         <EditorField label="Background">
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-            {BG_COLORS.map(c => (
-              <button key={c} type="button" onClick={() => setBg(c)} style={{ width: '28px', height: '28px', borderRadius: '8px', background: c, border: `3px solid ${bg === c ? '#fff' : 'rgba(255,255,255,0.2)'}`, cursor: 'pointer' }} />
+            {BG_OPTIONS.map(opt => (
+              <button key={opt.value} type="button" onClick={() => setBg(opt.value)}
+                style={{
+                  width: '72px', height: '52px', borderRadius: '10px',
+                  background: opt.preview, border: `2px solid ${bg === opt.value ? '#fff' : 'rgba(255,255,255,0.15)'}`,
+                  cursor: 'pointer', display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+                  paddingBottom: '5px', transition: 'border-color 0.15s',
+                  boxShadow: bg === opt.value ? '0 0 0 2px rgba(255,255,255,0.3)' : 'none',
+                }}>
+                <span style={{ fontSize: '10px', fontFamily: 'var(--font-head)', fontWeight: 700, color: opt.text, letterSpacing: '0.5px' }}>{opt.label}</span>
+              </button>
             ))}
           </div>
         </EditorField>
@@ -571,7 +594,9 @@ export default function StorefrontPage({ username, onBack }) {
   const [copied, setCopied] = useState(false);
 
   const accent = storefront?.accent_color || '#00f5ff';
-  const bg = storefront?.bg_color || '#0a0a0a';
+  const bgValue = storefront?.bg_color || '#0a0a0a';
+  const bgOption = BG_OPTIONS.find(o => o.value === bgValue);
+  const bg = bgOption?.preview || bgValue;
   const fontFamily = 'var(--font-head)';
   const sectionOrder = (() => {
     try { return JSON.parse(storefront?.section_order || '["beats","open_verses","features","drumkits"]'); }

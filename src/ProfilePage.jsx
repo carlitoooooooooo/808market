@@ -1144,6 +1144,50 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
                 </button>
               );
             })()}
+
+            {/* Fields */}
+            {[
+              { state: editBio, set: setEditBio, placeholder: 'Bio...', label: 'BIO', maxLen: 80, isExtra: false },
+            ].map(f => (
+              <div key={f.label}>
+                <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>{f.label}</label>
+                <input className="auth-input" value={f.state} onChange={e => f.set(e.target.value)} placeholder={f.placeholder} maxLength={f.maxLen} />
+              </div>
+            ))}
+            {[
+              { key: 'influenced_by', label: 'INFLUENCED BY', placeholder: 'e.g. Metro Boomin, Southside, Pi\'erre' },
+              { key: 'tagline', label: 'TAGLINE', placeholder: 'e.g. Trap producer from ATL' },
+              { key: 'location', label: 'LOCATION', placeholder: 'e.g. Atlanta, GA' },
+            ].map(f => {
+              const isSpotifyUrl = f.key === 'spotify_url';
+              const hasError = isSpotifyUrl && profileExtra[f.key] && !isValidSpotifyUrl(profileExtra[f.key]);
+              return (
+                <div key={f.key}>
+                  <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>
+                    {f.label}
+                    {isSpotifyUrl && profileExtra[f.key] && (
+                      <span style={{ marginLeft: '8px', fontSize: '10px', color: hasError ? '#ff3366' : '#00ff88' }}>
+                        {hasError ? '❌ Invalid URL' : '✓ Valid'}
+                      </span>
+                    )}
+                  </label>
+                  <input 
+                    className="auth-input" 
+                    value={profileExtra[f.key]} 
+                    onChange={e => setProfileExtra(prev => ({ ...prev, [f.key]: e.target.value }))} 
+                    placeholder={f.placeholder} 
+                    maxLength={200}
+                    style={hasError ? { borderColor: '#ff3366' } : {}}
+                  />
+                  {isSpotifyUrl && hasError && (
+                    <div style={{ fontSize: '11px', color: '#ff3366', marginTop: '4px', fontFamily: 'var(--font-body)' }}>
+                      Must be a valid Spotify URL (profile, playlist, artist, or track)
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+
             {/* ── Appearance Section ── */}
             <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '4px' }}>
               <button type="button" onClick={() => setShowAppearance(s => !s)}
@@ -1367,50 +1411,6 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
               </div>
             </div>
             </>}
-
-            {/* Fields */}
-            {[
-              { state: editBio, set: setEditBio, placeholder: 'Bio...', label: 'BIO', maxLen: 80, isExtra: false },
-            ].map(f => (
-              <div key={f.label}>
-                <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>{f.label}</label>
-                <input className="auth-input" value={f.state} onChange={e => f.set(e.target.value)} placeholder={f.placeholder} maxLength={f.maxLen} />
-              </div>
-            ))}
-            {[
-              { key: 'influenced_by', label: 'INFLUENCED BY', placeholder: 'e.g. Metro Boomin, Southside, Pi\'erre' },
-              { key: 'tagline', label: 'TAGLINE', placeholder: 'e.g. Trap producer from ATL' },
-              { key: 'location', label: 'LOCATION', placeholder: 'e.g. Atlanta, GA' },
-            ].map(f => {
-              const isSpotifyUrl = f.key === 'spotify_url';
-              const hasError = isSpotifyUrl && profileExtra[f.key] && !isValidSpotifyUrl(profileExtra[f.key]);
-              return (
-                <div key={f.key}>
-                  <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>
-                    {f.label}
-                    {isSpotifyUrl && profileExtra[f.key] && (
-                      <span style={{ marginLeft: '8px', fontSize: '10px', color: hasError ? '#ff3366' : '#00ff88' }}>
-                        {hasError ? '❌ Invalid URL' : '✓ Valid'}
-                      </span>
-                    )}
-                  </label>
-                  <input 
-                    className="auth-input" 
-                    value={profileExtra[f.key]} 
-                    onChange={e => setProfileExtra(prev => ({ ...prev, [f.key]: e.target.value }))} 
-                    placeholder={f.placeholder} 
-                    maxLength={200}
-                    style={hasError ? { borderColor: '#ff3366' } : {}}
-                  />
-                  {isSpotifyUrl && hasError && (
-                    <div style={{ fontSize: '11px', color: '#ff3366', marginTop: '4px', fontFamily: 'var(--font-body)' }}>
-                      Must be a valid Spotify URL (profile, playlist, artist, or track)
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-
             {/* ── Social Links Section ── */}
             <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '4px' }}>
               <button type="button" onClick={() => setShowSocials(s => !s)}

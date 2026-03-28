@@ -134,11 +134,14 @@ export function AuthProvider({ children }) {
     return user;
   }
 
-  const signup = useCallback(async (username, password, avatarColor, bio) => {
+  const signup = useCallback(async (username, password, avatarColor, bio, realEmail) => {
     if (!username || !password) return { error: "Username and password required" };
     if (password.length < 6) return { error: "Password must be at least 6 characters" };
     if (!/^[a-zA-Z0-9._-]{2,30}$/.test(username)) {
       return { error: "Username can only contain letters, numbers, dots, dashes, underscores (2-30 chars)" };
+    }
+    if (realEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(realEmail)) {
+      return { error: "Please enter a valid email address" };
     }
 
     const normalizedUsername = username.trim().toLowerCase();
@@ -152,7 +155,8 @@ export function AuthProvider({ children }) {
 
     if (existing) return { error: "Username already taken" };
 
-    const email = usernameToEmail(normalizedUsername);
+    // Use real email if provided, else generate a fake one
+    const email = realEmail ? realEmail.trim().toLowerCase() : usernameToEmail(normalizedUsername);
 
     // Create auth user
     const { data, error } = await supabase.auth.signUp({ email, password });
@@ -181,6 +185,7 @@ export function AuthProvider({ children }) {
         username: normalizedUsername,
         bio: bio || "",
         avatar_color: avatarColor || AVATAR_COLORS[0],
+        email: realEmail ? realEmail.trim().toLowerCase() : null,
       })
       .select()
       .single();

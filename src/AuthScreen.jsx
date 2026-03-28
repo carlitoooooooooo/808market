@@ -10,6 +10,7 @@ export default function AuthScreen() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [bio, setBio] = useState("");
+  const [email, setEmail] = useState("");
   const [avatarColor, setAvatarColor] = useState(AVATAR_COLORS[0]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -74,7 +75,7 @@ export default function AuthScreen() {
     if (mode === "login") {
       result = await login(username.trim(), password);
     } else {
-      result = await signup(username.trim(), password, avatarColor, bio.trim());
+      result = await signup(username.trim(), password, avatarColor, bio.trim(), email.trim());
     }
     setLoading(false);
     if (result?.error) setError(result.error);
@@ -129,6 +130,17 @@ export default function AuthScreen() {
 
           {mode === "signup" && (
             <>
+              <div className="auth-field">
+                <label className="auth-label">EMAIL <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '10px', fontWeight: 400 }}>(optional — for account recovery)</span></label>
+                <input
+                  className="auth-input"
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="your@email.com"
+                  disabled={loading}
+                />
+              </div>
               <div className="auth-field">
                 <label className="auth-label">BIO (OPTIONAL)</label>
                 <input

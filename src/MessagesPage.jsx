@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "./AuthContext.jsx";
 import { playMessageSound } from "./soundUtils.js";
+import CommunityChat from "./CommunityChat.jsx";
 
 const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
 const URL = 'https://bkapxykeryzxbqpgjgab.supabase.co';
@@ -156,6 +157,7 @@ function ChatThread({ otherUsername, onBack, currentUser }) {
 // ── Inbox ─────────────────────────────────────────────────────────
 export default function MessagesPage({ initialThread, onUnreadChange, onViewUser }) {
   const { currentUser } = useAuth();
+  const [tab, setTab] = useState('dms'); // 'dms' | 'community'
   const [threads, setThreads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeThread, setActiveThread] = useState(initialThread || null);
@@ -253,6 +255,25 @@ export default function MessagesPage({ initialThread, onUnreadChange, onViewUser
 
   return (
     <div className="messages-page">
+      {/* Tab switcher */}
+      <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.08)', flexShrink: 0 }}>
+        <button onClick={() => setTab('dms')} style={{ flex: 1, padding: '12px 0', background: 'none', border: 'none', borderBottom: `2px solid ${tab === 'dms' ? '#00f5ff' : 'transparent'}`, color: tab === 'dms' ? '#00f5ff' : 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', fontWeight: 600, fontSize: '13px', cursor: 'pointer', transition: 'all 0.15s' }}>
+          💬 Messages
+        </button>
+        <button onClick={() => setTab('community')} style={{ flex: 1, padding: '12px 0', background: 'none', border: 'none', borderBottom: `2px solid ${tab === 'community' ? '#bf5fff' : 'transparent'}`, color: tab === 'community' ? '#bf5fff' : 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', fontWeight: 600, fontSize: '13px', cursor: 'pointer', transition: 'all 0.15s' }}>
+          🌐 Community
+        </button>
+      </div>
+
+      {/* Community chat tab */}
+      {tab === 'community' && (
+        <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+          <CommunityChat onViewUser={onViewUser} />
+        </div>
+      )}
+
+      {/* DMs tab */}
+      {tab === 'dms' && <React.Fragment>
       {/* Header + search */}
       <div style={{ padding: '14px 16px 10px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
         <div style={{ fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '18px', marginBottom: '10px' }}>Messages</div>
@@ -325,6 +346,7 @@ export default function MessagesPage({ initialThread, onUnreadChange, onViewUser
           )}
         </div>
       ))}
+    </React.Fragment>}
     </div>
   );
 }

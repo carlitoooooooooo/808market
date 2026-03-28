@@ -528,20 +528,22 @@ function ListingUpload({ username, accent, onClose, onAdded }) {
 
       if (audioFile) {
         const ext = audioFile.name.split('.').pop();
-        const path = `listings/${username}_${Date.now()}.${ext}`;
+        const path = `${username}/listing_${Date.now()}.${ext}`;
         const res = await fetch(`${SUPABASE_URL}/storage/v1/object/audio/${path}`, {
           method: 'POST',
           headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}`, 'Content-Type': audioFile.type },
           body: audioFile,
         });
-        if (res.ok) {
-          audio_url = `${SUPABASE_URL}/storage/v1/object/public/audio/${path}`;
+        if (!res.ok) {
+          const errText = await res.text();
+          throw new Error(`Audio upload failed (${res.status}): ${errText}`);
         }
+        audio_url = `${SUPABASE_URL}/storage/v1/object/public/audio/${path}`;
       }
 
       if (coverFile) {
         const ext = coverFile.name.split('.').pop();
-        const path = `listing_covers/${username}_${Date.now()}.${ext}`;
+        const path = `${username}/listing_cover_${Date.now()}.${ext}`;
         const res = await fetch(`${SUPABASE_URL}/storage/v1/object/covers/${path}`, {
           method: 'POST',
           headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}`, 'Content-Type': coverFile.type },

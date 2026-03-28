@@ -32,9 +32,12 @@ function SectionHeader({ label, accent }) {
   );
 }
 
-function BeatCard({ beat, accent, onBuy }) {
+function BeatCard({ beat, accent, onBuy, cardStyle }) {
   const isFree = !beat.price || beat.price === 0;
+  const cardBg = cardStyle === 'glass' ? 'rgba(255,255,255,0.08)' : cardStyle === 'minimal' ? 'transparent' : cardStyle === 'bordered' ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.04)';
+  const cardBorder = cardStyle === 'bordered' ? `2px solid ${accent}40` : cardStyle === 'minimal' ? 'none' : '1px solid rgba(255,255,255,0.08)';
   const [playing, setPlaying] = React.useState(false);
+  // cardBg and cardBorder used in render below
   const audioRef = React.useRef(null);
 
   const togglePlay = (e) => {
@@ -60,9 +63,9 @@ function BeatCard({ beat, accent, onBuy }) {
   const audioUrl = beat.audio_url || beat.audioUrl;
 
   return (
-    <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', overflow: 'hidden', transition: 'border-color 0.2s' }}
-      onMouseEnter={e => e.currentTarget.style.borderColor = `${accent}50`}
-      onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'}
+    <div style={{ background: cardBg, border: cardBorder, borderRadius: '12px', overflow: 'hidden', transition: 'border-color 0.2s' }}
+      onMouseEnter={e => e.currentTarget.style.borderColor = `${accent}70`}
+      onMouseLeave={e => e.currentTarget.style.borderColor = cardStyle === 'bordered' ? `${accent}40` : 'rgba(255,255,255,0.08)'}
     >
       <div style={{ height: '120px', backgroundImage: `url(${beat.coverUrl || beat.cover_url})`, backgroundSize: 'cover', backgroundPosition: 'center', position: 'relative' }}>
         <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.3)' }} />
@@ -172,29 +175,86 @@ function DrumkitCard({ kit, accent }) {
   );
 }
 
+const CARD_STYLES = [
+  { value: 'default', label: 'Default' },
+  { value: 'glass', label: 'Glass' },
+  { value: 'minimal', label: 'Minimal' },
+  { value: 'bordered', label: 'Bordered' },
+];
+
+const FONT_STYLES = [
+  { value: 'default', label: 'Default', family: 'var(--font-head)' },
+  { value: 'mono', label: 'Mono', family: "'Space Mono', monospace" },
+  { value: 'serif', label: 'Serif', family: 'Georgia, serif' },
+  { value: 'rounded', label: 'Rounded', family: "'Nunito', 'Space Grotesk', sans-serif" },
+];
+
+const SECTION_LABELS = { beats: '🎵 Beats', open_verses: '🎤 Open Verses', features: '⭐ Features', drumkits: '🥁 Drum Kits' };
+
+function SectionOrderEditor({ order, setOrder }) {
+  const move = (i, dir) => {
+    const arr = [...order];
+    const j = i + dir;
+    if (j < 0 || j >= arr.length) return;
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+    setOrder(arr);
+  };
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+      {order.map((sec, i) => (
+        <div key={sec} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', padding: '8px 12px' }}>
+          <span style={{ flex: 1, fontSize: '13px', fontFamily: 'var(--font-body)' }}>{SECTION_LABELS[sec] || sec}</span>
+          <button onClick={() => move(i, -1)} disabled={i === 0} style={{ background: 'none', border: 'none', color: i === 0 ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.5)', cursor: i === 0 ? 'default' : 'pointer', fontSize: '14px' }}>↑</button>
+          <button onClick={() => move(i, 1)} disabled={i === order.length - 1} style={{ background: 'none', border: 'none', color: i === order.length - 1 ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.5)', cursor: i === order.length - 1 ? 'default' : 'pointer', fontSize: '14px' }}>↓</button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ─── Editor Modal ────────────────────────────────────────────────────────────
-function StorefrontEditor({ storefront, username, onSave, onClose }) {
+function StorefrontEditor({ storefront, username, beats, onSave, onClose }) {
   const [displayName, setDisplayName] = useState(storefront?.display_name || '');
   const [tagline, setTagline] = useState(storefront?.tagline || '');
+  const [aboutBio, setAboutBio] = useState(storefront?.about_bio || '');
   const [accent, setAccent] = useState(storefront?.accent_color || '#00f5ff');
   const [bg, setBg] = useState(storefront?.bg_color || '#0a0a0a');
+  const [cardStyle, setCardStyle] = useState(storefront?.card_style || 'default');
+  const [fontStyle, setFontStyle] = useState(storefront?.font_style || 'default');
+  const [sectionOrder, setSectionOrder] = useState(() => {
+    try { return JSON.parse(storefront?.section_order || '["beats","open_verses","features","drumkits"]'); }
+    catch { return ['beats', 'open_verses', 'features', 'drumkits']; }
+  });
+  const [featuredBeatId, setFeaturedBeatId] = useState(storefront?.featured_beat_id || '');
+  const [instagram, setInstagram] = useState(storefront?.instagram || '');
+  const [twitter, setTwitter] = useState(storefront?.twitter || '');
+  const [soundcloud, setSoundcloud] = useState(storefront?.soundcloud || '');
+  const [youtube, setYoutube] = useState(storefront?.youtube || '');
+  const [bioLink, setBioLink] = useState(storefront?.bio_link || '');
+  const [bioLinkLabel, setBioLinkLabel] = useState(storefront?.bio_link_label || '');
   const [bannerFile, setBannerFile] = useState(null);
   const [bannerPreview, setBannerPreview] = useState(storefront?.banner_url || null);
   const [cropFile, setCropFile] = useState(null);
   const [saving, setSaving] = useState(false);
   const bannerRef = useRef(null);
 
+  const F = ({ label, children }) => (
+    <div style={{ marginBottom: '14px' }}>
+      <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>{label}</label>
+      {children}
+    </div>
+  );
+
   const handleBannerChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    setCropFile(file); // open cropper instead of setting directly
+    setCropFile(file);
     bannerRef.current.value = '';
   };
 
   const handleSave = async () => {
     setSaving(true);
     let banner_url = storefront?.banner_url || null;
-
     if (bannerFile) {
       const ext = bannerFile.name.split('.').pop();
       const path = `banners/${username}_${Date.now()}.${ext}`;
@@ -205,8 +265,14 @@ function StorefrontEditor({ storefront, username, onSave, onClose }) {
       });
       if (res.ok) banner_url = `${SUPABASE_URL}/storage/v1/object/public/covers/${path}`;
     }
-
-    const payload = { username, display_name: displayName, tagline, accent_color: accent, bg_color: bg, banner_url, is_public: true };
+    const payload = {
+      username, display_name: displayName, tagline, about_bio: aboutBio,
+      accent_color: accent, bg_color: bg, banner_url, is_public: true,
+      card_style: cardStyle, font_style: fontStyle,
+      section_order: JSON.stringify(sectionOrder),
+      featured_beat_id: featuredBeatId || null,
+      instagram, twitter, soundcloud, youtube, bio_link: bioLink, bio_link_label: bioLinkLabel,
+    };
     if (storefront) {
       await dbPatch(`storefronts?username=eq.${encodeURIComponent(username)}`, payload);
     } else {
@@ -217,16 +283,15 @@ function StorefrontEditor({ storefront, username, onSave, onClose }) {
   };
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 900, overflowY: 'auto', display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: '20px', paddingBottom: 'env(safe-area-inset-bottom, 20px)' }}>
-      <div style={{ background: '#111', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '16px', padding: '24px 20px', width: '100%', maxWidth: '420px', marginTop: '20px', marginBottom: '40px' }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.9)', zIndex: 900, overflowY: 'auto', display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: '20px', paddingBottom: 'env(safe-area-inset-bottom, 20px)' }}>
+      <div style={{ background: '#111', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '16px', padding: '24px 20px', width: '100%', maxWidth: '480px', marginTop: '20px', marginBottom: '40px' }}>
         <div style={{ fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '18px', marginBottom: '20px' }}>✏️ Customize Storefront</div>
 
         {/* Banner */}
-        <div style={{ marginBottom: '14px' }}>
-          <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>Banner Image</label>
+        <F label="Banner Image">
           <input ref={bannerRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleBannerChange} />
           {bannerPreview ? (
-            <div style={{ position: 'relative', height: '80px', borderRadius: '10px', overflow: 'hidden', marginBottom: '6px', cursor: 'pointer' }} onClick={() => bannerRef.current?.click()}>
+            <div style={{ position: 'relative', height: '80px', borderRadius: '10px', overflow: 'hidden', cursor: 'pointer' }} onClick={() => bannerRef.current?.click()}>
               <img src={bannerPreview} alt="banner" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '12px', fontFamily: 'var(--font-head)' }}>Change Banner</div>
             </div>
@@ -236,33 +301,87 @@ function StorefrontEditor({ storefront, username, onSave, onClose }) {
               🖼 Upload Banner Image
             </button>
           )}
-        </div>
+        </F>
 
-        <div style={{ marginBottom: '14px' }}>
-          <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>Display Name</label>
+        <F label="Display Name">
           <input className="auth-input" value={displayName} onChange={e => setDisplayName(e.target.value)} placeholder={username} maxLength={40} />
-        </div>
+        </F>
 
-        <div style={{ marginBottom: '14px' }}>
-          <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>Tagline</label>
+        <F label="Tagline">
           <input className="auth-input" value={tagline} onChange={e => setTagline(e.target.value)} placeholder="Beats. Vibes. Culture." maxLength={80} />
-        </div>
+        </F>
 
-        <div style={{ marginBottom: '14px' }}>
-          <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '8px', textTransform: 'uppercase' }}>Accent Color</label>
+        <F label="About Bio">
+          <textarea className="auth-input" value={aboutBio} onChange={e => setAboutBio(e.target.value)} placeholder="Tell visitors about yourself..." maxLength={300} rows={3} style={{ resize: 'vertical', fontFamily: 'inherit' }} />
+        </F>
+
+        {/* Featured Beat */}
+        {beats && beats.length > 0 && (
+          <F label="⭐ Featured Beat">
+            <select className="auth-input" value={featuredBeatId} onChange={e => setFeaturedBeatId(e.target.value)} style={{ cursor: 'pointer' }}>
+              <option value="">None</option>
+              {beats.map(b => <option key={b.id} value={b.id}>{b.title}</option>)}
+            </select>
+          </F>
+        )}
+
+        {/* Section Order */}
+        <F label="Section Order">
+          <SectionOrderEditor order={sectionOrder} setOrder={setSectionOrder} />
+        </F>
+
+        {/* Card Style */}
+        <F label="Card Style">
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            {CARD_STYLES.map(s => (
+              <button key={s.value} type="button" onClick={() => setCardStyle(s.value)}
+                style={{ padding: '7px 14px', borderRadius: '20px', border: `2px solid ${cardStyle === s.value ? accent : 'rgba(255,255,255,0.15)'}`, background: cardStyle === s.value ? `${accent}20` : 'transparent', color: cardStyle === s.value ? accent : 'rgba(255,255,255,0.5)', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-head)' }}>
+                {s.label}
+              </button>
+            ))}
+          </div>
+        </F>
+
+        {/* Font Style */}
+        <F label="Font Style">
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            {FONT_STYLES.map(f => (
+              <button key={f.value} type="button" onClick={() => setFontStyle(f.value)}
+                style={{ padding: '7px 14px', borderRadius: '20px', border: `2px solid ${fontStyle === f.value ? accent : 'rgba(255,255,255,0.15)'}`, background: fontStyle === f.value ? `${accent}20` : 'transparent', color: fontStyle === f.value ? accent : 'rgba(255,255,255,0.5)', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: f.family }}>
+                {f.label}
+              </button>
+            ))}
+          </div>
+        </F>
+
+        {/* Accent Color */}
+        <F label="Accent Color">
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
             {ACCENT_COLORS.map(c => (
               <button key={c} type="button" onClick={() => setAccent(c)} style={{ width: '28px', height: '28px', borderRadius: '50%', background: c, border: `3px solid ${accent === c ? '#fff' : 'transparent'}`, cursor: 'pointer' }} />
             ))}
           </div>
-        </div>
+        </F>
 
-        <div style={{ marginBottom: '20px' }}>
-          <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '8px', textTransform: 'uppercase' }}>Background</label>
+        {/* Background */}
+        <F label="Background">
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
             {BG_COLORS.map(c => (
               <button key={c} type="button" onClick={() => setBg(c)} style={{ width: '28px', height: '28px', borderRadius: '8px', background: c, border: `3px solid ${bg === c ? '#fff' : 'rgba(255,255,255,0.2)'}`, cursor: 'pointer' }} />
             ))}
+          </div>
+        </F>
+
+        {/* Social Links */}
+        <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '14px', marginBottom: '14px' }}>
+          <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '10px', textTransform: 'uppercase' }}>Social Links</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <input className="auth-input" value={instagram} onChange={e => setInstagram(e.target.value)} placeholder="📸 Instagram handle" maxLength={50} />
+            <input className="auth-input" value={twitter} onChange={e => setTwitter(e.target.value)} placeholder="🐦 Twitter/X handle" maxLength={50} />
+            <input className="auth-input" value={soundcloud} onChange={e => setSoundcloud(e.target.value)} placeholder="☁️ SoundCloud username" maxLength={50} />
+            <input className="auth-input" value={youtube} onChange={e => setYoutube(e.target.value)} placeholder="▶️ YouTube channel" maxLength={50} />
+            <input className="auth-input" value={bioLink} onChange={e => setBioLink(e.target.value)} placeholder="🔗 Custom link URL" maxLength={200} />
+            <input className="auth-input" value={bioLinkLabel} onChange={e => setBioLinkLabel(e.target.value)} placeholder="🔗 Link label (e.g. My Website)" maxLength={50} />
           </div>
         </div>
 
@@ -276,11 +395,7 @@ function StorefrontEditor({ storefront, username, onSave, onClose }) {
       {cropFile && (
         <BannerCropper
           file={cropFile}
-          onCrop={(croppedFile) => {
-            setBannerFile(croppedFile);
-            setBannerPreview(URL.createObjectURL(croppedFile));
-            setCropFile(null);
-          }}
+          onCrop={(croppedFile) => { setBannerFile(croppedFile); setBannerPreview(URL.createObjectURL(croppedFile)); setCropFile(null); }}
           onCancel={() => setCropFile(null)}
         />
       )}
@@ -465,6 +580,12 @@ export default function StorefrontPage({ username, onBack }) {
 
   const accent = storefront?.accent_color || '#00f5ff';
   const bg = storefront?.bg_color || '#0a0a0a';
+  const fontFamily = FONT_STYLES.find(f => f.value === storefront?.font_style)?.family || 'var(--font-head)';
+  const sectionOrder = (() => {
+    try { return JSON.parse(storefront?.section_order || '["beats","open_verses","features","drumkits"]'); }
+    catch { return ['beats', 'open_verses', 'features', 'drumkits']; }
+  })();
+  const featuredBeat = storefront?.featured_beat_id ? beats.find(b => String(b.id) === String(storefront.featured_beat_id)) : null;
 
   useEffect(() => {
     if (!username) return;
@@ -599,15 +720,43 @@ export default function StorefrontPage({ username, onBack }) {
       </div>
 
       {/* Content */}
-      <div style={{ padding: '24px 20px', maxWidth: '800px', margin: '0 auto' }}>
+      <div style={{ padding: '24px 20px', maxWidth: '800px', margin: '0 auto', fontFamily }}>
 
         {/* Owner actions */}
         {isOwner && (
           <div style={{ marginBottom: '24px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
             <button onClick={() => setShowListingUpload(true)}
-              style={{ padding: '10px 18px', background: `linear-gradient(135deg, ${accent}, #bf5fff)`, border: 'none', borderRadius: '20px', color: '#000', fontWeight: 700, fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-head)' }}>
+              style={{ padding: '10px 18px', background: `linear-gradient(135deg, ${accent}, #bf5fff)`, border: 'none', borderRadius: '20px', color: '#000', fontWeight: 700, fontSize: '13px', cursor: 'pointer', fontFamily }}>
               ➕ Add Listing
             </button>
+          </div>
+        )}
+
+        {/* About Bio */}
+        {storefront?.about_bio && (
+          <div style={{ marginBottom: '24px', background: 'rgba(255,255,255,0.04)', border: `1px solid ${accent}20`, borderRadius: '12px', padding: '16px 18px', fontSize: '14px', color: 'rgba(255,255,255,0.7)', fontFamily: 'var(--font-body)', lineHeight: 1.6 }}>
+            {storefront.about_bio}
+          </div>
+        )}
+
+        {/* Social Links */}
+        {(storefront?.instagram || storefront?.twitter || storefront?.soundcloud || storefront?.youtube || storefront?.bio_link) && (
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '24px' }}>
+            {storefront.instagram && <a href={`https://instagram.com/${storefront.instagram}`} target="_blank" rel="noreferrer" style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px', padding: '6px 14px', color: 'rgba(255,255,255,0.6)', fontSize: '12px', textDecoration: 'none', fontWeight: 600 }}>📸 Instagram</a>}
+            {storefront.twitter && <a href={`https://x.com/${storefront.twitter}`} target="_blank" rel="noreferrer" style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px', padding: '6px 14px', color: 'rgba(255,255,255,0.6)', fontSize: '12px', textDecoration: 'none', fontWeight: 600 }}>🐦 Twitter</a>}
+            {storefront.soundcloud && <a href={`https://soundcloud.com/${storefront.soundcloud}`} target="_blank" rel="noreferrer" style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px', padding: '6px 14px', color: 'rgba(255,255,255,0.6)', fontSize: '12px', textDecoration: 'none', fontWeight: 600 }}>☁️ SoundCloud</a>}
+            {storefront.youtube && <a href={`https://youtube.com/@${storefront.youtube}`} target="_blank" rel="noreferrer" style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px', padding: '6px 14px', color: 'rgba(255,255,255,0.6)', fontSize: '12px', textDecoration: 'none', fontWeight: 600 }}>▶️ YouTube</a>}
+            {storefront.bio_link && <a href={storefront.bio_link.startsWith('http') ? storefront.bio_link : `https://${storefront.bio_link}`} target="_blank" rel="noreferrer" style={{ background: `${accent}20`, border: `1px solid ${accent}40`, borderRadius: '20px', padding: '6px 14px', color: accent, fontSize: '12px', textDecoration: 'none', fontWeight: 700 }}>🔗 {storefront.bio_link_label || 'Link'}</a>}
+          </div>
+        )}
+
+        {/* Featured Beat */}
+        {featuredBeat && (
+          <div style={{ marginBottom: '32px' }}>
+            <SectionHeader label="⭐ Featured Beat" accent={accent} />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '12px', maxWidth: '340px' }}>
+              <BeatCard beat={featuredBeat} accent={accent} onBuy={handleBuy} cardStyle={storefront?.card_style} />
+            </div>
           </div>
         )}
 
@@ -618,65 +767,53 @@ export default function StorefrontPage({ username, onBack }) {
           </div>
         )}
 
-        {/* Beats */}
-        {beats.length > 0 && (
-          <div style={{ marginBottom: '32px' }}>
-            <SectionHeader label={`🎵 Beats (${beats.length})`} accent={accent} />
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '12px' }}>
-              {beats.map(b => <BeatCard key={b.id} beat={b} accent={accent} onBuy={handleBuy} />)}
-            </div>
-          </div>
-        )}
-
-        {/* Open Verses */}
-        {openVerses.length > 0 && (
-          <div style={{ marginBottom: '32px' }}>
-            <SectionHeader label={`🎤 Open Verses (${openVerses.length})`} accent={accent} />
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '12px' }}>
-              {openVerses.map(l => <ListingCard key={l.id} listing={l} accent={accent} onBuy={handleBuy} isOwner={isOwner} onDelete={handleDeleteListing} />)}
-            </div>
-          </div>
-        )}
-
-        {/* Features */}
-        {(features.length > 0 || isOwner) && (
-          <div style={{ marginBottom: '32px' }}>
-            <SectionHeader label="⭐ Features" accent={accent} />
-            {features.length > 0 ? (
-              <div style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid ${accent}30`, borderRadius: '14px', padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
-                <div>
-                  <div style={{ fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '16px', marginBottom: '4px' }}>Book a Feature</div>
-                  {features[0].description && <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', fontFamily: 'var(--font-body)', maxWidth: '300px', lineHeight: 1.4 }}>{features[0].description}</div>}
-                  <div style={{ fontSize: '22px', fontWeight: 700, fontFamily: 'var(--font-head)', color: '#00ff88', marginTop: '8px' }}>${features[0].price}</div>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
-                  <button onClick={() => handleBuy(features[0])} style={{ background: `linear-gradient(135deg, ${accent}, #bf5fff)`, color: '#000', border: 'none', borderRadius: '12px', padding: '12px 24px', fontSize: '14px', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-head)', whiteSpace: 'nowrap' }}>
-                    🎤 Buy a Feature
-                  </button>
-                  {isOwner && (
-                    <button onClick={() => handleDeleteListing(features[0].id)} style={{ background: 'rgba(255,51,102,0.1)', border: '1px solid rgba(255,51,102,0.3)', color: '#ff3366', borderRadius: '8px', padding: '6px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'var(--font-head)' }}>
-                      🗑 Remove
-                    </button>
-                  )}
-                </div>
+        {/* Sections in custom order */}
+        {sectionOrder.map(section => {
+          if (section === 'beats' && beats.length > 0) return (
+            <div key="beats" style={{ marginBottom: '32px' }}>
+              <SectionHeader label={`🎵 Beats (${beats.length})`} accent={accent} />
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '12px' }}>
+                {beats.map(b => <BeatCard key={b.id} beat={b} accent={accent} onBuy={handleBuy} cardStyle={storefront?.card_style} />)}
               </div>
-            ) : isOwner ? (
-              <div style={{ textAlign: 'center', padding: '24px', background: 'rgba(255,255,255,0.03)', border: '1px dashed rgba(255,255,255,0.1)', borderRadius: '12px', color: 'rgba(255,255,255,0.3)', fontSize: '13px', fontFamily: 'var(--font-body)' }}>
-                Add a feature listing to show a "Buy a Feature" button here
-              </div>
-            ) : null}
-          </div>
-        )}
-
-        {/* Drumkits */}
-        {drumkits.length > 0 && (
-          <div style={{ marginBottom: '32px' }}>
-            <SectionHeader label={`🥁 Drum Kits (${drumkits.length})`} accent={accent} />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {drumkits.map(k => <DrumkitCard key={k.id} kit={k} accent={accent} />)}
             </div>
-          </div>
-        )}
+          );
+          if (section === 'open_verses' && openVerses.length > 0) return (
+            <div key="open_verses" style={{ marginBottom: '32px' }}>
+              <SectionHeader label={`🎤 Open Verses (${openVerses.length})`} accent={accent} />
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '12px' }}>
+                {openVerses.map(l => <ListingCard key={l.id} listing={l} accent={accent} onBuy={handleBuy} isOwner={isOwner} onDelete={handleDeleteListing} />)}
+              </div>
+            </div>
+          );
+          if (section === 'features' && (features.length > 0 || isOwner)) return (
+            <div key="features" style={{ marginBottom: '32px' }}>
+              <SectionHeader label="⭐ Features" accent={accent} />
+              {features.length > 0 ? (
+                <div style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid ${accent}30`, borderRadius: '14px', padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+                  <div>
+                    <div style={{ fontFamily, fontWeight: 700, fontSize: '16px', marginBottom: '4px' }}>Book a Feature</div>
+                    <div style={{ fontSize: '22px', fontWeight: 700, fontFamily, color: '#00ff88', marginTop: '8px' }}>${features[0].price}</div>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
+                    <button onClick={() => handleBuy(features[0])} style={{ background: `linear-gradient(135deg, ${accent}, #bf5fff)`, color: '#000', border: 'none', borderRadius: '12px', padding: '12px 24px', fontSize: '14px', fontWeight: 700, cursor: 'pointer', fontFamily, whiteSpace: 'nowrap' }}>🎤 Buy a Feature</button>
+                    {isOwner && <button onClick={() => handleDeleteListing(features[0].id)} style={{ background: 'rgba(255,51,102,0.1)', border: '1px solid rgba(255,51,102,0.3)', color: '#ff3366', borderRadius: '8px', padding: '6px 12px', fontSize: '11px', cursor: 'pointer', fontFamily }}>🗑 Remove</button>}
+                  </div>
+                </div>
+              ) : isOwner ? (
+                <div style={{ textAlign: 'center', padding: '24px', background: 'rgba(255,255,255,0.03)', border: '1px dashed rgba(255,255,255,0.1)', borderRadius: '12px', color: 'rgba(255,255,255,0.3)', fontSize: '13px', fontFamily: 'var(--font-body)' }}>Add a feature listing to show a "Buy a Feature" button here</div>
+              ) : null}
+            </div>
+          );
+          if (section === 'drumkits' && drumkits.length > 0) return (
+            <div key="drumkits" style={{ marginBottom: '32px' }}>
+              <SectionHeader label={`🥁 Drum Kits (${drumkits.length})`} accent={accent} />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {drumkits.map(k => <DrumkitCard key={k.id} kit={k} accent={accent} />)}
+              </div>
+            </div>
+          );
+          return null;
+        })}
       </div>
 
       {/* Powered by footer */}
@@ -688,6 +825,7 @@ export default function StorefrontPage({ username, onBack }) {
         <StorefrontEditor
           storefront={storefront}
           username={username}
+          beats={beats}
           onSave={(updated) => { setStorefront(updated); setShowEditor(false); }}
           onClose={() => setShowEditor(false)}
         />

@@ -625,8 +625,8 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
 
           {/* Username + badges */}
           <div style={{ minWidth: 0 }}>
-            <div className={`profile-username ${profileExtra.name_glow !== 'none' ? `name-glow-${profileExtra.name_glow}` : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-              <span>{currentUser.username}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', fontFamily: 'var(--font-head)', fontSize: '18px', fontWeight: 700 }}>
+              <span className={profileExtra.name_glow !== 'none' ? `name-glow-${profileExtra.name_glow}` : ''}>{currentUser.username}</span>
               {!JSON.parse(localStorage.getItem('hideActivityStatus') || 'false') && (
                 <span title="Online" style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#00ff88', boxShadow: '0 0 6px #00ff88', display: 'inline-block', flexShrink: 0 }} />
               )}

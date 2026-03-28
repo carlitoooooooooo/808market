@@ -37,7 +37,22 @@ export default function LeaderboardPage({ tracks, onVote, userVotes, onViewUser,
         headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` }
       });
       const data = await res.json();
-      setStorefronts(Array.isArray(data) ? data : []);
+      if (!Array.isArray(data)) { setStorefrontsLoading(false); setStorefrontsLoaded(true); return; }
+
+      // Fetch avatars for all storefront owners
+      const usernames = data.map(s => s.username);
+      if (usernames.length > 0) {
+        const profRes = await fetch(
+          `${SUPABASE_URL}/rest/v1/profiles?username=in.(${usernames.map(encodeURIComponent).join(',')})&select=username,avatar_url,avatar_color`,
+          { headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` } }
+        );
+        const profiles = await profRes.json();
+        const profileMap = {};
+        if (Array.isArray(profiles)) profiles.forEach(p => { profileMap[p.username] = p; });
+        setStorefronts(data.map(sf => ({ ...sf, avatar_url: profileMap[sf.username]?.avatar_url || null, avatar_color: profileMap[sf.username]?.avatar_color || sf.accent_color })));
+      } else {
+        setStorefronts(data);
+      }
     } catch {}
     setStorefrontsLoading(false);
     setStorefrontsLoaded(true);
@@ -358,7 +373,9 @@ export default function LeaderboardPage({ tracks, onVote, userVotes, onViewUser,
               onMouseEnter={e => e.currentTarget.style.borderColor = `${sf.accent_color || '#00f5ff'}50`}
               onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'}
             >
-              <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: sf.accent_color || '#00f5ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>🏪</div>
+              <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: sf.avatar_color || sf.accent_color || '#00f5ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 700, fontFamily: 'var(--font-head)', flexShrink: 0, overflow: 'hidden', border: `2px solid ${sf.accent_color || '#00f5ff'}40` }}>
+                {sf.avatar_url ? <img src={sf.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : (sf.username[0] || '?').toUpperCase()}
+              </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '14px', color: '#fff' }}>{sf.display_name || `@${sf.username}`}</div>
                 {sf.tagline && <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.45)', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{sf.tagline}</div>}

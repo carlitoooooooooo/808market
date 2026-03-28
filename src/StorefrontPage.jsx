@@ -212,6 +212,15 @@ function SectionOrderEditor({ order, setOrder }) {
   );
 }
 
+function EditorField({ label, children }) {
+  return (
+    <div style={{ marginBottom: '14px' }}>
+      <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>{label}</label>
+      {children}
+    </div>
+  );
+}
+
 // ─── Editor Modal ────────────────────────────────────────────────────────────
 function StorefrontEditor({ storefront, username, beats, onSave, onClose }) {
   const [displayName, setDisplayName] = useState(storefront?.display_name || '');
@@ -237,13 +246,6 @@ function StorefrontEditor({ storefront, username, beats, onSave, onClose }) {
   const [cropFile, setCropFile] = useState(null);
   const [saving, setSaving] = useState(false);
   const bannerRef = useRef(null);
-
-  const F = ({ label, children }) => (
-    <div style={{ marginBottom: '14px' }}>
-      <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>{label}</label>
-      {children}
-    </div>
-  );
 
   const handleBannerChange = (e) => {
     const file = e.target.files[0];
@@ -288,7 +290,7 @@ function StorefrontEditor({ storefront, username, beats, onSave, onClose }) {
         <div style={{ fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '18px', marginBottom: '20px' }}>✏️ Customize Storefront</div>
 
         {/* Banner */}
-        <F label="Banner Image">
+        <EditorField label="Banner Image">
           <input ref={bannerRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleBannerChange} />
           {bannerPreview ? (
             <div style={{ position: 'relative', height: '80px', borderRadius: '10px', overflow: 'hidden', cursor: 'pointer' }} onClick={() => bannerRef.current?.click()}>
@@ -301,37 +303,37 @@ function StorefrontEditor({ storefront, username, beats, onSave, onClose }) {
               🖼 Upload Banner Image
             </button>
           )}
-        </F>
+        </EditorField>
 
-        <F label="Display Name">
+        <EditorField label="Display Name">
           <input className="auth-input" value={displayName} onChange={e => setDisplayName(e.target.value)} placeholder={username} maxLength={40} />
-        </F>
+        </EditorField>
 
-        <F label="Tagline">
+        <EditorField label="Tagline">
           <input className="auth-input" value={tagline} onChange={e => setTagline(e.target.value)} placeholder="Beats. Vibes. Culture." maxLength={80} />
-        </F>
+        </EditorField>
 
-        <F label="About Bio">
+        <EditorField label="About Bio">
           <textarea className="auth-input" value={aboutBio} onChange={e => setAboutBio(e.target.value)} placeholder="Tell visitors about yourself..." maxLength={300} rows={3} style={{ resize: 'vertical', fontFamily: 'inherit' }} />
-        </F>
+        </EditorField>
 
         {/* Featured Beat */}
         {beats && beats.length > 0 && (
-          <F label="⭐ Featured Beat">
+          <EditorField label="⭐ Featured Beat">
             <select className="auth-input" value={featuredBeatId} onChange={e => setFeaturedBeatId(e.target.value)} style={{ cursor: 'pointer' }}>
               <option value="">None</option>
               {beats.map(b => <option key={b.id} value={b.id}>{b.title}</option>)}
             </select>
-          </F>
+          </EditorField>
         )}
 
         {/* Section Order */}
-        <F label="Section Order">
+        <EditorField label="Section Order">
           <SectionOrderEditor order={sectionOrder} setOrder={setSectionOrder} />
-        </F>
+        </EditorField>
 
         {/* Card Style */}
-        <F label="Card Style">
+        <EditorField label="Card Style">
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
             {CARD_STYLES.map(s => (
               <button key={s.value} type="button" onClick={() => setCardStyle(s.value)}
@@ -340,27 +342,27 @@ function StorefrontEditor({ storefront, username, beats, onSave, onClose }) {
               </button>
             ))}
           </div>
-        </F>
+        </EditorField>
 
 
 
         {/* Accent Color */}
-        <F label="Accent Color">
+        <EditorField label="Accent Color">
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
             {ACCENT_COLORS.map(c => (
               <button key={c} type="button" onClick={() => setAccent(c)} style={{ width: '28px', height: '28px', borderRadius: '50%', background: c, border: `3px solid ${accent === c ? '#fff' : 'transparent'}`, cursor: 'pointer' }} />
             ))}
           </div>
-        </F>
+        </EditorField>
 
         {/* Background */}
-        <F label="Background">
+        <EditorField label="Background">
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
             {BG_COLORS.map(c => (
               <button key={c} type="button" onClick={() => setBg(c)} style={{ width: '28px', height: '28px', borderRadius: '8px', background: c, border: `3px solid ${bg === c ? '#fff' : 'rgba(255,255,255,0.2)'}`, cursor: 'pointer' }} />
             ))}
           </div>
-        </F>
+        </EditorField>
 
         {/* Social Links */}
         <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '14px', marginBottom: '14px' }}>
@@ -832,3 +834,4 @@ export default function StorefrontPage({ username, onBack }) {
     </div>
   );
 }
+

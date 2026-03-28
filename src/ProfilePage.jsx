@@ -53,7 +53,7 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
   const [editing, setEditing] = useState(false);
   const [editBio, setEditBio] = useState(currentUser?.bio || "");
   const [editColor, setEditColor] = useState(currentUser?.avatarColor || AVATAR_COLORS[0]);
-  const [profileExtra, setProfileExtra] = useState({ location: '', tagline: '', instagram: '', twitter: '', soundcloud: '', youtube: '', spotify_url: '', influenced_by: '', avatar_border: 'none', name_glow: 'none', profile_bg: 'none', bio_link: '', bio_link_label: '', profile_badge: '' });
+  const [profileExtra, setProfileExtra] = useState({ location: '', tagline: '', instagram: '', twitter: '', soundcloud: '', youtube: '', spotify_url: '', influenced_by: '', avatar_border: 'none', name_glow: 'none', profile_bg: 'none', bio_link: '', bio_link_label: '', profile_badge: '', profile_badge_color: 'cyan-purple' });
   const [totalPlays, setTotalPlays] = useState(0);
   const [avatarUrl, setAvatarUrl] = useState(currentUser?.avatarUrl || null);
   const [coverUrl, setCoverUrl] = useState(null);
@@ -273,11 +273,11 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
   // Load extra profile fields
   useEffect(() => {
     if (!currentUser?.username) return;
-    fetch(`${SUPABASE_URL}/rest/v1/profiles?username=eq.${encodeURIComponent(currentUser.username)}&select=location,tagline,instagram,twitter,soundcloud,youtube,spotify_url,influenced_by,avatar_border,name_glow,profile_bg,bio_link,bio_link_label,profile_badge`, {
+    fetch(`${SUPABASE_URL}/rest/v1/profiles?username=eq.${encodeURIComponent(currentUser.username)}&select=location,tagline,instagram,twitter,soundcloud,youtube,spotify_url,influenced_by,avatar_border,name_glow,profile_bg,bio_link,bio_link_label,profile_badge,profile_badge_color`, {
       headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` }
     }).then(r => r.json()).then(data => {
       const p = Array.isArray(data) ? data[0] : data;
-      if (p) setProfileExtra({ location: p.location||'', tagline: p.tagline||'', instagram: p.instagram||'', twitter: p.twitter||'', soundcloud: p.soundcloud||'', youtube: p.youtube||'', spotify_url: p.spotify_url||'', influenced_by: p.influenced_by||'', avatar_border: p.avatar_border||'none', name_glow: p.name_glow||'none', profile_bg: p.profile_bg||'none', bio_link: p.bio_link||'', bio_link_label: p.bio_link_label||'', profile_badge: p.profile_badge||'' });
+      if (p) setProfileExtra({ location: p.location||'', tagline: p.tagline||'', instagram: p.instagram||'', twitter: p.twitter||'', soundcloud: p.soundcloud||'', youtube: p.youtube||'', spotify_url: p.spotify_url||'', influenced_by: p.influenced_by||'', avatar_border: p.avatar_border||'none', name_glow: p.name_glow||'none', profile_bg: p.profile_bg||'none', bio_link: p.bio_link||'', bio_link_label: p.bio_link_label||'', profile_badge: p.profile_badge||'', profile_badge_color: p.profile_badge_color||'cyan-purple' });
     }).catch(() => {});
 
     // Load total plays from tracks
@@ -650,13 +650,27 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
             </div>
 
             {/* Profile Badge */}
-            {profileExtra.profile_badge && (
-              <div style={{ marginTop: '4px', marginBottom: '2px' }}>
-                <span style={{ background: 'linear-gradient(135deg, #00f5ff, #bf5fff)', color: '#000', fontSize: '10px', fontFamily: 'var(--font-head)', fontWeight: 700, padding: '2px 10px', borderRadius: '20px', letterSpacing: '0.5px' }}>
-                  {profileExtra.profile_badge}
-                </span>
-              </div>
-            )}
+            {profileExtra.profile_badge && (() => {
+              const BADGE_COLORS = {
+                'cyan-purple': { bg: 'linear-gradient(135deg,#00f5ff,#bf5fff)', color: '#000' },
+                'gold':        { bg: 'linear-gradient(135deg,#ffd700,#ffed4e)', color: '#000' },
+                'red':         { bg: 'linear-gradient(135deg,#ff3366,#ff0000)', color: '#fff' },
+                'green':       { bg: 'linear-gradient(135deg,#00ff88,#00cc66)', color: '#000' },
+                'blue':        { bg: 'linear-gradient(135deg,#4080ff,#0040cc)', color: '#fff' },
+                'orange':      { bg: 'linear-gradient(135deg,#ff9900,#ff6600)', color: '#000' },
+                'pink':        { bg: 'linear-gradient(135deg,#ff64c8,#ff0099)', color: '#fff' },
+                'white':       { bg: 'linear-gradient(135deg,#fff,#ccc)', color: '#000' },
+                'dark':        { bg: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)' },
+              };
+              const bc = BADGE_COLORS[profileExtra.profile_badge_color] || BADGE_COLORS['cyan-purple'];
+              return (
+                <div style={{ marginTop: '4px', marginBottom: '2px' }}>
+                  <span style={{ background: bc.bg, color: bc.color, border: bc.border || 'none', fontSize: '10px', fontFamily: 'var(--font-head)', fontWeight: 700, padding: '2px 10px', borderRadius: '20px', letterSpacing: '0.5px' }}>
+                    {profileExtra.profile_badge}
+                  </span>
+                </div>
+              );
+            })()}
 
             {/* Followers / Following */}
             <div style={{ display: 'flex', gap: '14px', marginTop: '4px' }}>
@@ -1223,6 +1237,30 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
                             </button>
                           ))}
                         </div>
+                        {/* Badge Color Picker */}
+                        {profileExtra.profile_badge && (
+                          <div style={{ marginTop: '10px' }}>
+                            <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '8px' }}>BADGE COLOR</div>
+                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                              {[
+                                { value: 'cyan-purple', label: 'Signature', bg: 'linear-gradient(135deg,#00f5ff,#bf5fff)', color: '#000' },
+                                { value: 'gold', label: 'Gold', bg: 'linear-gradient(135deg,#ffd700,#ffed4e)', color: '#000' },
+                                { value: 'red', label: 'Red', bg: 'linear-gradient(135deg,#ff3366,#ff0000)', color: '#fff' },
+                                { value: 'green', label: 'Green', bg: 'linear-gradient(135deg,#00ff88,#00cc66)', color: '#000' },
+                                { value: 'blue', label: 'Blue', bg: 'linear-gradient(135deg,#4080ff,#0040cc)', color: '#fff' },
+                                { value: 'orange', label: 'Orange', bg: 'linear-gradient(135deg,#ff9900,#ff6600)', color: '#000' },
+                                { value: 'pink', label: 'Pink', bg: 'linear-gradient(135deg,#ff64c8,#ff0099)', color: '#fff' },
+                                { value: 'white', label: 'White', bg: 'linear-gradient(135deg,#fff,#ccc)', color: '#000' },
+                                { value: 'dark', label: 'Dark', bg: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)' },
+                              ].map(c => (
+                                <button key={c.value} type="button" onClick={() => setProfileExtra(prev => ({ ...prev, profile_badge_color: c.value }))}
+                                  style={{ padding: '4px 12px', background: c.bg, color: c.color, border: profileExtra.profile_badge_color === c.value ? '2px solid #fff' : (c.border || '2px solid transparent'), borderRadius: '20px', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-head)' }}>
+                                  {c.label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                       <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                         {[

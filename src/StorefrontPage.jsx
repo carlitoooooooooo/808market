@@ -441,12 +441,55 @@ function ListingUpload({ username, accent, onClose, onAdded }) {
   const [coverFile, setCoverFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
+  const [myDrumkits, setMyDrumkits] = useState([]);
+  const [selectedKitId, setSelectedKitId] = useState('');
   const audioRef = useRef(null);
   const coverRef = useRef(null);
 
   const GENRES = ['Hip-Hop', 'Drill', 'Trap', 'R&B', 'Electronic', 'Other'];
 
+  // Load drumkits when type switches to drumkit
+  useEffect(() => {
+    if (type !== 'drumkit' || myDrumkits.length > 0) return;
+    fetch(`${SUPABASE_URL}/rest/v1/drumkits?uploaded_by_username=eq.${encodeURIComponent(username)}&select=id,name,file_url,price,description`, {
+      headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` }
+    }).then(r => r.json()).then(data => { if (Array.isArray(data)) setMyDrumkits(data); }).catch(() => {});
+  }, [type, username]);
+
   const handleSubmit = async () => {
+    if (type === 'drumkit') {
+      if (!selectedKitId) return setError('Select a drumkit');
+      const kit = myDrumkits.find(k => String(k.id) === selectedKitId);
+      if (!kit) return setError('Drumkit not found');
+      // Add it as a listing entry referencing the drumkit
+      try {
+        const listing = await dbPost('artist_listings', {
+          seller_username: username,
+          type: 'drumkit',
+          title: kit.name,
+          description: kit.description || '',
+          price: kit.price || 0,
+          audio_url: null,
+          cover_url: null,
+          is_active: true,
+          // Store kit ID in description for reference
+          bpm: null,
+          genre: 'Other',
+        });
+        // Also store drumkit file_url by patching
+        const listingId = Array.isArray(listing) ? listing[0]?.id : listing?.id;
+        if (listingId) {
+          await fetch(`${SUPABASE_URL}/rest/v1/artist_listings?id=eq.${listingId}`, {
+            method: 'PATCH',
+            headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ audio_url: kit.file_url }),
+          });
+        }
+        onAdded(Array.isArray(listing) ? { ...listing[0], audio_url: kit.file_url } : { ...listing, audio_url: kit.file_url });
+        onClose();
+      } catch (err) { setError('Failed: ' + err.message); }
+      return;
+    }
     if (type === 'open_verse' && !title) return setError('Title is required');
     if (!price || parseFloat(price) <= 0) return setError('Price is required');
     if (type === 'open_verse' && !audioFile) return setError('Audio preview is required for open verses');
@@ -511,7 +554,7 @@ function ListingUpload({ username, accent, onClose, onAdded }) {
         <div style={{ marginBottom: '14px' }}>
           <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '8px', textTransform: 'uppercase' }}>Type</label>
           <div style={{ display: 'flex', gap: '8px' }}>
-            {[{ v: 'open_verse', l: '🎤 Open Verse' }, { v: 'feature', l: '⭐ Feature' }].map(t => (
+            {[{ v: 'open_verse', l: '🎤 Open Verse' }, { v: 'feature', l: '⭐ Feature' }, { v: 'drumkit', l: '🥁 Drum Kit' }].map(t => (
               <button key={t.v} type="button" onClick={() => setType(t.v)}
                 style={{ flex: 1, padding: '10px', borderRadius: '10px', border: `2px solid ${type === t.v ? accent : 'rgba(255,255,255,0.1)'}`, background: type === t.v ? `${accent}20` : 'transparent', color: type === t.v ? accent : 'rgba(255,255,255,0.5)', fontFamily: 'var(--font-head)', fontWeight: 600, fontSize: '13px', cursor: 'pointer' }}>
                 {t.l}
@@ -520,8 +563,32 @@ function ListingUpload({ username, accent, onClose, onAdded }) {
           </div>
         </div>
 
-        {/* Feature: simplified — just price + description */}
-        {type === 'feature' ? (
+        {/* Drumkit: pick from existing kits */}
+        {type === 'drumkit' ? (
+          <>
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>Select a Drum Kit</label>
+              {myDrumkits.length === 0 ? (
+                <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '14px', fontSize: '13px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-body)' }}>
+                  No drumkits found. Upload one from your profile first.
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {myDrumkits.map(k => (
+                    <div key={k.id} onClick={() => setSelectedKitId(String(k.id))}
+                      style={{ background: selectedKitId === String(k.id) ? `${accent}15` : 'rgba(255,255,255,0.04)', border: `2px solid ${selectedKitId === String(k.id) ? accent : 'rgba(255,255,255,0.1)'}`, borderRadius: '10px', padding: '12px 14px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div>
+                        <div style={{ fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '13px' }}>{k.name}</div>
+                        <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', marginTop: '2px' }}>{k.price > 0 ? `$${k.price}` : 'FREE'}</div>
+                      </div>
+                      {selectedKitId === String(k.id) && <span style={{ color: accent, fontSize: '16px' }}>✓</span>}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
+        ) : type === 'feature' ? (
           <>
             <div style={{ marginBottom: '20px' }}>
               <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>Feature Price ($)</label>

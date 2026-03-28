@@ -103,13 +103,18 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
     }, 350);
   }, [track, onSwipe]);
 
+  const lastXRef = useRef(0);
+  const isHorizontalRef = useRef(false);
+
   const onPointerDown = useCallback((e) => {
     if (isFlying) return;
-    if (isFlipped) return; // back face buttons handle their own events
+    if (isFlipped) return;
     pointerDownRef.current = true;
     dragStartedRef.current = false;
+    isHorizontalRef.current = false;
     startXRef.current = e.clientX;
     startYRef.current = e.clientY;
+    lastXRef.current = e.clientX;
     e.currentTarget.setPointerCapture(e.pointerId);
   }, [isFlying, isFlipped]);
 
@@ -117,13 +122,19 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
     if (!pointerDownRef.current || isFlying) return;
     const dx = e.clientX - startXRef.current;
     const dy = e.clientY - startYRef.current;
-    if (Math.abs(dx) > 8 || Math.abs(dy) > 8) {
+    lastXRef.current = e.clientX;
+
+    if (!dragStartedRef.current && (Math.abs(dx) > 6 || Math.abs(dy) > 6)) {
       dragStartedRef.current = true;
+      // Determine if primarily horizontal or vertical
+      isHorizontalRef.current = Math.abs(dx) >= Math.abs(dy);
     }
-    if (dragStartedRef.current) {
+
+    if (dragStartedRef.current && isHorizontalRef.current) {
+      e.preventDefault(); // prevent page scroll when swiping horizontally
       setIsDragging(true);
       setDragX(dx);
-      setDragY(dy);
+      setDragY(dy * 0.3); // dampen vertical movement
       if (dx > 30) setStamp("❤️ LIKED");
       else if (dx < -30) setStamp("PASS 💨");
       else setStamp(null);
@@ -134,39 +145,33 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
     if (!pointerDownRef.current) return;
     pointerDownRef.current = false;
 
-    if (!dragStartedRef.current) {
-      // Tap on front face — flip
+    if (!dragStartedRef.current || !isHorizontalRef.current) {
+      // Tap or vertical scroll — flip card
       setDragX(0);
       setDragY(0);
       setIsDragging(false);
       setStamp(null);
-      setIsFlipped(true);
+      if (!dragStartedRef.current) setIsFlipped(true);
+      dragStartedRef.current = false;
       return;
     }
 
-    // Use current dragX state as fallback if e.clientX is 0 (some mobile browsers)
-    const endX = e.clientX || (startXRef.current + dragX);
-    const dx = endX - startXRef.current;
     dragStartedRef.current = false;
     setIsDragging(false);
+
+    // Use lastXRef for reliable final position on mobile
+    const dx = lastXRef.current - startXRef.current;
 
     if (dx > SWIPE_THRESHOLD) {
       triggerSwipe("right");
     } else if (dx < -SWIPE_THRESHOLD) {
       triggerSwipe("left");
     } else {
-      // Use the tracked dragX if dx is suspiciously 0
-      if (dragX > SWIPE_THRESHOLD) {
-        triggerSwipe("right");
-      } else if (dragX < -SWIPE_THRESHOLD) {
-        triggerSwipe("left");
-      } else {
-        setDragX(0);
-        setDragY(0);
-        setStamp(null);
-      }
+      setDragX(0);
+      setDragY(0);
+      setStamp(null);
     }
-  }, [triggerSwipe, dragX]);
+  }, [triggerSwipe]);
 
   async function handleCopIt(e) {
     e.stopPropagation();
@@ -260,6 +265,7 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
         cursor: isTop ? (isFlipped ? "default" : "grab") : "default",
         position: "relative",
         pointerEvents: isFlipped ? "none" : "auto",
+        touchAction: isTop ? "pan-y" : "auto",
       }}
       onPointerDown={isTop ? onPointerDown : undefined}
       onPointerMove={isTop ? onPointerMove : undefined}

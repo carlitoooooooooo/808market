@@ -58,7 +58,7 @@ function BeatCard({ beat, accent, onBuy }) {
   );
 }
 
-function ListingCard({ listing, accent, onBuy }) {
+function ListingCard({ listing, accent, onBuy, onDelete, isOwner }) {
   const typeLabel = listing.type === 'open_verse' ? '🎤 Open Verse' : '⭐ Feature';
   return (
     <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', overflow: 'hidden', transition: 'border-color 0.2s' }}
@@ -77,9 +77,12 @@ function ListingCard({ listing, accent, onBuy }) {
         {listing.description && <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.45)', fontFamily: 'var(--font-body)', marginBottom: '8px', lineHeight: 1.4 }}>{listing.description}</div>}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span style={{ fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '14px', color: '#00ff88' }}>${listing.price}</span>
-          <button onClick={() => onBuy(listing)} style={{ background: accent, color: '#000', border: 'none', borderRadius: '8px', padding: '5px 12px', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-head)' }}>
-            🛒 Book
-          </button>
+          <div style={{ display: 'flex', gap: '6px' }}>
+            {isOwner && <button onClick={() => onDelete && onDelete(listing.id)} style={{ background: 'rgba(255,51,102,0.15)', border: '1px solid rgba(255,51,102,0.3)', color: '#ff3366', borderRadius: '8px', padding: '5px 8px', fontSize: '11px', cursor: 'pointer' }}>🗑</button>}
+            <button onClick={() => onBuy(listing)} style={{ background: accent, color: '#000', border: 'none', borderRadius: '8px', padding: '5px 12px', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-head)' }}>
+              🛒 Book
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -110,11 +113,34 @@ function StorefrontEditor({ storefront, username, onSave, onClose }) {
   const [tagline, setTagline] = useState(storefront?.tagline || '');
   const [accent, setAccent] = useState(storefront?.accent_color || '#00f5ff');
   const [bg, setBg] = useState(storefront?.bg_color || '#0a0a0a');
+  const [bannerFile, setBannerFile] = useState(null);
+  const [bannerPreview, setBannerPreview] = useState(storefront?.banner_url || null);
   const [saving, setSaving] = useState(false);
+  const bannerRef = useRef(null);
+
+  const handleBannerChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setBannerFile(file);
+    setBannerPreview(URL.createObjectURL(file));
+  };
 
   const handleSave = async () => {
     setSaving(true);
-    const payload = { username, display_name: displayName, tagline, accent_color: accent, bg_color: bg, is_public: true };
+    let banner_url = storefront?.banner_url || null;
+
+    if (bannerFile) {
+      const ext = bannerFile.name.split('.').pop();
+      const path = `banners/${username}_${Date.now()}.${ext}`;
+      const res = await fetch(`${SUPABASE_URL}/storage/v1/object/covers/${path}`, {
+        method: 'POST',
+        headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}`, 'Content-Type': bannerFile.type },
+        body: bannerFile,
+      });
+      if (res.ok) banner_url = `${SUPABASE_URL}/storage/v1/object/public/covers/${path}`;
+    }
+
+    const payload = { username, display_name: displayName, tagline, accent_color: accent, bg_color: bg, banner_url, is_public: true };
     if (storefront) {
       await dbPatch(`storefronts?username=eq.${encodeURIComponent(username)}`, payload);
     } else {
@@ -128,6 +154,23 @@ function StorefrontEditor({ storefront, username, onSave, onClose }) {
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
       <div style={{ background: '#111', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '16px', padding: '28px 24px', width: '100%', maxWidth: '420px' }}>
         <div style={{ fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '18px', marginBottom: '20px' }}>✏️ Customize Storefront</div>
+
+        {/* Banner */}
+        <div style={{ marginBottom: '14px' }}>
+          <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>Banner Image</label>
+          <input ref={bannerRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleBannerChange} />
+          {bannerPreview ? (
+            <div style={{ position: 'relative', height: '80px', borderRadius: '10px', overflow: 'hidden', marginBottom: '6px', cursor: 'pointer' }} onClick={() => bannerRef.current?.click()}>
+              <img src={bannerPreview} alt="banner" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '12px', fontFamily: 'var(--font-head)' }}>Change Banner</div>
+            </div>
+          ) : (
+            <button type="button" onClick={() => bannerRef.current?.click()}
+              style={{ width: '100%', padding: '10px', background: 'rgba(255,255,255,0.05)', border: '1px dashed rgba(255,255,255,0.2)', borderRadius: '10px', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontFamily: 'var(--font-body)', fontSize: '13px' }}>
+              🖼 Upload Banner Image
+            </button>
+          )}
+        </div>
 
         <div style={{ marginBottom: '14px' }}>
           <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>Display Name</label>
@@ -355,6 +398,16 @@ export default function StorefrontPage({ username, onBack }) {
     }).catch(() => setLoading(false));
   }, [username]);
 
+  const handleDeleteListing = async (id) => {
+    if (!confirm('Remove this listing?')) return;
+    await fetch(`${SUPABASE_URL}/rest/v1/artist_listings?id=eq.${id}`, {
+      method: 'PATCH',
+      headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ is_active: false }),
+    });
+    setListings(prev => prev.filter(l => l.id !== id));
+  };
+
   const handleBuy = async (item) => {
     const isBeat = !!item.audio_url && !item.type;
     const isFree = !item.price || item.price === 0;
@@ -432,6 +485,11 @@ export default function StorefrontPage({ username, onBack }) {
         )}
       </div>
 
+      {/* Banner */}
+      {storefront?.banner_url && (
+        <div style={{ width: '100%', height: '160px', backgroundImage: `url(${storefront.banner_url})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
+      )}
+
       {/* Hero */}
       <div style={{ padding: '32px 20px 24px', textAlign: 'center', borderBottom: `1px solid ${accent}20` }}>
         {/* Avatar */}
@@ -489,7 +547,7 @@ export default function StorefrontPage({ username, onBack }) {
           <div style={{ marginBottom: '32px' }}>
             <SectionHeader label={`🎤 Open Verses (${openVerses.length})`} accent={accent} />
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '12px' }}>
-              {openVerses.map(l => <ListingCard key={l.id} listing={l} accent={accent} onBuy={handleBuy} />)}
+              {openVerses.map(l => <ListingCard key={l.id} listing={l} accent={accent} onBuy={handleBuy} isOwner={isOwner} onDelete={handleDeleteListing} />)}
             </div>
           </div>
         )}
@@ -499,7 +557,7 @@ export default function StorefrontPage({ username, onBack }) {
           <div style={{ marginBottom: '32px' }}>
             <SectionHeader label={`⭐ Features (${features.length})`} accent={accent} />
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '12px' }}>
-              {features.map(l => <ListingCard key={l.id} listing={l} accent={accent} onBuy={handleBuy} />)}
+              {features.map(l => <ListingCard key={l.id} listing={l} accent={accent} onBuy={handleBuy} isOwner={isOwner} onDelete={handleDeleteListing} />)}
             </div>
           </div>
         )}

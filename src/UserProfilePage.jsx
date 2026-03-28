@@ -326,6 +326,11 @@ export default function UserProfilePage({ username, onClose, onOpenModal, userVo
                   style={{ background: 'none', border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.5)', borderRadius: '20px', padding: '8px 12px', fontSize: '13px', cursor: 'pointer' }}
                   title="Share profile"
                 >📤</button>
+                <button
+                  onClick={() => onOpenStorefront && onOpenStorefront(username)}
+                  style={{ background: 'none', border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.5)', borderRadius: '20px', padding: '8px 12px', fontSize: '13px', cursor: 'pointer' }}
+                  title="View Storefront"
+                >🏪</button>
               </div>
             )}
 

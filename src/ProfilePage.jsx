@@ -709,6 +709,8 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
                 }
               } catch {}
             }}>📤</button>
+            <button className="profile-edit-btn" title="My Storefront" onClick={() => onOpenStorefront && onOpenStorefront(currentUser.username)}
+              style={{ fontSize: '14px' }}>🏪</button>
           </div>
         )}
       </div>

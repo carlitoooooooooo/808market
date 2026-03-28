@@ -30,7 +30,7 @@ const TABS = [
   { id: "leaderboard", label: "🔥 Top Beats" },
   { id: "profile", label: "👤 Profile" },
   { id: "notifications", label: "🔔 Notifs" },
-  { id: "messages", label: "💬 Messages" },
+  { id: "create", label: "🏪 Create" },
 ];
 
 const GENRES = ["ALL", "Hip-Hop", "Drill", "Trap", "R&B", "Electronic", "Other"];
@@ -681,12 +681,23 @@ export default function App() {
             width: '32px', height: '32px', fontSize: '14px', cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>🔍</button>
-          <button onClick={() => setShowAbout(true)} style={{
-            background: 'none', border: '1px solid rgba(255,255,255,0.15)',
-            color: 'rgba(255,255,255,0.5)', borderRadius: '20px',
-            padding: '5px 12px', fontSize: '12px', cursor: 'pointer',
-            fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500,
-          }}>About</button>
+          {currentUser && (
+            <button onClick={() => setActiveTab("messages")} style={{
+              background: unreadMessages > 0 ? 'rgba(0,245,255,0.12)' : 'none',
+              border: `1px solid ${unreadMessages > 0 ? 'rgba(0,245,255,0.4)' : 'rgba(255,255,255,0.15)'}`,
+              color: unreadMessages > 0 ? '#00f5ff' : 'rgba(255,255,255,0.5)',
+              borderRadius: '50%', width: '32px', height: '32px', fontSize: '15px',
+              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              position: 'relative',
+            }}>
+              💬
+              {unreadMessages > 0 && (
+                <span style={{ position: 'absolute', top: '-4px', right: '-4px', background: '#ff3366', color: '#fff', fontSize: '9px', fontWeight: 700, borderRadius: '50%', width: '16px', height: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {unreadMessages > 9 ? '9+' : unreadMessages}
+                </span>
+              )}
+            </button>
+          )}
           {currentUser ? (
             <>
               <button className="btn-upload" onClick={() => setShowUpload(true)}>
@@ -956,6 +967,7 @@ export default function App() {
             onVote={handleVoteFromModal}
             userVotes={userVotes}
             onViewUser={setViewingUser}
+            onViewStorefront={(u) => setStorefrontUser(u)}
           />
         )}
 
@@ -971,7 +983,7 @@ export default function App() {
         )}
 
         {activeTab === "profile" && (
-          <ProfilePage userVotes={userVotes} tracks={tracks} onViewUser={(username) => setViewingUser(username)} onUpload={() => setShowUpload(true)} onOpenSettings={() => setShowSettings(true)} />
+          <ProfilePage userVotes={userVotes} tracks={tracks} onViewUser={(username) => setViewingUser(username)} onUpload={() => setShowUpload(true)} onOpenSettings={() => setShowSettings(true)} onOpenStorefront={(u) => setStorefrontUser(u)} />
         )}
       </main>
 
@@ -997,9 +1009,7 @@ export default function App() {
             {tab.id === "notifications" && unreadCount > 0 && (
               <span className="notif-badge">{unreadCount > 9 ? "9+" : unreadCount}</span>
             )}
-            {tab.id === "messages" && unreadMessages > 0 && (
-              <span className="notif-badge">{unreadMessages > 9 ? "9+" : unreadMessages}</span>
-            )}
+
           </button>
         ))}
       </nav>
@@ -1007,6 +1017,12 @@ export default function App() {
       <Toast message={toast.message} visible={toast.visible} />
 
       {/* Messages: full-screen overlay, sits above app-main but below modals */}
+      {activeTab === "create" && currentUser && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 10, overflowY: 'auto' }}>
+          <StorefrontPage username={currentUser.username} onBack={() => setActiveTab("discover")} />
+        </div>
+      )}
+
       {activeTab === "messages" && currentUser && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 10, background: 'var(--bg)', display: 'flex', flexDirection: 'column' }}>
           {/* Spacer for the app header */}
@@ -1089,6 +1105,7 @@ export default function App() {
           onClose={() => setViewingUser(null)}
           onOpenModal={(track) => { setViewingUser(null); setDeepLinkTrack(track); }}
           userVotes={userVotes}
+          onOpenStorefront={(u) => { setViewingUser(null); setStorefrontUser(u); }}
           onMessageUser={(username) => {
             setViewingUser(null);
             setMessageThread(username);

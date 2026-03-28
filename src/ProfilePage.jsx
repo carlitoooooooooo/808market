@@ -738,6 +738,34 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
         </div>
       </div>
 
+      {/* My Purchases */}
+      <div className="profile-section">
+        <div className="section-title">🛒 MY PURCHASES</div>
+        {purchasesLoading ? (
+          <div style={{ color: 'var(--text-dim)', fontSize: '13px', fontFamily: 'var(--font-body)' }}>Loading...</div>
+        ) : purchases.length === 0 ? (
+          <div style={{ color: 'var(--text-dim)', fontSize: '13px', fontFamily: 'var(--font-body)' }}>No purchases yet.</div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {purchases.map(p => (
+              <div key={p.id} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '12px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontFamily: 'var(--font-head)', fontSize: '14px', fontWeight: 700, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.track_title}</div>
+                  <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.45)', marginTop: '2px' }}>by {p.artist} · ${p.amount_paid}</div>
+                </div>
+                {p.audio_url ? (
+                  <a href={p.audio_url} download={`${p.track_title} - ${p.artist}.mp3`} style={{ flexShrink: 0, padding: '7px 12px', background: 'linear-gradient(135deg, #00f5ff, #bf5fff)', color: '#000', borderRadius: '20px', fontSize: '11px', fontWeight: 700, fontFamily: 'var(--font-head)', textDecoration: 'none', whiteSpace: 'nowrap' }}>
+                    ⬇️ Download
+                  </a>
+                ) : (
+                  <span style={{ fontSize: '12px', color: 'var(--text-dim)' }}>Unavailable</span>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       </div> {/* end profile-left-col */}
 
       {/* RIGHT COLUMN: beats + saved */}
@@ -975,62 +1003,6 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
       </div>
 
       </div> {/* end profile-right-col */}
-
-      {/* My Purchases */}
-      <div style={{ padding: '0 16px 24px' }}>
-        <div className="section-title" style={{ marginBottom: '12px' }}>🛒 MY PURCHASES</div>
-        {purchasesLoading ? (
-          <div style={{ color: 'var(--text-dim)', fontSize: '13px', fontFamily: 'var(--font-body)' }}>Loading...</div>
-        ) : purchases.length === 0 ? (
-          <div style={{ color: 'var(--text-dim)', fontSize: '13px', fontFamily: 'var(--font-body)' }}>No purchases yet.</div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {purchases.map(p => (
-              <div key={p.id} style={{
-                background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                borderRadius: '12px',
-                padding: '12px 14px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '12px'
-              }}>
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ fontFamily: 'var(--font-head)', fontSize: '14px', fontWeight: 700, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {p.track_title}
-                  </div>
-                  <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.45)', marginTop: '2px' }}>
-                    by {p.artist} · {p.license_type === 'exclusive' ? 'Exclusive' : p.license_type === 'lease' ? 'Non-Excl. Lease' : 'License'} · ${p.amount_paid}
-                  </div>
-                </div>
-                {p.audio_url ? (
-                  <a
-                    href={p.audio_url}
-                    download={`${p.track_title} - ${p.artist}.mp3`}
-                    style={{
-                      flexShrink: 0,
-                      padding: '8px 14px',
-                      background: 'linear-gradient(135deg, #00f5ff, #bf5fff)',
-                      color: '#000',
-                      borderRadius: '20px',
-                      fontSize: '12px',
-                      fontWeight: 700,
-                      fontFamily: 'var(--font-head)',
-                      textDecoration: 'none',
-                      whiteSpace: 'nowrap'
-                    }}
-                  >
-                    ⬇️ Download
-                  </a>
-                ) : (
-                  <span style={{ fontSize: '12px', color: 'var(--text-dim)' }}>Unavailable</span>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
 
       {/* Logout */}
       <div className="profile-logout" style={{ padding: "16px", textAlign: "center" }}>

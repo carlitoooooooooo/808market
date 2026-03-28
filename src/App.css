@@ -425,6 +425,7 @@ body {
 }
 .auth-input:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(0,245,255,0.1); }
 .auth-input::placeholder { color: rgba(255,255,255,0.2); }
+.auth-input option { background: #1a1a1a; color: #fff; }
 
 .avatar-color-picker {
   display: flex;

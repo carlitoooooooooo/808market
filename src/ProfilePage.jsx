@@ -1338,6 +1338,16 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
             />
           </div>
           </div>
+
+          {/* Save button at bottom too — so keyboard doesn't hide it */}
+          <div style={{ padding: '16px', display: 'flex', gap: '12px' }}>
+            <button onClick={() => setEditing(false)} style={{ flex: 1, padding: '13px', background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '12px', color: '#fff', fontSize: '14px', cursor: 'pointer', fontFamily: 'var(--font-head)' }}>
+              Cancel
+            </button>
+            <button onClick={saveEdit} style={{ flex: 2, padding: '13px', background: 'linear-gradient(135deg, #00f5ff, #bf5fff)', border: 'none', borderRadius: '12px', color: '#000', fontSize: '14px', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-head)' }}>
+              Save Profile
+            </button>
+          </div>
           </div>{/* end edit-profile-box */}
         </div>
       )}

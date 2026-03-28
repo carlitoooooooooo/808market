@@ -140,6 +140,11 @@ export default function AuthScreen() {
                   placeholder="your@email.com"
                   disabled={loading}
                 />
+                {!email && (
+                  <div style={{ fontSize: '11px', color: '#ff9900', marginTop: '5px', fontFamily: 'var(--font-body)' }}>
+                    ⚠️ Without an email, you won't be able to recover your account if you forget your password.
+                  </div>
+                )}
               </div>
               <div className="auth-field">
                 <label className="auth-label">BIO (OPTIONAL)</label>

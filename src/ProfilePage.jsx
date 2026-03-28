@@ -53,7 +53,7 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
   const [editing, setEditing] = useState(false);
   const [editBio, setEditBio] = useState(currentUser?.bio || "");
   const [editColor, setEditColor] = useState(currentUser?.avatarColor || AVATAR_COLORS[0]);
-  const [profileExtra, setProfileExtra] = useState({ location: '', tagline: '', instagram: '', twitter: '', soundcloud: '', youtube: '', spotify_url: '', influenced_by: '', avatar_border: 'none', name_glow: 'none', profile_bg: 'none', bio_link: '', bio_link_label: '' });
+  const [profileExtra, setProfileExtra] = useState({ location: '', tagline: '', instagram: '', twitter: '', soundcloud: '', youtube: '', spotify_url: '', influenced_by: '', avatar_border: 'none', name_glow: 'none', profile_bg: 'none', bio_link: '', bio_link_label: '', profile_badge: '' });
   const [totalPlays, setTotalPlays] = useState(0);
   const [avatarUrl, setAvatarUrl] = useState(currentUser?.avatarUrl || null);
   const [coverUrl, setCoverUrl] = useState(null);
@@ -273,11 +273,11 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
   // Load extra profile fields
   useEffect(() => {
     if (!currentUser?.username) return;
-    fetch(`${SUPABASE_URL}/rest/v1/profiles?username=eq.${encodeURIComponent(currentUser.username)}&select=location,tagline,instagram,twitter,soundcloud,youtube,spotify_url,influenced_by,avatar_border,name_glow,profile_bg,bio_link,bio_link_label`, {
+    fetch(`${SUPABASE_URL}/rest/v1/profiles?username=eq.${encodeURIComponent(currentUser.username)}&select=location,tagline,instagram,twitter,soundcloud,youtube,spotify_url,influenced_by,avatar_border,name_glow,profile_bg,bio_link,bio_link_label,profile_badge`, {
       headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` }
     }).then(r => r.json()).then(data => {
       const p = Array.isArray(data) ? data[0] : data;
-      if (p) setProfileExtra({ location: p.location||'', tagline: p.tagline||'', instagram: p.instagram||'', twitter: p.twitter||'', soundcloud: p.soundcloud||'', youtube: p.youtube||'', spotify_url: p.spotify_url||'', influenced_by: p.influenced_by||'', avatar_border: p.avatar_border||'none', name_glow: p.name_glow||'none', profile_bg: p.profile_bg||'none', bio_link: p.bio_link||'', bio_link_label: p.bio_link_label||'' });
+      if (p) setProfileExtra({ location: p.location||'', tagline: p.tagline||'', instagram: p.instagram||'', twitter: p.twitter||'', soundcloud: p.soundcloud||'', youtube: p.youtube||'', spotify_url: p.spotify_url||'', influenced_by: p.influenced_by||'', avatar_border: p.avatar_border||'none', name_glow: p.name_glow||'none', profile_bg: p.profile_bg||'none', bio_link: p.bio_link||'', bio_link_label: p.bio_link_label||'', profile_badge: p.profile_badge||'' });
     }).catch(() => {});
 
     // Load total plays from tracks
@@ -648,6 +648,15 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
                 <span style={{ background: 'linear-gradient(135deg, #ff9900, #ff3366)', color: '#fff', fontSize: '9px', fontFamily: 'var(--font-head)', fontWeight: 700, padding: '2px 8px', borderRadius: '20px', letterSpacing: '1px', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>BETA</span>
               )}
             </div>
+
+            {/* Profile Badge */}
+            {profileExtra.profile_badge && (
+              <div style={{ marginTop: '4px', marginBottom: '2px' }}>
+                <span style={{ background: 'linear-gradient(135deg, #00f5ff, #bf5fff)', color: '#000', fontSize: '10px', fontFamily: 'var(--font-head)', fontWeight: 700, padding: '2px 10px', borderRadius: '20px', letterSpacing: '0.5px' }}>
+                  {profileExtra.profile_badge}
+                </span>
+              </div>
+            )}
 
             {/* Followers / Following */}
             <div style={{ display: 'flex', gap: '14px', marginTop: '4px' }}>
@@ -1195,11 +1204,34 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
                       <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px' }}>
                         👑 ADMIN/TEAM ONLY
                       </div>
+                      {/* Profile Badge */}
+                      <div style={{ marginBottom: '12px' }}>
+                        <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px' }}>PROFILE BADGE</div>
+                        <input
+                          className="auth-input"
+                          value={profileExtra.profile_badge}
+                          onChange={e => setProfileExtra(prev => ({ ...prev, profile_badge: e.target.value.slice(0, 30) }))}
+                          placeholder="e.g. 808market Staff, OG Member..."
+                          maxLength={30}
+                          style={{ fontSize: '13px' }}
+                        />
+                        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '6px' }}>
+                          {['808market Staff', 'OG Member', 'Top Producer', 'Verified Artist', 'Community OG', ''].map(preset => (
+                            <button key={preset} type="button" onClick={() => setProfileExtra(prev => ({ ...prev, profile_badge: preset }))}
+                              style={{ padding: '3px 10px', background: profileExtra.profile_badge === preset ? 'rgba(0,245,255,0.15)' : 'rgba(255,255,255,0.05)', border: `1px solid ${profileExtra.profile_badge === preset ? 'rgba(0,245,255,0.4)' : 'rgba(255,255,255,0.1)'}`, borderRadius: '12px', color: profileExtra.profile_badge === preset ? 'var(--cyan)' : 'rgba(255,255,255,0.4)', fontSize: '11px', cursor: 'pointer', fontFamily: 'var(--font-head)' }}>
+                              {preset || '✕ None'}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                       <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                         {[
                           { value: 'crown', label: '👑 Crown', style: { background: 'linear-gradient(135deg, #ffd700, #ffed4e)', color: '#000' } },
                           { value: 'neon', label: '⚡ Neon', style: { background: 'linear-gradient(135deg, #00ff88, #00f5ff, #bf5fff)', color: '#000' } },
                           { value: 'hologram', label: '✨ Hologram', style: { background: 'linear-gradient(135deg, #ff3366, #00f5ff, #bf5fff, #00ff88)', color: '#fff' } },
+                          { value: 'wave', label: '🌊 Wave', style: { background: 'linear-gradient(135deg, #00f5ff, #bf5fff, #00ff88)', color: '#000' } },
+                          { value: 'shock', label: '⚡ Shock', style: { background: '#00f5ff', color: '#000' } },
+                          { value: 'mystic', label: '🔮 Mystic', style: { background: 'linear-gradient(135deg, #6a0dad, #9b59b6)', color: '#fff' } },
                         ].map(g => (
                           <button key={g.value} type="button"
                             onClick={() => setProfileExtra(prev => ({ ...prev, name_glow: g.value }))}

@@ -2566,6 +2566,7 @@ body {
   overflow-y: scroll;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
+  padding-top: env(safe-area-inset-top, 0px);
 }
 .edit-profile-overlay::-webkit-scrollbar { display: none; }
 .edit-profile-box { width: 100%; }
@@ -2573,7 +2574,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 80px 16px 16px;
+  padding: 16px;
   border-bottom: 1px solid rgba(255,255,255,0.08);
   position: sticky;
   top: 0;

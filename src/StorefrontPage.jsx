@@ -34,6 +34,31 @@ function SectionHeader({ label, accent }) {
 
 function BeatCard({ beat, accent, onBuy }) {
   const isFree = !beat.price || beat.price === 0;
+  const [playing, setPlaying] = React.useState(false);
+  const audioRef = React.useRef(null);
+
+  const togglePlay = (e) => {
+    e.stopPropagation();
+    const audioUrl = beat.audio_url || beat.audioUrl;
+    if (!audioUrl) return;
+    if (playing) {
+      audioRef.current?.pause();
+      setPlaying(false);
+    } else {
+      if (!audioRef.current) {
+        audioRef.current = new Audio(audioUrl);
+        audioRef.current.currentTime = beat.snippet_start || beat.snippetStart || 0;
+        audioRef.current.onended = () => setPlaying(false);
+      }
+      audioRef.current.play();
+      setPlaying(true);
+    }
+  };
+
+  React.useEffect(() => () => audioRef.current?.pause(), []);
+
+  const audioUrl = beat.audio_url || beat.audioUrl;
+
   return (
     <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', overflow: 'hidden', transition: 'border-color 0.2s' }}
       onMouseEnter={e => e.currentTarget.style.borderColor = `${accent}50`}
@@ -41,9 +66,15 @@ function BeatCard({ beat, accent, onBuy }) {
     >
       <div style={{ height: '120px', backgroundImage: `url(${beat.coverUrl || beat.cover_url})`, backgroundSize: 'cover', backgroundPosition: 'center', position: 'relative' }}>
         <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.3)' }} />
+        {/* Play button */}
+        {audioUrl && (
+          <button onClick={togglePlay} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', background: playing ? accent : 'rgba(0,0,0,0.6)', border: `2px solid ${accent}`, borderRadius: '50%', width: '40px', height: '40px', color: playing ? '#000' : accent, fontSize: '16px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s' }}>
+            {playing ? '⏸' : '▶'}
+          </button>
+        )}
         <div style={{ position: 'absolute', bottom: '8px', left: '8px', display: 'flex', gap: '4px' }}>
           {beat.genre && <span style={{ background: 'rgba(0,0,0,0.7)', color: accent, fontSize: '9px', padding: '2px 6px', borderRadius: '8px', fontFamily: 'var(--font-head)', fontWeight: 700 }}>{beat.genre}</span>}
-          {beat.bpm && <span style={{ background: 'rgba(0,0,0,0.7)', color: 'rgba(255,255,255,0.6)', fontSize: '9px', padding: '2px 6px', borderRadius: '8px', fontFamily: 'var(--font-body)' }}>{beat.bpm} BPM</span>}
+          {beat.bpm > 0 && <span style={{ background: 'rgba(0,0,0,0.7)', color: 'rgba(255,255,255,0.6)', fontSize: '9px', padding: '2px 6px', borderRadius: '8px', fontFamily: 'var(--font-body)' }}>{beat.bpm} BPM</span>}
         </div>
       </div>
       <div style={{ padding: '10px 12px' }}>
@@ -61,14 +92,47 @@ function BeatCard({ beat, accent, onBuy }) {
 
 function ListingCard({ listing, accent, onBuy, onDelete, isOwner }) {
   const typeLabel = listing.type === 'open_verse' ? '🎤 Open Verse' : '⭐ Feature';
+  const [playing, setPlaying] = React.useState(false);
+  const audioRef = React.useRef(null);
+
+  const togglePlay = (e) => {
+    e.stopPropagation();
+    if (!listing.audio_url) return;
+    if (playing) {
+      audioRef.current?.pause();
+      setPlaying(false);
+    } else {
+      if (!audioRef.current) {
+        audioRef.current = new Audio(listing.audio_url);
+        audioRef.current.onended = () => setPlaying(false);
+      }
+      audioRef.current.play();
+      setPlaying(true);
+    }
+  };
+
+  React.useEffect(() => () => audioRef.current?.pause(), []);
+
   return (
     <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', overflow: 'hidden', transition: 'border-color 0.2s' }}
       onMouseEnter={e => e.currentTarget.style.borderColor = `${accent}50`}
       onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'}
     >
-      {listing.cover_url && (
-        <div style={{ height: '100px', backgroundImage: `url(${listing.cover_url})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
-      )}
+      {listing.cover_url ? (
+        <div style={{ height: '100px', backgroundImage: `url(${listing.cover_url})`, backgroundSize: 'cover', backgroundPosition: 'center', position: 'relative' }}>
+          {listing.audio_url && (
+            <button onClick={togglePlay} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', background: playing ? accent : 'rgba(0,0,0,0.6)', border: `2px solid ${accent}`, borderRadius: '50%', width: '36px', height: '36px', color: playing ? '#000' : accent, fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {playing ? '⏸' : '▶'}
+            </button>
+          )}
+        </div>
+      ) : listing.audio_url ? (
+        <div style={{ height: '60px', background: 'rgba(255,255,255,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <button onClick={togglePlay} style={{ background: playing ? accent : 'rgba(0,0,0,0.4)', border: `2px solid ${accent}`, borderRadius: '50%', width: '36px', height: '36px', color: playing ? '#000' : accent, fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {playing ? '⏸' : '▶'}
+          </button>
+        </div>
+      ) : null}
       <div style={{ padding: '12px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
           <span style={{ background: `${accent}22`, color: accent, fontSize: '10px', padding: '2px 8px', borderRadius: '8px', fontFamily: 'var(--font-head)', fontWeight: 700 }}>{typeLabel}</span>

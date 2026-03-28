@@ -23,7 +23,11 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
   const startYRef = useRef(0);
   const pointerDownRef = useRef(false);
   const dragStartedRef = useRef(false);
+  const isHorizontalRef = useRef(false);
+  const lastXRef = useRef(0);
+  const currentDragX = useRef(0);
   const cardRef = useRef(null);
+  const outerRef = useRef(null);
 
   useEffect(() => {
     if (track.isSoundCloud) return;
@@ -103,8 +107,19 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
     }, 350);
   }, [track, onSwipe]);
 
-  const lastXRef = useRef(0);
-  const isHorizontalRef = useRef(false);
+  // Apply transform directly to DOM — no React state re-render on every move
+  const applyDragTransform = useCallback((dx, dy) => {
+    if (!outerRef.current) return;
+    const rotate = dx * 0.08;
+    outerRef.current.style.transform = `translate(${dx}px, ${dy * 0.3}px) rotate(${rotate}deg)`;
+    outerRef.current.style.transition = 'none';
+  }, []);
+
+  const resetTransform = useCallback(() => {
+    if (!outerRef.current) return;
+    outerRef.current.style.transform = '';
+    outerRef.current.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+  }, []);
 
   const onPointerDown = useCallback((e) => {
     if (isFlying) return;
@@ -115,6 +130,7 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
     startXRef.current = e.clientX;
     startYRef.current = e.clientY;
     lastXRef.current = e.clientX;
+    currentDragX.current = 0;
     e.currentTarget.setPointerCapture(e.pointerId);
   }, [isFlying, isFlipped]);
 
@@ -123,55 +139,48 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
     const dx = e.clientX - startXRef.current;
     const dy = e.clientY - startYRef.current;
     lastXRef.current = e.clientX;
+    currentDragX.current = dx;
 
-    if (!dragStartedRef.current && (Math.abs(dx) > 6 || Math.abs(dy) > 6)) {
+    if (!dragStartedRef.current && (Math.abs(dx) > 5 || Math.abs(dy) > 5)) {
       dragStartedRef.current = true;
-      // Determine if primarily horizontal or vertical
       isHorizontalRef.current = Math.abs(dx) >= Math.abs(dy);
     }
 
     if (dragStartedRef.current && isHorizontalRef.current) {
-      e.preventDefault(); // prevent page scroll when swiping horizontally
-      setIsDragging(true);
-      setDragX(dx);
-      setDragY(dy * 0.3); // dampen vertical movement
-      if (dx > 30) setStamp("❤️ LIKED");
-      else if (dx < -30) setStamp("PASS 💨");
-      else setStamp(null);
+      e.preventDefault();
+      applyDragTransform(dx, dy);
+      // Only update stamp label in state (cheap)
+      const newStamp = dx > 30 ? "❤️ LIKED" : dx < -30 ? "PASS 💨" : null;
+      setStamp(prev => prev !== newStamp ? newStamp : prev);
+      if (!isDragging) setIsDragging(true);
     }
-  }, [isFlying]);
+  }, [isFlying, isDragging, applyDragTransform]);
 
   const onPointerUp = useCallback((e) => {
     if (!pointerDownRef.current) return;
     pointerDownRef.current = false;
 
     if (!dragStartedRef.current || !isHorizontalRef.current) {
-      // Tap or vertical scroll — flip card
-      setDragX(0);
-      setDragY(0);
-      setIsDragging(false);
-      setStamp(null);
+      setDragX(0); setDragY(0); setIsDragging(false); setStamp(null);
       if (!dragStartedRef.current) setIsFlipped(true);
       dragStartedRef.current = false;
       return;
     }
 
+    const dx = currentDragX.current;
     dragStartedRef.current = false;
     setIsDragging(false);
-
-    // Use lastXRef for reliable final position on mobile
-    const dx = lastXRef.current - startXRef.current;
 
     if (dx > SWIPE_THRESHOLD) {
       triggerSwipe("right");
     } else if (dx < -SWIPE_THRESHOLD) {
       triggerSwipe("left");
     } else {
-      setDragX(0);
-      setDragY(0);
+      resetTransform();
       setStamp(null);
+      currentDragX.current = 0;
     }
-  }, [triggerSwipe]);
+  }, [triggerSwipe, resetTransform]);
 
   async function handleCopIt(e) {
     e.stopPropagation();
@@ -220,7 +229,7 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
   }
 
   const rotation = dragX * 0.08;
-  const stampOpacity = Math.min(1, Math.abs(dragX) / SWIPE_THRESHOLD);
+  const stampOpacity = Math.min(1, Math.abs(currentDragX.current || dragX) / SWIPE_THRESHOLD);
 
   let flyStyle = {};
   if (isFlying) {
@@ -228,16 +237,13 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
       transform: `translateX(${flyDir === "right" ? "120vw" : "-120vw"}) rotate(${flyDir === "right" ? 30 : -30}deg)`,
       transition: "transform 0.35s cubic-bezier(0.4, 0, 0.6, 1)",
     };
-  } else if (isDragging) {
-    flyStyle = {
-      transform: `translateX(${dragX}px) translateY(${dragY * 0.3}px) rotate(${rotation}deg)`,
-    };
-  } else {
+  } else if (!isDragging) {
     flyStyle = {
       transform: `translateX(0) rotate(0deg) scale(${stackIndex === 0 ? 1 : 0.96 - stackIndex * 0.02})`,
-      transition: isDragging ? "none" : "transform 0.25s ease",
+      transition: "transform 0.25s ease",
     };
   }
+  // When isDragging, transform is applied directly via outerRef (no state re-render)
 
   // Price display
   const priceLabel = (!track.price || track.price === 0) ? "FREE" : `$${track.price}`;
@@ -246,6 +252,7 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
   return (
     // Outer: handles fly/drag transform + perspective
     <div
+      ref={outerRef}
       style={{
         position: "absolute",
         zIndex: 10 - stackIndex,
@@ -253,6 +260,7 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
         height: "clamp(380px, 55vh, 500px)",
         perspective: "1000px",
         userSelect: "none",
+        willChange: "transform",
         ...flyStyle,
       }}
     >

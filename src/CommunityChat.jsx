@@ -317,12 +317,12 @@ export default function CommunityChat({ onViewUser }) {
                           dangerouslySetInnerHTML={{ __html: bodyHighlighted }} />
 
                         {/* Action buttons */}
-                        <div className="msg-actions" style={{ display: 'flex', gap: '3px', opacity: 0, transition: 'opacity 0.15s', flexDirection: 'column' }}>
-                          <button onClick={() => setReplyTo(msg)} style={{ background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '6px', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontSize: '11px', padding: '3px 6px' }} title="Reply">↩</button>
-                          <button onClick={() => setShowEmojiPicker(showEmojiPicker === msg.id ? null : msg.id)} style={{ background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '6px', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontSize: '11px', padding: '3px 6px' }} title="React">😊</button>
-                          {own && <button onClick={() => startEdit(msg)} style={{ background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '6px', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontSize: '11px', padding: '3px 6px' }} title="Edit">✏️</button>}
-                          {canMod && <button onClick={() => togglePin(msg)} style={{ background: 'rgba(0,245,255,0.1)', border: 'none', borderRadius: '6px', color: 'var(--cyan)', cursor: 'pointer', fontSize: '11px', padding: '3px 6px' }} title={msg.is_pinned ? "Unpin" : "Pin"}>📌</button>}
-                          {(canMod || own) && <button onClick={() => deleteMsg(msg.id)} style={{ background: 'rgba(255,51,102,0.12)', border: 'none', borderRadius: '6px', color: '#ff3366', cursor: 'pointer', fontSize: '11px', padding: '3px 6px' }} title="Delete">🗑</button>}
+                        <div className="msg-actions" style={{ display: 'flex', gap: '5px', opacity: 0, transition: 'opacity 0.15s', flexDirection: 'column' }}>
+                          <button onClick={() => setReplyTo(msg)} style={{ background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '6px', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontSize: '11px', padding: '6px 10px' }} title="Reply">↩</button>
+                          <button onClick={() => setShowEmojiPicker(showEmojiPicker === msg.id ? null : msg.id)} style={{ background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '6px', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontSize: '11px', padding: '6px 10px' }} title="React">😊</button>
+                          {own && <button onClick={() => startEdit(msg)} style={{ background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '6px', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontSize: '11px', padding: '6px 10px' }} title="Edit">✏️</button>}
+                          {canMod && <button onClick={() => togglePin(msg)} style={{ background: 'rgba(0,245,255,0.1)', border: 'none', borderRadius: '6px', color: 'var(--cyan)', cursor: 'pointer', fontSize: '11px', padding: '6px 10px' }} title={msg.is_pinned ? "Unpin" : "Pin"}>📌</button>}
+                          {(canMod || own) && <button onClick={() => deleteMsg(msg.id)} style={{ background: 'rgba(255,51,102,0.12)', border: 'none', borderRadius: '6px', color: '#ff3366', cursor: 'pointer', fontSize: '11px', padding: '6px 10px' }} title="Delete">🗑</button>}
                         </div>
                       </div>
 
@@ -455,3 +455,5 @@ function SidebarUser({ u, dotColor, profiles, onViewUser }) {
     </div>
   );
 }
+
+

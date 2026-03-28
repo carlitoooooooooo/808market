@@ -387,7 +387,9 @@ export default function UserProfilePage({ username, onClose, onOpenModal, userVo
                 </div>
               )}
             </div>
-          <DrumkitSection username={username} isOwnProfile={false} />
+          <div style={{ padding: '12px 0 16px 0' }} className="user-profile-tracks-section">
+            <DrumkitSection username={username} isOwnProfile={false} />
+          </div>
           </>
         )}
       {/* Inline TrackModal if no onOpenModal prop */}

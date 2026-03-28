@@ -10,6 +10,7 @@ import EditBeatModal from "./EditBeatModal.jsx";
 import ImageCropper from "./ImageCropper.jsx";
 import TrackModal from "./TrackModal.jsx";
 import DrumkitSection from "./DrumkitSection.jsx";
+import BannerCropper from "./BannerCropper.jsx";
 
 const REACTIONS_EMOJIS = ["🔥", "😤", "💯", "🥶", "😭", "💀"];
 
@@ -58,6 +59,7 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
   const [coverUrl, setCoverUrl] = useState(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
+  const [coverCropFile, setCoverCropFile] = useState(null);
   const avatarInputRef = React.useRef(null);
   const coverInputRef = React.useRef(null);
   const [showSnippetPicker, setShowSnippetPicker] = useState(false);
@@ -461,9 +463,8 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
     setCropFile(file);
   }
 
-  async function handleCoverChange(e) {
-    const file = e.target.files[0];
-    if (!file || !file.type.startsWith('image/')) return;
+  async function uploadCoverFile(file) {
+    if (!file) return;
     setUploadingCover(true);
     try {
       const ext = file.name.split('.').pop();
@@ -485,6 +486,13 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
       }
     } catch (err) { console.error('Cover upload error:', err); }
     finally { setUploadingCover(false); }
+  }
+
+  function handleCoverChange(e) {
+    const file = e.target.files[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    coverInputRef.current.value = '';
+    setCoverCropFile(file); // open cropper
   }
 
   async function handleCroppedAvatar(croppedFile) {
@@ -1070,6 +1078,8 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
       {/* Edit modal */}
       {editing && (
         <div className="edit-profile-overlay">
+          {/* Spacer for mobile: push content below app header */}
+          <div className="edit-profile-nav-spacer" />
           <div className="edit-profile-box">
             <div className="edit-profile-header">
               <button onClick={() => setEditing(false)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', fontSize: '16px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>

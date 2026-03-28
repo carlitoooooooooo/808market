@@ -2566,11 +2566,12 @@ body {
   overflow-y: scroll;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
-  padding-top: env(safe-area-inset-top, 0px);
   padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
 }
 .edit-profile-overlay::-webkit-scrollbar { display: none; }
 .edit-profile-box { width: 100%; }
+/* Mobile only: spacer pushes content below app header */
+.edit-profile-nav-spacer { height: 56px; flex-shrink: 0; display: block; }
 .edit-profile-header {
   display: flex;
   align-items: center;
@@ -2578,10 +2579,12 @@ body {
   padding: 16px;
   border-bottom: 1px solid rgba(255,255,255,0.08);
   position: sticky;
-  top: 0;
+  top: 56px;
   background: #000;
   z-index: 10;
 }
+
+
 
 
 
@@ -3099,6 +3102,8 @@ html.party-mode .auth-submit {
   .profile-settings-btn { display: none !important; }
 
   /* ── Edit profile popup on desktop ── */
+  .edit-profile-nav-spacer { display: none !important; }
+  .edit-profile-header { top: 0; }
   .edit-profile-overlay {
     display: flex;
     align-items: flex-start;

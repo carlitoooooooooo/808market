@@ -443,8 +443,14 @@ function ListingUpload({ username, accent, onClose, onAdded }) {
   const [error, setError] = useState('');
   const [myDrumkits, setMyDrumkits] = useState([]);
   const [selectedKitId, setSelectedKitId] = useState('');
+  const [kitMode, setKitMode] = useState('existing'); // 'existing' | 'new'
+  const [kitName, setKitName] = useState('');
+  const [kitPrice, setKitPrice] = useState('');
+  const [kitFile, setKitFile] = useState(null);
+  const [kitProgress, setKitProgress] = useState(0);
   const audioRef = useRef(null);
   const coverRef = useRef(null);
+  const kitFileRef = useRef(null);
 
   const GENRES = ['Hip-Hop', 'Drill', 'Trap', 'R&B', 'Electronic', 'Other'];
 
@@ -458,36 +464,57 @@ function ListingUpload({ username, accent, onClose, onAdded }) {
 
   const handleSubmit = async () => {
     if (type === 'drumkit') {
-      if (!selectedKitId) return setError('Select a drumkit');
-      const kit = myDrumkits.find(k => String(k.id) === selectedKitId);
-      if (!kit) return setError('Drumkit not found');
-      // Add it as a listing entry referencing the drumkit
-      try {
-        const listing = await dbPost('artist_listings', {
-          seller_username: username,
-          type: 'drumkit',
-          title: kit.name,
-          description: kit.description || '',
-          price: kit.price || 0,
-          audio_url: null,
-          cover_url: null,
-          is_active: true,
-          // Store kit ID in description for reference
-          bpm: null,
-          genre: 'Other',
-        });
-        // Also store drumkit file_url by patching
-        const listingId = Array.isArray(listing) ? listing[0]?.id : listing?.id;
-        if (listingId) {
-          await fetch(`${SUPABASE_URL}/rest/v1/artist_listings?id=eq.${listingId}`, {
-            method: 'PATCH',
-            headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ audio_url: kit.file_url }),
+      if (kitMode === 'existing') {
+        if (!selectedKitId) return setError('Select a drumkit');
+        const kit = myDrumkits.find(k => String(k.id) === selectedKitId);
+        if (!kit) return setError('Drumkit not found');
+        try {
+          setUploading(true);
+          const listing = await dbPost('artist_listings', {
+            seller_username: username, type: 'drumkit', title: kit.name,
+            description: kit.description || '', price: kit.price || 0,
+            audio_url: kit.file_url, cover_url: null, is_active: true, bpm: null, genre: 'Other',
           });
-        }
-        onAdded(Array.isArray(listing) ? { ...listing[0], audio_url: kit.file_url } : { ...listing, audio_url: kit.file_url });
-        onClose();
-      } catch (err) { setError('Failed: ' + err.message); }
+          onAdded(Array.isArray(listing) ? { ...listing[0], audio_url: kit.file_url } : { ...listing, audio_url: kit.file_url });
+          onClose();
+        } catch (err) { setError('Failed: ' + err.message); }
+        setUploading(false);
+      } else {
+        // Upload new kit
+        if (!kitFile) return setError('Select a .zip or .rar file');
+        if (!kitName.trim()) return setError('Name is required');
+        setUploading(true); setKitProgress(0);
+        try {
+          const ext = kitFile.name.split('.').pop().toLowerCase();
+          const path = `${username}/${Date.now()}.${ext}`;
+          const fileUrl = await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', `${SUPABASE_URL}/storage/v1/object/drumkits/${path}`);
+            xhr.setRequestHeader('Authorization', `Bearer ${ANON_KEY}`);
+            xhr.setRequestHeader('apikey', ANON_KEY);
+            xhr.setRequestHeader('x-upsert', 'true');
+            xhr.setRequestHeader('Content-Type', 'application/octet-stream');
+            xhr.upload.onprogress = e => { if (e.lengthComputable) setKitProgress(Math.round(e.loaded / e.total * 100)); };
+            xhr.onload = () => xhr.status < 300 ? resolve(`${SUPABASE_URL}/storage/v1/object/public/drumkits/${path}`) : reject(new Error(`Upload failed: ${xhr.status}`));
+            xhr.onerror = () => reject(new Error('Network error'));
+            xhr.send(kitFile);
+          });
+          // Save to drumkits table
+          await fetch(`${SUPABASE_URL}/rest/v1/drumkits`, {
+            method: 'POST',
+            headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}`, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+            body: JSON.stringify({ uploaded_by_username: username, name: kitName.trim(), price: parseFloat(kitPrice) || 0, file_url: fileUrl, file_size_mb: Math.round(kitFile.size / 1024 / 1024 * 10) / 10 }),
+          });
+          // Also add as listing
+          const listing = await dbPost('artist_listings', {
+            seller_username: username, type: 'drumkit', title: kitName.trim(),
+            price: parseFloat(kitPrice) || 0, audio_url: fileUrl, is_active: true, bpm: null, genre: 'Other',
+          });
+          onAdded(Array.isArray(listing) ? { ...listing[0], audio_url: fileUrl } : { ...listing, audio_url: fileUrl });
+          onClose();
+        } catch (err) { setError('Upload failed: ' + err.message); }
+        setUploading(false);
+      }
       return;
     }
     if (type === 'open_verse' && !title) return setError('Title is required');
@@ -563,30 +590,71 @@ function ListingUpload({ username, accent, onClose, onAdded }) {
           </div>
         </div>
 
-        {/* Drumkit: pick from existing kits */}
+        {/* Drumkit: pick existing or upload new */}
         {type === 'drumkit' ? (
           <>
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>Select a Drum Kit</label>
-              {myDrumkits.length === 0 ? (
-                <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '14px', fontSize: '13px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-body)' }}>
-                  No drumkits found. Upload one from your profile first.
-                </div>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {myDrumkits.map(k => (
-                    <div key={k.id} onClick={() => setSelectedKitId(String(k.id))}
-                      style={{ background: selectedKitId === String(k.id) ? `${accent}15` : 'rgba(255,255,255,0.04)', border: `2px solid ${selectedKitId === String(k.id) ? accent : 'rgba(255,255,255,0.1)'}`, borderRadius: '10px', padding: '12px 14px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <div>
-                        <div style={{ fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '13px' }}>{k.name}</div>
-                        <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', marginTop: '2px' }}>{k.price > 0 ? `$${k.price}` : 'FREE'}</div>
-                      </div>
-                      {selectedKitId === String(k.id) && <span style={{ color: accent, fontSize: '16px' }}>✓</span>}
-                    </div>
-                  ))}
-                </div>
-              )}
+            {/* Mode toggle */}
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '14px' }}>
+              {[{ v: 'existing', l: 'Use Existing' }, { v: 'new', l: '+ Upload New' }].map(m => (
+                <button key={m.v} type="button" onClick={() => setKitMode(m.v)}
+                  style={{ flex: 1, padding: '9px', borderRadius: '10px', border: `2px solid ${kitMode === m.v ? accent : 'rgba(255,255,255,0.1)'}`, background: kitMode === m.v ? `${accent}20` : 'transparent', color: kitMode === m.v ? accent : 'rgba(255,255,255,0.5)', fontFamily: 'var(--font-head)', fontWeight: 600, fontSize: '12px', cursor: 'pointer' }}>
+                  {m.l}
+                </button>
+              ))}
             </div>
+
+            {kitMode === 'existing' ? (
+              <div style={{ marginBottom: '20px' }}>
+                {myDrumkits.length === 0 ? (
+                  <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '14px', fontSize: '13px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-body)' }}>
+                    No drumkits found on your profile yet.
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {myDrumkits.map(k => (
+                      <div key={k.id} onClick={() => setSelectedKitId(String(k.id))}
+                        style={{ background: selectedKitId === String(k.id) ? `${accent}15` : 'rgba(255,255,255,0.04)', border: `2px solid ${selectedKitId === String(k.id) ? accent : 'rgba(255,255,255,0.1)'}`, borderRadius: '10px', padding: '12px 14px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                          <div style={{ fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '13px' }}>{k.name}</div>
+                          <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', marginTop: '2px' }}>{k.price > 0 ? `$${k.price}` : 'FREE'}</div>
+                        </div>
+                        {selectedKitId === String(k.id) && <span style={{ color: accent, fontSize: '16px' }}>✓</span>}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>Kit Name</label>
+                  <input className="auth-input" value={kitName} onChange={e => setKitName(e.target.value)} placeholder="My Drum Kit..." maxLength={80} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>Price ($) — leave 0 for free</label>
+                  <input className="auth-input" type="number" min="0" step="0.01" value={kitPrice} onChange={e => setKitPrice(e.target.value)} placeholder="0.00" />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>Kit File (.zip or .rar, max 50MB)</label>
+                  <input ref={kitFileRef} type="file" accept=".zip,.rar" style={{ display: 'none' }} onChange={e => {
+                    const f = e.target.files[0];
+                    if (!f) return;
+                    if (f.size > 50 * 1024 * 1024) { setError('Max 50MB'); return; }
+                    setKitFile(f);
+                    if (!kitName) setKitName(f.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' '));
+                  }} />
+                  <button type="button" onClick={() => kitFileRef.current?.click()}
+                    style={{ width: '100%', padding: '10px', background: 'rgba(255,255,255,0.05)', border: `1px solid ${kitFile ? accent : 'rgba(255,255,255,0.15)'}`, borderRadius: '10px', color: kitFile ? accent : 'rgba(255,255,255,0.4)', cursor: 'pointer', fontFamily: 'var(--font-body)', fontSize: '13px', textAlign: 'left' }}>
+                    {kitFile ? `✓ ${kitFile.name}` : '📦 Select .zip or .rar...'}
+                  </button>
+                  {kitProgress > 0 && kitProgress < 100 && (
+                    <div style={{ marginTop: '8px', height: '4px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px', overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${kitProgress}%`, background: accent, transition: 'width 0.3s' }} />
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </>
         ) : type === 'feature' ? (
           <>

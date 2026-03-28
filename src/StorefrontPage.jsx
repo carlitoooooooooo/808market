@@ -342,17 +342,7 @@ function StorefrontEditor({ storefront, username, beats, onSave, onClose }) {
           </div>
         </F>
 
-        {/* Font Style */}
-        <F label="Font Style">
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-            {FONT_STYLES.map(f => (
-              <button key={f.value} type="button" onClick={() => setFontStyle(f.value)}
-                style={{ padding: '7px 14px', borderRadius: '20px', border: `2px solid ${fontStyle === f.value ? accent : 'rgba(255,255,255,0.15)'}`, background: fontStyle === f.value ? `${accent}20` : 'transparent', color: fontStyle === f.value ? accent : 'rgba(255,255,255,0.5)', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: f.family }}>
-                {f.label}
-              </button>
-            ))}
-          </div>
-        </F>
+
 
         {/* Accent Color */}
         <F label="Accent Color">

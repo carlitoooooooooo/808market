@@ -429,25 +429,29 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
     setUserData("avatarColor", editColor);
     // Save extra fields to DB
     console.log('Saving profileExtra:', profileExtra);
+    // Only send fields that exist in the DB
+    const safePayload = {
+      location: profileExtra.location,
+      tagline: profileExtra.tagline,
+      instagram: profileExtra.instagram,
+      twitter: profileExtra.twitter,
+      soundcloud: profileExtra.soundcloud,
+      youtube: profileExtra.youtube,
+      spotify_url: profileExtra.spotify_url,
+      influenced_by: profileExtra.influenced_by,
+      avatar_border: profileExtra.avatar_border,
+      name_glow: profileExtra.name_glow,
+      profile_bg: profileExtra.profile_bg,
+      bio_link: profileExtra.bio_link,
+      bio_link_label: profileExtra.bio_link_label,
+      profile_badge: profileExtra.profile_badge,
+      profile_badge_color: profileExtra.profile_badge_color,
+    };
     fetch(`${SUPABASE_URL}/rest/v1/profiles?username=eq.${encodeURIComponent(currentUser.username)}`, {
       method: 'PATCH',
       headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify(profileExtra),
-    }).then(r => {
-      console.log('Response status:', r.status);
-      if (!r.ok) {
-        return r.text().then(text => {
-          console.error('Failed to save profile:', r.status, r.statusText, text);
-          alert('Failed to save profile. Status: ' + r.status);
-        });
-      } else {
-        console.log('Profile saved successfully');
-        alert('Profile saved!');
-      }
-    }).catch(err => {
-      console.error('Profile save error:', err);
-      alert('Error saving profile: ' + err.message);
-    });
+      body: JSON.stringify(safePayload),
+    }).catch(() => {});
     setEditing(false);
   }
 

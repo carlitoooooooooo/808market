@@ -1043,7 +1043,13 @@ body {
   0%   { box-shadow: 0 0 0 2px #ffd700, 0 0 10px rgba(255,215,0,0.4); }
   100% { box-shadow: 0 0 0 2px #ffd700, 0 0 24px rgba(255,215,0,0.8); }
 }
-.profile-info { flex: 1; min-width: 0; overflow: hidden; }
+.profile-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
 .profile-username {
   font-family: var(--font-head);
   font-size: 18px;

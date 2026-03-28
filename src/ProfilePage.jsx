@@ -600,116 +600,100 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
       )}
       <input ref={coverInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleCoverChange} />
 
-      {/* Header */}
-      <div className="profile-header">
-        <div
-          className={`profile-avatar ${profileExtra.avatar_border !== 'none' ? `avatar-border-${profileExtra.avatar_border}` : ''}`}
-          style={{ background: avatarUrl ? 'transparent' : currentUser.avatarColor, cursor: 'pointer', overflow: 'hidden', position: 'relative' }}
-          onClick={() => avatarInputRef.current?.click()}
-          title="Change profile picture"
-        >
-          {avatarUrl ? (
-            <img src={avatarUrl} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
-          ) : (
-            currentUser.username[0].toUpperCase()
-          )}
-          {uploadingAvatar && (
-            <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', fontSize: '12px' }}>
-              ⏳
-            </div>
-          )}
-          <input ref={avatarInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatarChange} />
-        </div>
-        <div className="profile-info">
-          <div className={`profile-username ${profileExtra.name_glow !== 'none' ? `name-glow-${profileExtra.name_glow}` : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            {currentUser.username}
-            {!JSON.parse(localStorage.getItem('hideActivityStatus') || 'false') && (
-              <span title="You appear online" style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#00ff88', boxShadow: '0 0 6px #00ff88', display: 'inline-block', flexShrink: 0 }} />
-            )}
-            {currentUser.role?.toLowerCase() === 'admin' && (
-              <span style={{
-                background: 'linear-gradient(135deg, #00f5ff, #bf5fff)',
-                color: '#000', fontSize: '10px', fontFamily: 'var(--font-head)',
-                fontWeight: 700, padding: '3px 10px', borderRadius: '20px',
-                letterSpacing: '1px', textTransform: 'uppercase',
-                flexShrink: 0, whiteSpace: 'nowrap',
-              }}>ADMIN</span>
-            )}
-            {TEAM_MEMBERS.includes(currentUser.username) && currentUser.role !== 'admin' && (
-              <span style={{
-                background: 'linear-gradient(135deg, #00ff88, #00f5ff)',
-                color: '#000', fontSize: '10px', fontFamily: 'var(--font-head)',
-                fontWeight: 700, padding: '3px 10px', borderRadius: '20px',
-                letterSpacing: '1px', textTransform: 'uppercase',
-                flexShrink: 0, whiteSpace: 'nowrap',
-              }}>TEAM</span>
-            )}
-            {currentUser.isBetaTester && currentUser.role !== 'admin' && !TEAM_MEMBERS.includes(currentUser.username) && (
-              <span style={{
-                background: 'linear-gradient(135deg, #ff9900, #ff3366)',
-                color: '#fff', fontSize: '9px', fontFamily: 'var(--font-head)',
-                fontWeight: 700, padding: '2px 8px', borderRadius: '20px',
-                letterSpacing: '1px', textTransform: 'uppercase',
-              }}>BETA TESTER</span>
-            )}
-          </div>
-          {/* Follower/Following counts - clickable */}
-          <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', fontFamily: 'var(--font-body)', marginTop: '2px', marginBottom: '2px', display: 'flex', gap: '12px' }}>
-            <span style={{ cursor: 'pointer' }} onClick={async () => {
-              const data = await fetch(`${SUPABASE_URL}/rest/v1/follows?following_username=eq.${encodeURIComponent(currentUser.username)}&select=follower_username`, { headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` } }).then(r => r.json());
-              setFollowList({ type: 'followers', users: Array.isArray(data) ? data.map(d => d.follower_username) : [] });
-            }}>
-              <span style={{ color: 'rgba(255,255,255,0.9)', fontWeight: 700 }}>{followerCount}</span>
-              <span style={{ marginLeft: '3px' }}>followers</span>
-            </span>
-            <span style={{ cursor: 'pointer' }} onClick={async () => {
-              const data = await fetch(`${SUPABASE_URL}/rest/v1/follows?follower_username=eq.${encodeURIComponent(currentUser.username)}&select=following_username`, { headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` } }).then(r => r.json());
-              setFollowList({ type: 'following', users: Array.isArray(data) ? data.map(d => d.following_username) : [] });
-            }}>
-              <span style={{ color: 'rgba(255,255,255,0.9)', fontWeight: 700 }}>{followingCount}</span>
-              <span style={{ marginLeft: '3px' }}>following</span>
-            </span>
-          </div>
-          {!editing && (
-            <>
-              {currentUser.bio && <div className="profile-bio">{currentUser.bio}</div>}
-              {profileExtra.tagline && <div style={{ fontSize: '12px', color: 'var(--cyan)', fontFamily: 'var(--font-body)', marginTop: '2px', fontStyle: 'italic' }}>{profileExtra.tagline}</div>}
-              {profileExtra.location && <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-body)', marginTop: '2px' }}>📍 {profileExtra.location}</div>}
-              {profileExtra.influenced_by && (
-                <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-body)', marginTop: '4px' }}>
-                  🎵 Influenced by: <span style={{ color: 'rgba(255,255,255,0.6)' }}>{profileExtra.influenced_by}</span>
-                </div>
-              )}
-              {(profileExtra.instagram || profileExtra.twitter || profileExtra.soundcloud || profileExtra.youtube || profileExtra.spotify_url || profileExtra.bio_link) && (
-                <div style={{ display: 'flex', gap: '10px', marginTop: '6px', flexWrap: 'wrap' }}>
-                  {profileExtra.instagram && <a href={`https://instagram.com/${profileExtra.instagram}`} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', textDecoration: 'none' }}>📸 Instagram</a>}
-                  {profileExtra.twitter && <a href={`https://x.com/${profileExtra.twitter}`} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', textDecoration: 'none' }}>🐦 Twitter</a>}
-                  {profileExtra.soundcloud && <a href={`https://soundcloud.com/${profileExtra.soundcloud}`} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', textDecoration: 'none' }}>☁️ SoundCloud</a>}
-                  {profileExtra.youtube && <a href={`https://youtube.com/@${profileExtra.youtube}`} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', textDecoration: 'none' }}>▶️ YouTube</a>}
-                  {profileExtra.spotify_url && <a href={profileExtra.spotify_url} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', textDecoration: 'none' }}>🎵 Spotify</a>}
-                  {profileExtra.bio_link && <a href={profileExtra.bio_link.startsWith('http') ? profileExtra.bio_link : `https://${profileExtra.bio_link}`} target="_blank" rel="noreferrer" style={{ color: 'var(--cyan)', fontSize: '13px', textDecoration: 'none', fontWeight: 600 }}>🔗 {profileExtra.bio_link_label || 'Link'}</a>}
-                </div>
-              )}
-            </>
-          )}
-          {/* Edit button only shown inline — form is a full-screen modal */}
-        </div>
-      </div>
+      {/* ── Profile Identity Block ── */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
 
-      {/* Stats */}
-      <div className="profile-stats">
-        <div className="stat-box">
-          <div className="stat-value" style={{ color: "var(--green)" }}>{totalCopsReceived}</div>
-          <div className="stat-label">❤️ likes recv'd</div>
+        {/* Avatar + Name row */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          {/* Avatar */}
+          <div
+            className={`profile-avatar ${profileExtra.avatar_border !== 'none' ? `avatar-border-${profileExtra.avatar_border}` : ''}`}
+            style={{ background: avatarUrl ? 'transparent' : currentUser.avatarColor, cursor: 'pointer', overflow: 'hidden', position: 'relative', flexShrink: 0 }}
+            onClick={() => avatarInputRef.current?.click()}
+            title="Change profile picture"
+          >
+            {avatarUrl ? (
+              <img src={avatarUrl} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+            ) : (
+              currentUser.username[0].toUpperCase()
+            )}
+            {uploadingAvatar && (
+              <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', fontSize: '12px' }}>⏳</div>
+            )}
+            <input ref={avatarInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatarChange} />
+          </div>
+
+          {/* Username + badges */}
+          <div style={{ minWidth: 0 }}>
+            <div className={`profile-username ${profileExtra.name_glow !== 'none' ? `name-glow-${profileExtra.name_glow}` : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+              <span>{currentUser.username}</span>
+              {!JSON.parse(localStorage.getItem('hideActivityStatus') || 'false') && (
+                <span title="Online" style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#00ff88', boxShadow: '0 0 6px #00ff88', display: 'inline-block', flexShrink: 0 }} />
+              )}
+              {currentUser.role?.toLowerCase() === 'admin' && (
+                <span style={{ background: 'linear-gradient(135deg, #00f5ff, #bf5fff)', color: '#000', fontSize: '9px', fontFamily: 'var(--font-head)', fontWeight: 700, padding: '2px 8px', borderRadius: '20px', letterSpacing: '1px', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>ADMIN</span>
+              )}
+              {TEAM_MEMBERS.includes(currentUser.username) && currentUser.role !== 'admin' && (
+                <span style={{ background: 'linear-gradient(135deg, #00ff88, #00f5ff)', color: '#000', fontSize: '9px', fontFamily: 'var(--font-head)', fontWeight: 700, padding: '2px 8px', borderRadius: '20px', letterSpacing: '1px', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>TEAM</span>
+              )}
+              {currentUser.isBetaTester && currentUser.role !== 'admin' && !TEAM_MEMBERS.includes(currentUser.username) && (
+                <span style={{ background: 'linear-gradient(135deg, #ff9900, #ff3366)', color: '#fff', fontSize: '9px', fontFamily: 'var(--font-head)', fontWeight: 700, padding: '2px 8px', borderRadius: '20px', letterSpacing: '1px', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>BETA</span>
+              )}
+            </div>
+
+            {/* Followers / Following */}
+            <div style={{ display: 'flex', gap: '14px', marginTop: '4px' }}>
+              <span style={{ cursor: 'pointer', fontSize: '12px', color: 'rgba(255,255,255,0.5)', fontFamily: 'var(--font-body)' }} onClick={async () => {
+                const data = await fetch(`${SUPABASE_URL}/rest/v1/follows?following_username=eq.${encodeURIComponent(currentUser.username)}&select=follower_username`, { headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` } }).then(r => r.json());
+                setFollowList({ type: 'followers', users: Array.isArray(data) ? data.map(d => d.follower_username) : [] });
+              }}>
+                <span style={{ color: '#fff', fontWeight: 700 }}>{followerCount}</span> followers
+              </span>
+              <span style={{ cursor: 'pointer', fontSize: '12px', color: 'rgba(255,255,255,0.5)', fontFamily: 'var(--font-body)' }} onClick={async () => {
+                const data = await fetch(`${SUPABASE_URL}/rest/v1/follows?follower_username=eq.${encodeURIComponent(currentUser.username)}&select=following_username`, { headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` } }).then(r => r.json());
+                setFollowList({ type: 'following', users: Array.isArray(data) ? data.map(d => d.following_username) : [] });
+              }}>
+                <span style={{ color: '#fff', fontWeight: 700 }}>{followingCount}</span> following
+              </span>
+            </div>
+          </div>
         </div>
-        <div className="stat-box">
-          <div className="stat-value" style={{ color: "var(--purple)" }}>{myUploads.length}</div>
-          <div className="stat-label">🎵 beats</div>
+
+        {/* Stats row */}
+        <div className="profile-stats" style={{ marginBottom: 0 }}>
+          <div className="stat-box">
+            <div className="stat-value" style={{ color: 'var(--green)' }}>{totalCopsReceived}</div>
+            <div className="stat-label">❤️ likes</div>
+          </div>
+          <div className="stat-box">
+            <div className="stat-value" style={{ color: 'var(--purple)' }}>{myUploads.length}</div>
+            <div className="stat-label">🎵 beats</div>
+          </div>
+          <div className="stat-box">
+            <div className="stat-value" style={{ color: 'var(--cyan)' }}>{totalPlays}</div>
+            <div className="stat-label">🎧 plays</div>
+          </div>
         </div>
-        <div className="stat-box">
-          <div className="stat-value" style={{ color: "var(--cyan)" }}>{totalPlays}</div>
-          <div className="stat-label">🎧 plays</div>
-        </div>
+
+        {/* Bio + extra info */}
+        {!editing && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            {currentUser.bio && <div className="profile-bio" style={{ marginBottom: 0 }}>{currentUser.bio}</div>}
+            {profileExtra.tagline && <div style={{ fontSize: '12px', color: 'var(--cyan)', fontFamily: 'var(--font-body)', fontStyle: 'italic' }}>{profileExtra.tagline}</div>}
+            {profileExtra.location && <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-body)' }}>📍 {profileExtra.location}</div>}
+            {profileExtra.influenced_by && <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-body)' }}>🎵 Influenced by: <span style={{ color: 'rgba(255,255,255,0.6)' }}>{profileExtra.influenced_by}</span></div>}
+            {(profileExtra.instagram || profileExtra.twitter || profileExtra.soundcloud || profileExtra.youtube || profileExtra.spotify_url || profileExtra.bio_link) && (
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '2px' }}>
+                {profileExtra.instagram && <a href={`https://instagram.com/${profileExtra.instagram}`} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', textDecoration: 'none' }}>📸 IG</a>}
+                {profileExtra.twitter && <a href={`https://x.com/${profileExtra.twitter}`} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', textDecoration: 'none' }}>🐦 X</a>}
+                {profileExtra.soundcloud && <a href={`https://soundcloud.com/${profileExtra.soundcloud}`} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', textDecoration: 'none' }}>☁️ SC</a>}
+                {profileExtra.youtube && <a href={`https://youtube.com/@${profileExtra.youtube}`} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', textDecoration: 'none' }}>▶️ YT</a>}
+                {profileExtra.spotify_url && <a href={profileExtra.spotify_url} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', textDecoration: 'none' }}>🎵 Spotify</a>}
+                {profileExtra.bio_link && <a href={profileExtra.bio_link.startsWith('http') ? profileExtra.bio_link : `https://${profileExtra.bio_link}`} target="_blank" rel="noreferrer" style={{ color: 'var(--cyan)', fontSize: '12px', textDecoration: 'none', fontWeight: 600 }}>🔗 {profileExtra.bio_link_label || 'Link'}</a>}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Pinned Track */}

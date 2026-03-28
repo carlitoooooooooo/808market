@@ -1228,9 +1228,11 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
                   </div>
                   {/* Admin/Team Only */}
                   {(currentUser.role === 'admin' || TEAM_MEMBERS.includes(currentUser.username)) && (
-                    <div>
-                      <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px' }}>
-                        👑 ADMIN/TEAM ONLY
+                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '14px', marginTop: '6px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+                        <div style={{ flex: 1, height: '1px', background: 'linear-gradient(90deg, transparent, rgba(0,245,255,0.3))' }} />
+                        <span style={{ fontSize: '10px', color: 'var(--cyan)', fontFamily: 'var(--font-head)', fontWeight: 700, letterSpacing: '1.5px', whiteSpace: 'nowrap' }}>👑 ADMIN / TEAM</span>
+                        <div style={{ flex: 1, height: '1px', background: 'linear-gradient(90deg, rgba(0,245,255,0.3), transparent)' }} />
                       </div>
                       {/* Profile Badge */}
                       <div style={{ marginBottom: '12px' }}>

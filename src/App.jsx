@@ -13,6 +13,7 @@ import UserProfilePage from "./UserProfilePage.jsx";
 import { FireAnimation, TrashAnimation } from "./SwipeAnimations.jsx";
 import AboutPage from "./AboutPage.jsx";
 import SettingsPage from "./SettingsPage.jsx";
+import AnalyticsPage from "./AnalyticsPage.jsx";
 import MessagesPage from "./MessagesPage.jsx";
 import LandingPage from "./LandingPage.jsx";
 import AuthPrompt from "./AuthPrompt.jsx";
@@ -128,6 +129,7 @@ export default function App() {
   const [showUpload, setShowUpload] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showAnalytics, setShowAnalytics] = useState(false);
   const [messageThread, setMessageThread] = useState(null); // username to open DM with
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [guestMode, setGuestMode] = useState(false);
@@ -345,6 +347,14 @@ export default function App() {
     const interval = setInterval(ping, 2 * 60 * 1000); // then every 2 min
     return () => clearInterval(interval);
   }, [currentUser?.username]);
+
+  // Handle /analytics route
+  useEffect(() => {
+    if (window.location.pathname === '/analytics') {
+      history.replaceState(null, '', '/');
+      setShowAnalytics(true);
+    }
+  }, []);
 
   // Stripe Connect return handler
   useEffect(() => {
@@ -1003,7 +1013,13 @@ export default function App() {
       )}
 
       {showSettings && (
-        <SettingsPage onClose={() => setShowSettings(false)} />
+        <SettingsPage onClose={() => setShowSettings(false)} onOpenAnalytics={() => setShowAnalytics(true)} />
+      )}
+
+      {showAnalytics && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 600, background: 'var(--bg)', overflowY: 'auto' }}>
+          <AnalyticsPage onBack={() => setShowAnalytics(false)} />
+        </div>
       )}
 
 

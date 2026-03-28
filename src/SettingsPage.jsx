@@ -99,7 +99,7 @@ function BulkPriceEditor({ username }) {
   );
 }
 
-export default function SettingsPage({ onClose }) {
+export default function SettingsPage({ onClose, onOpenAnalytics }) {
   const { currentUser, logout } = useAuth();
 
   const [section, setSection] = useState("account"); // "account" | "password" | "fun" | "creator" | "privacy" | "about"
@@ -869,6 +869,18 @@ export default function SettingsPage({ onClose }) {
                   <div className="settings-field">
                     <label className="settings-label">Total Uploads</label>
                     <div className="settings-value" style={{ fontSize: "24px", fontWeight: 700 }}>{uploadCount}</div>
+                  </div>
+
+                  <div>
+                    <button
+                      onClick={() => { onClose(); onOpenAnalytics && onOpenAnalytics(); }}
+                      style={{
+                        width: "100%", padding: "12px", background: "rgba(0,245,255,0.1)",
+                        border: "1px solid rgba(0,245,255,0.3)", borderRadius: "12px",
+                        color: "var(--cyan)", fontSize: "14px", fontWeight: 600,
+                        cursor: "pointer", fontFamily: "var(--font-head)",
+                      }}
+                    >📊 View Beat Analytics</button>
                   </div>
 
                   <div style={{ borderTop: "1px solid var(--border)", paddingTop: "16px" }}>

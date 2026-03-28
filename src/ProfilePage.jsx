@@ -694,25 +694,6 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
           )}
           {/* Edit button only shown inline — form is a full-screen modal */}
         </div>
-        {!editing && (
-          <div style={{ display: 'flex', gap: '6px' }}>
-            <button className="profile-edit-btn" onClick={() => setEditing(true)} title="Edit profile">✏️</button>
-            <button className="profile-edit-btn profile-settings-btn" onClick={onOpenSettings} title="Settings">⚙️</button>
-            <button className="profile-edit-btn" title="Share profile" onClick={async () => {
-              const url = `https://808market.app/u/${currentUser.username}`;
-              try {
-                if (navigator.share) {
-                  await navigator.share({ title: `${currentUser.username} on 808market`, url });
-                } else {
-                  await navigator.clipboard.writeText(url);
-                  alert('Profile link copied!');
-                }
-              } catch {}
-            }}>📤</button>
-            <button className="profile-edit-btn" title="My Storefront" onClick={() => onOpenStorefront && onOpenStorefront(currentUser.username)}
-              style={{ fontSize: '14px' }}>🏪</button>
-          </div>
-        )}
       </div>
 
       {/* Stats */}
@@ -780,7 +761,26 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
 
       {/* My Beats */}
       <div className="profile-section">
-        <div className="section-title">🎵 MY BEATS</div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+          <div className="section-title" style={{ marginBottom: 0 }}>🎵 MY BEATS</div>
+          {!editing && (
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button onClick={() => setEditing(true)} title="Edit profile"
+                style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '10px', color: '#fff', width: '44px', height: '44px', fontSize: '18px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✏️</button>
+              <button onClick={onOpenSettings} title="Settings"
+                style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '10px', color: '#fff', width: '44px', height: '44px', fontSize: '18px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>⚙️</button>
+              <button title="Share profile" onClick={async () => {
+                const url = `https://808market.app/u/${currentUser.username}`;
+                try {
+                  if (navigator.share) await navigator.share({ title: `${currentUser.username} on 808market`, url });
+                  else { await navigator.clipboard.writeText(url); alert('Profile link copied!'); }
+                } catch {}
+              }} style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '10px', color: '#fff', width: '44px', height: '44px', fontSize: '18px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>📤</button>
+              <button title="My Storefront" onClick={() => onOpenStorefront && onOpenStorefront(currentUser.username)}
+                style={{ background: 'rgba(191,95,255,0.1)', border: '1px solid rgba(191,95,255,0.3)', borderRadius: '10px', color: '#bf5fff', width: '44px', height: '44px', fontSize: '18px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🏪</button>
+            </div>
+          )}
+        </div>
 
         {uploadsLoading ? (
           <div style={{ color: "var(--cyan)", fontSize: "13px", padding: "8px 0", fontFamily: "var(--font-body)" }}>loading beats...</div>

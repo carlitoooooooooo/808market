@@ -99,7 +99,7 @@ function BulkPriceEditor({ username }) {
   );
 }
 
-export default function SettingsPage({ onClose, onOpenAnalytics }) {
+export default function SettingsPage({ onClose, onOpenAnalytics, onOpenStorefront }) {
   const { currentUser, logout } = useAuth();
 
   const [section, setSection] = useState("account"); // "account" | "password" | "fun" | "creator" | "privacy" | "about"
@@ -881,6 +881,15 @@ export default function SettingsPage({ onClose, onOpenAnalytics }) {
                         cursor: "pointer", fontFamily: "var(--font-head)",
                       }}
                     >📊 View Beat Analytics</button>
+                    <button
+                      onClick={() => { onClose(); onOpenStorefront && onOpenStorefront(); }}
+                      style={{
+                        width: "100%", padding: "12px", background: "rgba(191,95,255,0.1)",
+                        border: "1px solid rgba(191,95,255,0.3)", borderRadius: "12px",
+                        color: "#bf5fff", fontSize: "14px", fontWeight: 600,
+                        cursor: "pointer", fontFamily: "var(--font-head)", marginTop: "8px",
+                      }}
+                    >🏪 My Storefront</button>
                   </div>
 
                   <div style={{ borderTop: "1px solid var(--border)", paddingTop: "16px" }}>

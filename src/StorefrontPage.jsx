@@ -170,20 +170,31 @@ function ListingCard({ listing, accent, onBuy, onDelete, isOwner }) {
   );
 }
 
-function DrumkitCard({ kit, accent }) {
+function DrumkitCard({ kit, accent, onBuy, currentUser }) {
+  const isFree = !kit.price || kit.price === 0;
   return (
-    <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '12px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', transition: 'border-color 0.2s' }}
+    <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '12px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', transition: 'border-color 0.2s' }}
       onMouseEnter={e => e.currentTarget.style.borderColor = `${accent}50`}
       onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'}
     >
-      <div>
-        <div style={{ fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '13px', marginBottom: '3px' }}>{kit.name}</div>
-        <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-body)' }}>{kit.file_count ? `${kit.file_count} samples` : 'Drum Kit'} · {kit.price ? `$${kit.price}` : 'FREE'}</div>
+      <div style={{ minWidth: 0 }}>
+        <div style={{ fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '13px', marginBottom: '3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{kit.name}</div>
+        <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-body)' }}>
+          🥁 Drum Kit · <span style={{ color: isFree ? accent : '#00ff88', fontWeight: 700 }}>{isFree ? 'FREE' : `$${kit.price}`}</span>
+        </div>
+        {kit.description && <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', fontFamily: 'var(--font-body)', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{kit.description}</div>}
       </div>
-      <a href={kit.file_url} target="_blank" rel="noreferrer"
-        style={{ background: accent, color: '#000', border: 'none', borderRadius: '8px', padding: '6px 14px', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-head)', textDecoration: 'none' }}>
-        ⬇️ Get Kit
-      </a>
+      {isFree ? (
+        <a href={kit.file_url} target="_blank" rel="noreferrer"
+          style={{ flexShrink: 0, background: accent, color: '#000', border: 'none', borderRadius: '8px', padding: '6px 14px', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-head)', textDecoration: 'none', whiteSpace: 'nowrap' }}>
+          ⬇️ Free
+        </a>
+      ) : (
+        <button onClick={() => onBuy && onBuy({ ...kit, title: kit.name, artist: kit.uploaded_by_username, type: 'drumkit' })}
+          style={{ flexShrink: 0, background: `linear-gradient(135deg, ${accent}, #bf5fff)`, color: '#000', border: 'none', borderRadius: '8px', padding: '6px 14px', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-head)', whiteSpace: 'nowrap' }}>
+          🛒 Buy
+        </button>
+      )}
     </div>
   );
 }
@@ -633,12 +644,12 @@ export default function StorefrontPage({ username, onBack }) {
   };
 
   const handleBuy = async (item) => {
-    const isBeat = !!item.audio_url && !item.type;
     const isFree = !item.price || item.price === 0;
-    if (isFree && isBeat) {
+    const downloadUrl = item.audio_url || item.file_url;
+    if (isFree && downloadUrl) {
       const a = document.createElement('a');
-      a.href = item.audio_url;
-      a.download = `${item.title}.mp3`;
+      a.href = downloadUrl;
+      a.download = `${item.title || item.name}.${item.file_url ? 'zip' : 'mp3'}`;
       a.target = '_blank';
       document.body.appendChild(a);
       a.click();
@@ -825,7 +836,7 @@ export default function StorefrontPage({ username, onBack }) {
             <div key="drumkits" style={{ marginBottom: '32px' }}>
               <SectionHeader label={`🥁 Drum Kits (${drumkits.length})`} accent={accent} />
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {drumkits.map(k => <DrumkitCard key={k.id} kit={k} accent={accent} />)}
+                {drumkits.map(k => <DrumkitCard key={k.id} kit={k} accent={accent} onBuy={handleBuy} />)}
               </div>
             </div>
           );

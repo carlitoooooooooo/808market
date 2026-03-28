@@ -51,6 +51,7 @@ const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsI
 export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, onOpenSettings, onOpenStorefront }) {
   const { currentUser, setUserData, logout } = useAuth();
   const [editing, setEditing] = useState(false);
+  const [showAppearance, setShowAppearance] = useState(false);
   const [editBio, setEditBio] = useState(currentUser?.bio || "");
   const [editColor, setEditColor] = useState(currentUser?.avatarColor || AVATAR_COLORS[0]);
   const [profileExtra, setProfileExtra] = useState({ location: '', tagline: '', instagram: '', twitter: '', soundcloud: '', youtube: '', spotify_url: '', influenced_by: '', avatar_border: 'none', name_glow: 'none', profile_bg: 'none', bio_link: '', bio_link_label: '', profile_badge: '', profile_badge_color: 'cyan-purple' });
@@ -1138,6 +1139,15 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
                 </button>
               );
             })()}
+            {/* ── Appearance Section ── */}
+            <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '4px' }}>
+              <button type="button" onClick={() => setShowAppearance(s => !s)}
+                style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'none', border: 'none', padding: '10px 0', cursor: 'pointer', color: '#fff', fontFamily: 'var(--font-head)', fontSize: '13px', fontWeight: 700 }}>
+                <span>🎨 Appearance</span>
+                <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '16px' }}>{showAppearance ? '▲' : '▼'}</span>
+              </button>
+            </div>
+            {showAppearance && <>
             {/* Name glow picker */}
             <div>
               <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>
@@ -1349,6 +1359,8 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
                 ))}
               </div>
             </div>
+            </>}
+
             {/* Fields */}
             {[
               { state: editBio, set: setEditBio, placeholder: 'Bio...', label: 'BIO', maxLen: 80, isExtra: false },
@@ -1486,3 +1498,4 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
     </div>
   );
 }
+

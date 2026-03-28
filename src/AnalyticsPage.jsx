@@ -29,7 +29,7 @@ export default function AnalyticsPage({ onBack }) {
   useEffect(() => {
     if (!currentUser?.username) return;
     Promise.all([
-      fetch(`${SUPABASE_URL}/rest/v1/tracks?uploaded_by_username=eq.${encodeURIComponent(currentUser.username)}&select=id,title,play_count,cops,passes,price,listed_at&order=play_count.desc`, {
+      fetch(`${SUPABASE_URL}/rest/v1/tracks?uploaded_by_username=eq.${encodeURIComponent(currentUser.username)}&select=id,title,play_count,likes,passes,price,listed_at&order=play_count.desc`, {
         headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` }
       }).then(r => r.json()),
       fetch(`${SUPABASE_URL}/rest/v1/purchases?producer_username=eq.${encodeURIComponent(currentUser.username)}&select=amount_paid,purchased_at,track_title,buyer_username&order=purchased_at.desc`, {
@@ -43,10 +43,10 @@ export default function AnalyticsPage({ onBack }) {
   }, [currentUser?.username]);
 
   const totalPlays = beats.reduce((s, b) => s + (b.play_count || 0), 0);
-  const totalCops = beats.reduce((s, b) => s + (b.cops || 0), 0);
+  const totalLikes = beats.reduce((s, b) => s + (b.likes || 0), 0);
   const totalPasses = beats.reduce((s, b) => s + (b.passes || 0), 0);
   const totalRevenue = purchases.reduce((s, p) => s + (p.amount_paid || 0), 0);
-  const copRate = totalCops + totalPasses > 0 ? Math.round((totalCops / (totalCops + totalPasses)) * 100) : 0;
+  const likeRate = totalLikes + totalPasses > 0 ? Math.round((totalLikes / (totalLikes + totalPasses)) * 100) : 0;
   const producerCut = totalRevenue * 0.85;
 
   const top5 = [...beats].sort((a, b) => (b.play_count || 0) - (a.play_count || 0)).slice(0, 5);
@@ -79,7 +79,7 @@ export default function AnalyticsPage({ onBack }) {
             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '28px' }}>
               <StatCard label="Total Plays" value={totalPlays.toLocaleString()} color="var(--cyan)" />
               <StatCard label="Beats" value={beats.length} color="var(--purple)" />
-              <StatCard label="❤️ Cop Rate" value={`${copRate}%`} sub={`${totalCops} cops · ${totalPasses} passes`} color="var(--green)" />
+              <StatCard label="❤️ Like Rate" value={`${likeRate}%`} sub={`${totalLikes} likes · ${totalPasses} passes`} color="var(--green)" />
               <StatCard label="💰 Revenue" value={`$${totalRevenue.toFixed(2)}`} sub={`Your cut: $${producerCut.toFixed(2)}`} color="#ffd700" />
               <StatCard label="Sales" value={purchases.length} color="#ff9900" />
             </div>
@@ -101,7 +101,7 @@ export default function AnalyticsPage({ onBack }) {
                     <div style={{ height: '100%', width: `${((b.play_count || 0) / maxPlays) * 100}%`, background: 'linear-gradient(90deg, var(--cyan), var(--purple))', borderRadius: '2px' }} />
                   </div>
                   <div style={{ display: 'flex', gap: '16px', marginTop: '8px', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-body)' }}>
-                    <span>❤️ {b.cops || 0} cops</span>
+                    <span>❤️ {b.likes || 0} likes</span>
                     <span>💨 {b.passes || 0} passes</span>
                     <span>{b.price ? `$${b.price}` : 'FREE'}</span>
                   </div>
@@ -134,3 +134,4 @@ export default function AnalyticsPage({ onBack }) {
     </div>
   );
 }
+

@@ -430,7 +430,7 @@ function StorefrontEditor({ storefront, username, beats, onSave, onClose }) {
 }
 
 // ─── Artist Listing Upload ────────────────────────────────────────────────────
-function ListingUpload({ username, accent, onClose, onAdded }) {
+function ListingUpload({ username, userId, accent, onClose, onAdded }) {
   const [type, setType] = useState('open_verse');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -486,16 +486,16 @@ function ListingUpload({ username, accent, onClose, onAdded }) {
         setUploading(true); setKitProgress(0);
         try {
           const ext = kitFile.name.split('.').pop().toLowerCase();
-          const path = `${username}/${Date.now()}.${ext}`;
+          const uploaderId = userId || username;
+          const path = `${uploaderId}/${Date.now()}.${ext}`;
           const fileUrl = await new Promise((resolve, reject) => {
             const xhr = new XMLHttpRequest();
             xhr.open('POST', `${SUPABASE_URL}/storage/v1/object/drumkits/${path}`);
             xhr.setRequestHeader('Authorization', `Bearer ${ANON_KEY}`);
-            xhr.setRequestHeader('apikey', ANON_KEY);
             xhr.setRequestHeader('x-upsert', 'true');
             xhr.setRequestHeader('Content-Type', 'application/octet-stream');
             xhr.upload.onprogress = e => { if (e.lengthComputable) setKitProgress(Math.round(e.loaded / e.total * 100)); };
-            xhr.onload = () => xhr.status < 300 ? resolve(`${SUPABASE_URL}/storage/v1/object/public/drumkits/${path}`) : reject(new Error(`Upload failed: ${xhr.status}`));
+            xhr.onload = () => xhr.status < 300 ? resolve(`${SUPABASE_URL}/storage/v1/object/public/drumkits/${path}`) : reject(new Error(`Upload failed: ${xhr.status} ${xhr.responseText}`));
             xhr.onerror = () => reject(new Error('Network error'));
             xhr.send(kitFile);
           });
@@ -528,30 +528,16 @@ function ListingUpload({ username, accent, onClose, onAdded }) {
 
       if (audioFile) {
         const ext = audioFile.name.split('.').pop();
-        const path = `${username}/listing_${Date.now()}.${ext}`;
-        const res = await fetch(`${SUPABASE_URL}/storage/v1/object/audio/${path}`, {
-          method: 'POST',
-          headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}`, 'Content-Type': audioFile.type },
-          body: audioFile,
-        });
-        if (!res.ok) {
-          const errText = await res.text();
-          throw new Error(`Audio upload failed (${res.status}): ${errText}`);
-        }
-        audio_url = `${SUPABASE_URL}/storage/v1/object/public/audio/${path}`;
+        const uploaderId = userId || username;
+        const path = `${uploaderId}/listing_${Date.now()}.${ext}`;
+        audio_url = await uploadFile('audio', path, audioFile);
       }
 
       if (coverFile) {
         const ext = coverFile.name.split('.').pop();
-        const path = `${username}/listing_cover_${Date.now()}.${ext}`;
-        const res = await fetch(`${SUPABASE_URL}/storage/v1/object/covers/${path}`, {
-          method: 'POST',
-          headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}`, 'Content-Type': coverFile.type },
-          body: coverFile,
-        });
-        if (res.ok) {
-          cover_url = `${SUPABASE_URL}/storage/v1/object/public/covers/${path}`;
-        }
+        const uploaderId = userId || username;
+        const path = `${uploaderId}/listing_cover_${Date.now()}.${ext}`;
+        cover_url = await uploadFile('covers', path, coverFile).catch(() => null);
       }
 
       const listing = await dbPost('artist_listings', {
@@ -724,6 +710,25 @@ function ListingUpload({ username, accent, onClose, onAdded }) {
       </div>
     </div>
   );
+}
+
+function uploadFile(bucket, path, file) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `${SUPABASE_URL}/storage/v1/object/${bucket}/${path}`);
+    xhr.setRequestHeader('Authorization', `Bearer ${ANON_KEY}`);
+    xhr.setRequestHeader('x-upsert', 'true');
+    xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve(`${SUPABASE_URL}/storage/v1/object/public/${bucket}/${path}`);
+      } else {
+        reject(new Error(`Upload failed (${xhr.status}): ${xhr.responseText}`));
+      }
+    };
+    xhr.onerror = () => reject(new Error('Network error'));
+    xhr.send(file);
+  });
 }
 
 // ─── Main Storefront Page ─────────────────────────────────────────────────────
@@ -1005,6 +1010,7 @@ export default function StorefrontPage({ username, onBack }) {
       {showListingUpload && (
         <ListingUpload
           username={username}
+          userId={currentUser?.id}
           accent={accent}
           onClose={() => setShowListingUpload(false)}
           onAdded={(listing) => setListings(prev => [listing, ...prev])}

@@ -229,8 +229,9 @@ function ListingUpload({ username, accent, onClose, onAdded }) {
   const GENRES = ['Hip-Hop', 'Drill', 'Trap', 'R&B', 'Electronic', 'Other'];
 
   const handleSubmit = async () => {
-    if (!title) return setError('Title is required');
+    if (type === 'open_verse' && !title) return setError('Title is required');
     if (!price || parseFloat(price) <= 0) return setError('Price is required');
+    if (type === 'open_verse' && !audioFile) return setError('Audio preview is required for open verses');
     setUploading(true);
     setError('');
     try {
@@ -266,7 +267,7 @@ function ListingUpload({ username, accent, onClose, onAdded }) {
       const listing = await dbPost('artist_listings', {
         seller_username: username,
         type,
-        title,
+        title: type === 'feature' ? 'Feature' : title,
         description,
         genre,
         bpm: bpm ? parseInt(bpm) : null,
@@ -301,53 +302,74 @@ function ListingUpload({ username, accent, onClose, onAdded }) {
           </div>
         </div>
 
-        <div style={{ marginBottom: '14px' }}>
-          <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>Title</label>
-          <input className="auth-input" value={title} onChange={e => setTitle(e.target.value)} placeholder={type === 'open_verse' ? "Song name..." : "Feature listing name..."} maxLength={80} />
-        </div>
+        {/* Feature: simplified — just price + description */}
+        {type === 'feature' ? (
+          <>
+            <div style={{ marginBottom: '14px' }}>
+              <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>Feature Price ($)</label>
+              <input className="auth-input" type="number" min="1" step="0.01" value={price} onChange={e => setPrice(e.target.value)} placeholder="200.00" />
+            </div>
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>Description (optional)</label>
+              <textarea className="auth-input" value={description} onChange={e => setDescription(e.target.value)}
+                placeholder="What's your style? Turn time? What genres do you work with?"
+                rows={3} maxLength={300} style={{ resize: 'vertical', fontFamily: 'inherit' }} />
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Open Verse: full form */}
+            <div style={{ marginBottom: '14px' }}>
+              <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>Song Title</label>
+              <input className="auth-input" value={title} onChange={e => setTitle(e.target.value)} placeholder="Song name..." maxLength={80} />
+            </div>
 
-        <div style={{ marginBottom: '14px' }}>
-          <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>Description</label>
-          <textarea className="auth-input" value={description} onChange={e => setDescription(e.target.value)}
-            placeholder={type === 'open_verse' ? "What does the song have so far? What are you looking for from the buyer?" : "What's your style? Turn time? What genres do you work with?"}
-            rows={3} maxLength={300} style={{ resize: 'vertical', fontFamily: 'inherit' }} />
-        </div>
+            <div style={{ marginBottom: '14px' }}>
+              <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>Description</label>
+              <textarea className="auth-input" value={description} onChange={e => setDescription(e.target.value)}
+                placeholder="What does the song have so far? What are you looking for from the buyer?"
+                rows={3} maxLength={300} style={{ resize: 'vertical', fontFamily: 'inherit' }} />
+            </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '14px' }}>
-          <div>
-            <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>Genre</label>
-            <select className="auth-input" value={genre} onChange={e => setGenre(e.target.value)} style={{ cursor: 'pointer' }}>
-              {GENRES.map(g => <option key={g} value={g}>{g}</option>)}
-            </select>
-          </div>
-          <div>
-            <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>BPM (optional)</label>
-            <input className="auth-input" type="number" value={bpm} onChange={e => setBpm(e.target.value)} placeholder="140" />
-          </div>
-        </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '14px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>Genre</label>
+                <select className="auth-input" value={genre} onChange={e => setGenre(e.target.value)} style={{ cursor: 'pointer' }}>
+                  {GENRES.map(g => <option key={g} value={g}>{g}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>BPM (optional)</label>
+                <input className="auth-input" type="number" value={bpm} onChange={e => setBpm(e.target.value)} placeholder="140" />
+              </div>
+            </div>
 
-        <div style={{ marginBottom: '14px' }}>
-          <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>Price ($)</label>
-          <input className="auth-input" type="number" min="1" step="0.01" value={price} onChange={e => setPrice(e.target.value)} placeholder="50.00" />
-        </div>
+            <div style={{ marginBottom: '14px' }}>
+              <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>Price ($)</label>
+              <input className="auth-input" type="number" min="1" step="0.01" value={price} onChange={e => setPrice(e.target.value)} placeholder="50.00" />
+            </div>
 
-        <div style={{ marginBottom: '14px' }}>
-          <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>Audio Preview (optional)</label>
-          <input ref={audioRef} type="file" accept="audio/*" style={{ display: 'none' }} onChange={e => setAudioFile(e.target.files[0])} />
-          <button type="button" onClick={() => audioRef.current?.click()}
-            style={{ width: '100%', padding: '10px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '10px', color: audioFile ? accent : 'rgba(255,255,255,0.4)', cursor: 'pointer', fontFamily: 'var(--font-body)', fontSize: '13px', textAlign: 'left' }}>
-            {audioFile ? `✓ ${audioFile.name}` : '🎵 Upload audio preview...'}
-          </button>
-        </div>
+            <div style={{ marginBottom: '14px' }}>
+              <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>
+                Audio Preview <span style={{ color: '#ff3366', fontSize: '10px' }}>* Required · up to 1 minute</span>
+              </label>
+              <input ref={audioRef} type="file" accept="audio/*" style={{ display: 'none' }} onChange={e => setAudioFile(e.target.files[0])} />
+              <button type="button" onClick={() => audioRef.current?.click()}
+                style={{ width: '100%', padding: '10px', background: 'rgba(255,255,255,0.05)', border: `1px solid ${audioFile ? accent : 'rgba(255,51,102,0.3)'}`, borderRadius: '10px', color: audioFile ? accent : 'rgba(255,100,100,0.7)', cursor: 'pointer', fontFamily: 'var(--font-body)', fontSize: '13px', textAlign: 'left' }}>
+                {audioFile ? `✓ ${audioFile.name}` : '🎵 Upload audio preview (required)...'}
+              </button>
+            </div>
 
-        <div style={{ marginBottom: '20px' }}>
-          <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>Cover Image (optional)</label>
-          <input ref={coverRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => setCoverFile(e.target.files[0])} />
-          <button type="button" onClick={() => coverRef.current?.click()}
-            style={{ width: '100%', padding: '10px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '10px', color: coverFile ? accent : 'rgba(255,255,255,0.4)', cursor: 'pointer', fontFamily: 'var(--font-body)', fontSize: '13px', textAlign: 'left' }}>
-            {coverFile ? `✓ ${coverFile.name}` : '🖼 Upload cover image...'}
-          </button>
-        </div>
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>Cover Image (optional)</label>
+              <input ref={coverRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => setCoverFile(e.target.files[0])} />
+              <button type="button" onClick={() => coverRef.current?.click()}
+                style={{ width: '100%', padding: '10px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '10px', color: coverFile ? accent : 'rgba(255,255,255,0.4)', cursor: 'pointer', fontFamily: 'var(--font-body)', fontSize: '13px', textAlign: 'left' }}>
+                {coverFile ? `✓ ${coverFile.name}` : '🖼 Upload cover image...'}
+              </button>
+            </div>
+          </>
+        )}
 
         {error && <div style={{ color: '#ff3366', fontSize: '13px', marginBottom: '12px' }}>{error}</div>}
 
@@ -553,12 +575,32 @@ export default function StorefrontPage({ username, onBack }) {
         )}
 
         {/* Features */}
-        {features.length > 0 && (
+        {(features.length > 0 || isOwner) && (
           <div style={{ marginBottom: '32px' }}>
-            <SectionHeader label={`⭐ Features (${features.length})`} accent={accent} />
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '12px' }}>
-              {features.map(l => <ListingCard key={l.id} listing={l} accent={accent} onBuy={handleBuy} isOwner={isOwner} onDelete={handleDeleteListing} />)}
-            </div>
+            <SectionHeader label="⭐ Features" accent={accent} />
+            {features.length > 0 ? (
+              <div style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid ${accent}30`, borderRadius: '14px', padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+                <div>
+                  <div style={{ fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '16px', marginBottom: '4px' }}>Book a Feature</div>
+                  {features[0].description && <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', fontFamily: 'var(--font-body)', maxWidth: '300px', lineHeight: 1.4 }}>{features[0].description}</div>}
+                  <div style={{ fontSize: '22px', fontWeight: 700, fontFamily: 'var(--font-head)', color: '#00ff88', marginTop: '8px' }}>${features[0].price}</div>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
+                  <button onClick={() => handleBuy(features[0])} style={{ background: `linear-gradient(135deg, ${accent}, #bf5fff)`, color: '#000', border: 'none', borderRadius: '12px', padding: '12px 24px', fontSize: '14px', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-head)', whiteSpace: 'nowrap' }}>
+                    🎤 Buy a Feature
+                  </button>
+                  {isOwner && (
+                    <button onClick={() => handleDeleteListing(features[0].id)} style={{ background: 'rgba(255,51,102,0.1)', border: '1px solid rgba(255,51,102,0.3)', color: '#ff3366', borderRadius: '8px', padding: '6px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'var(--font-head)' }}>
+                      🗑 Remove
+                    </button>
+                  )}
+                </div>
+              </div>
+            ) : isOwner ? (
+              <div style={{ textAlign: 'center', padding: '24px', background: 'rgba(255,255,255,0.03)', border: '1px dashed rgba(255,255,255,0.1)', borderRadius: '12px', color: 'rgba(255,255,255,0.3)', fontSize: '13px', fontFamily: 'var(--font-body)' }}>
+                Add a feature listing to show a "Buy a Feature" button here
+              </div>
+            ) : null}
           </div>
         )}
 

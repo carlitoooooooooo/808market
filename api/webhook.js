@@ -42,13 +42,27 @@ export default async function handler(req, res) {
     const paymentIntentId = session.payment_intent;
 
     try {
-      // 1. Look up the track's audio_url
+      // 1. Look up audio_url — check tracks first, then artist_listings
+      let track = null;
       const trackRes = await fetch(
         `${SUPABASE_URL}/rest/v1/tracks?id=eq.${trackId}&select=id,title,audio_url,uploaded_by_username`,
         { headers: { apikey: SUPABASE_SERVICE_KEY, Authorization: `Bearer ${SUPABASE_SERVICE_KEY}` } }
       );
       const tracks = await trackRes.json();
-      const track = tracks?.[0];
+      track = tracks?.[0];
+
+      // If not found in tracks, check artist_listings (open verse / feature)
+      if (!track) {
+        const listingRes = await fetch(
+          `${SUPABASE_URL}/rest/v1/artist_listings?id=eq.${trackId}&select=id,title,audio_url,seller_username`,
+          { headers: { apikey: SUPABASE_SERVICE_KEY, Authorization: `Bearer ${SUPABASE_SERVICE_KEY}` } }
+        );
+        const listings = await listingRes.json();
+        const listing = listings?.[0];
+        if (listing) {
+          track = { id: listing.id, title: listing.title, audio_url: listing.audio_url, uploaded_by_username: listing.seller_username };
+        }
+      }
 
       // 2. Record purchase in DB
       const transferScheduledAt = producerStripeAccountId

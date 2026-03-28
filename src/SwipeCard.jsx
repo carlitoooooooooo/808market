@@ -144,7 +144,9 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
       return;
     }
 
-    const dx = e.clientX - startXRef.current;
+    // Use current dragX state as fallback if e.clientX is 0 (some mobile browsers)
+    const endX = e.clientX || (startXRef.current + dragX);
+    const dx = endX - startXRef.current;
     dragStartedRef.current = false;
     setIsDragging(false);
 
@@ -153,11 +155,18 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
     } else if (dx < -SWIPE_THRESHOLD) {
       triggerSwipe("left");
     } else {
-      setDragX(0);
-      setDragY(0);
-      setStamp(null);
+      // Use the tracked dragX if dx is suspiciously 0
+      if (dragX > SWIPE_THRESHOLD) {
+        triggerSwipe("right");
+      } else if (dragX < -SWIPE_THRESHOLD) {
+        triggerSwipe("left");
+      } else {
+        setDragX(0);
+        setDragY(0);
+        setStamp(null);
+      }
     }
-  }, [triggerSwipe]);
+  }, [triggerSwipe, dragX]);
 
   async function handleCopIt(e) {
     e.stopPropagation();

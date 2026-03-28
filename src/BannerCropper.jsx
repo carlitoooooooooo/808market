@@ -98,7 +98,7 @@ export default function BannerCropper({ file, onCrop, onCancel }) {
     // dy is in CSS pixels → convert to image pixels
     const displayScale = getDisplayScale(); // canvas internal px per CSS px
     const imgDy = (dy * displayScale) / getScaleX();
-    setOffsetY(clampOffset(startOffset - imgDy));
+    setOffsetY(clampOffset(startOffset + imgDy));
   }, [dragging, startY, startOffset]);
 
   const onMouseUp = () => setDragging(false);
@@ -115,7 +115,7 @@ export default function BannerCropper({ file, onCrop, onCancel }) {
     const dy = e.touches[0].clientY - startY;
     const displayScale = getDisplayScale();
     const imgDy = (dy * displayScale) / getScaleX();
-    setOffsetY(clampOffset(startOffset - imgDy));
+    setOffsetY(clampOffset(startOffset + imgDy));
   }, [dragging, startY, startOffset]);
 
   const onTouchEnd = () => setDragging(false);

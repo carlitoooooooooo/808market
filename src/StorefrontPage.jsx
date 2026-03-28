@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "./AuthContext.jsx";
+import BannerCropper from "./BannerCropper.jsx";
 
 const SUPABASE_URL = 'https://bkapxykeryzxbqpgjgab.supabase.co';
 const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
@@ -115,14 +116,15 @@ function StorefrontEditor({ storefront, username, onSave, onClose }) {
   const [bg, setBg] = useState(storefront?.bg_color || '#0a0a0a');
   const [bannerFile, setBannerFile] = useState(null);
   const [bannerPreview, setBannerPreview] = useState(storefront?.banner_url || null);
+  const [cropFile, setCropFile] = useState(null);
   const [saving, setSaving] = useState(false);
   const bannerRef = useRef(null);
 
   const handleBannerChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    setBannerFile(file);
-    setBannerPreview(URL.createObjectURL(file));
+    setCropFile(file); // open cropper instead of setting directly
+    bannerRef.current.value = '';
   };
 
   const handleSave = async () => {
@@ -207,6 +209,17 @@ function StorefrontEditor({ storefront, username, onSave, onClose }) {
           </button>
         </div>
       </div>
+      {cropFile && (
+        <BannerCropper
+          file={cropFile}
+          onCrop={(croppedFile) => {
+            setBannerFile(croppedFile);
+            setBannerPreview(URL.createObjectURL(croppedFile));
+            setCropFile(null);
+          }}
+          onCancel={() => setCropFile(null)}
+        />
+      )}
     </div>
   );
 }

@@ -1362,7 +1362,19 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
         </div>
       )}
 
-      {/* Image cropper */}
+      {/* Cover image cropper */}
+      {coverCropFile && (
+        <BannerCropper
+          file={coverCropFile}
+          onCrop={async (croppedFile) => {
+            setCoverCropFile(null);
+            await uploadCoverFile(croppedFile);
+          }}
+          onCancel={() => setCoverCropFile(null)}
+        />
+      )}
+
+      {/* Avatar image cropper */}
       {cropFile && (
         <ImageCropper
           file={cropFile}

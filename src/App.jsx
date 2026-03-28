@@ -1018,7 +1018,7 @@ export default function App() {
 
       {/* Messages: full-screen overlay, sits above app-main but below modals */}
       {activeTab === "create" && currentUser && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 10, overflowY: 'auto' }}>
+        <div style={{ position: 'fixed', inset: 0, zIndex: 200, overflowY: 'auto' }}>
           <StorefrontPage username={currentUser.username} onBack={() => setActiveTab("discover")} />
         </div>
       )}
@@ -1051,7 +1051,7 @@ export default function App() {
       )}
 
       {storefrontUser && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 600, overflowY: 'auto' }}>
+        <div style={{ position: 'fixed', inset: 0, zIndex: 700, overflowY: 'auto' }}>
           <StorefrontPage username={storefrontUser} onBack={() => setStorefrontUser(null)} />
         </div>
       )}

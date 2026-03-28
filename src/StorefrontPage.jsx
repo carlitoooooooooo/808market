@@ -305,15 +305,9 @@ function ListingUpload({ username, accent, onClose, onAdded }) {
         {/* Feature: simplified — just price + description */}
         {type === 'feature' ? (
           <>
-            <div style={{ marginBottom: '14px' }}>
+            <div style={{ marginBottom: '20px' }}>
               <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>Feature Price ($)</label>
               <input className="auth-input" type="number" min="1" step="0.01" value={price} onChange={e => setPrice(e.target.value)} placeholder="200.00" />
-            </div>
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>Description (optional)</label>
-              <textarea className="auth-input" value={description} onChange={e => setDescription(e.target.value)}
-                placeholder="What's your style? Turn time? What genres do you work with?"
-                rows={3} maxLength={300} style={{ resize: 'vertical', fontFamily: 'inherit' }} />
             </div>
           </>
         ) : (

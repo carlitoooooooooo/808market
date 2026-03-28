@@ -570,7 +570,7 @@ export default function StorefrontPage({ username, onBack }) {
 
   const accent = storefront?.accent_color || '#00f5ff';
   const bg = storefront?.bg_color || '#0a0a0a';
-  const fontFamily = FONT_STYLES.find(f => f.value === storefront?.font_style)?.family || 'var(--font-head)';
+  const fontFamily = 'var(--font-head)';
   const sectionOrder = (() => {
     try { return JSON.parse(storefront?.section_order || '["beats","open_verses","features","drumkits"]'); }
     catch { return ['beats', 'open_verses', 'features', 'drumkits']; }

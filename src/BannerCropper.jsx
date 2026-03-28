@@ -79,6 +79,13 @@ export default function BannerCropper({ file, onCrop, onCancel }) {
     return Math.max(0, Math.min(val, img.height - cropHeightInImg));
   };
 
+  // Get the ratio of canvas CSS display size to canvas internal pixel size
+  const getDisplayScale = () => {
+    if (!canvasRef.current) return 1;
+    const rect = canvasRef.current.getBoundingClientRect();
+    return canvasRef.current.height / rect.height; // internal pixels per CSS pixel
+  };
+
   const onMouseDown = (e) => {
     setDragging(true);
     setStartY(e.clientY);
@@ -88,7 +95,9 @@ export default function BannerCropper({ file, onCrop, onCancel }) {
   const onMouseMove = useCallback((e) => {
     if (!dragging) return;
     const dy = e.clientY - startY;
-    const imgDy = dy / getScaleX();
+    // dy is in CSS pixels → convert to image pixels
+    const displayScale = getDisplayScale(); // canvas internal px per CSS px
+    const imgDy = (dy * displayScale) / getScaleX();
     setOffsetY(clampOffset(startOffset - imgDy));
   }, [dragging, startY, startOffset]);
 
@@ -104,7 +113,8 @@ export default function BannerCropper({ file, onCrop, onCancel }) {
     if (!dragging) return;
     e.preventDefault();
     const dy = e.touches[0].clientY - startY;
-    const imgDy = dy / getScaleX();
+    const displayScale = getDisplayScale();
+    const imgDy = (dy * displayScale) / getScaleX();
     setOffsetY(clampOffset(startOffset - imgDy));
   }, [dragging, startY, startOffset]);
 

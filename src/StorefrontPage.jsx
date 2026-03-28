@@ -767,6 +767,7 @@ export default function StorefrontPage({ username, onBack }) {
   const hasContent = beats.length > 0 || listings.length > 0 || drumkits.length > 0;
   const openVerses = listings.filter(l => l.type === 'open_verse');
   const features = listings.filter(l => l.type === 'feature');
+  const listedDrumkits = listings.filter(l => l.type === 'drumkit');
 
   return (
     <div style={{ minHeight: '100vh', background: bg, color: '#fff' }}>
@@ -899,11 +900,16 @@ export default function StorefrontPage({ username, onBack }) {
               ) : null}
             </div>
           );
-          if (section === 'drumkits' && drumkits.length > 0) return (
+          if (section === 'drumkits' && (drumkits.length > 0 || listedDrumkits.length > 0)) return (
             <div key="drumkits" style={{ marginBottom: '32px' }}>
-              <SectionHeader label={`🥁 Drum Kits (${drumkits.length})`} accent={accent} />
+              <SectionHeader label={`🥁 Drum Kits (${drumkits.length + listedDrumkits.length})`} accent={accent} />
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {drumkits.map(k => <DrumkitCard key={k.id} kit={k} accent={accent} onBuy={handleBuy} />)}
+                {listedDrumkits.map(l => (
+                  <DrumkitCard key={l.id} accent={accent} onBuy={handleBuy}
+                    kit={{ id: l.id, name: l.title, price: l.price, file_url: l.audio_url, description: l.description }}
+                  />
+                ))}
               </div>
             </div>
           );

@@ -395,13 +395,6 @@ function ListingUpload({ username, accent, onClose, onAdded }) {
               <input className="auth-input" value={title} onChange={e => setTitle(e.target.value)} placeholder="Song name..." maxLength={80} />
             </div>
 
-            <div style={{ marginBottom: '14px' }}>
-              <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>Description</label>
-              <textarea className="auth-input" value={description} onChange={e => setDescription(e.target.value)}
-                placeholder="What does the song have so far? What are you looking for from the buyer?"
-                rows={3} maxLength={300} style={{ resize: 'vertical', fontFamily: 'inherit' }} />
-            </div>
-
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '14px' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>Genre</label>

@@ -151,8 +151,8 @@ function StorefrontEditor({ storefront, username, onSave, onClose }) {
   };
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-      <div style={{ background: '#111', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '16px', padding: '28px 24px', width: '100%', maxWidth: '420px' }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 900, overflowY: 'auto', display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: '20px', paddingBottom: 'env(safe-area-inset-bottom, 20px)' }}>
+      <div style={{ background: '#111', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '16px', padding: '24px 20px', width: '100%', maxWidth: '420px', marginTop: '20px', marginBottom: '40px' }}>
         <div style={{ fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '18px', marginBottom: '20px' }}>✏️ Customize Storefront</div>
 
         {/* Banner */}
@@ -286,8 +286,8 @@ function ListingUpload({ username, accent, onClose, onAdded }) {
   };
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.9)', zIndex: 900, overflowY: 'auto', padding: '20px' }}>
-      <div style={{ background: '#111', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '16px', padding: '28px 24px', width: '100%', maxWidth: '480px', margin: '0 auto' }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.9)', zIndex: 900, overflowY: 'auto', display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: '20px', paddingBottom: 'env(safe-area-inset-bottom, 20px)' }}>
+      <div style={{ background: '#111', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '16px', padding: '24px 20px', width: '100%', maxWidth: '480px', marginTop: '20px', marginBottom: '40px' }}>
         <div style={{ fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '18px', marginBottom: '20px' }}>➕ Add Listing</div>
 
         <div style={{ marginBottom: '14px' }}>

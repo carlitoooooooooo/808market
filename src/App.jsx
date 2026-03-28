@@ -103,7 +103,7 @@ function BetaTag() {
       onClick={handleTap}
       style={{ cursor: 'pointer', userSelect: 'none' }}
     >
-      {spinning ? 'STILL BETA' : 'BETA'}
+      {spinning ? 'STILL BETA' : <><span>BETA</span><span style={{ fontSize: '8px', opacity: 0.6, marginLeft: '3px', fontWeight: 500, letterSpacing: '0.5px' }}>v1.8</span></>}
     </span>
   );
 }

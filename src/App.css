@@ -2655,8 +2655,9 @@ body {
 /* ===== MESSAGES PAGE ===== */
 .messages-page {
   height: 100%;
-  overflow-y: auto;
-  scrollbar-width: none;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 .messages-page::-webkit-scrollbar { display: none; }
 

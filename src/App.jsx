@@ -1024,10 +1024,10 @@ export default function App() {
       )}
 
       {activeTab === "messages" && currentUser && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 10, background: 'var(--bg)', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 10, background: 'var(--bg)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           {/* Spacer for the app header */}
-          <div style={{ height: '56px', flexShrink: 0 }} />
-          <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+          <div style={{ height: '56px', flexShrink: 0, width: '100%' }} />
+          <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', width: '100%', maxWidth: '860px', borderLeft: '1px solid rgba(255,255,255,0.06)', borderRight: '1px solid rgba(255,255,255,0.06)' }}>
             <MessagesPage
               key={messageThread}
               initialThread={messageThread}

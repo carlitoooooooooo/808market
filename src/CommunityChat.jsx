@@ -33,7 +33,7 @@ export default function CommunityChat({ onViewUser }) {
   const [sending, setSending] = useState(false);
   const [profiles, setProfiles] = useState({}); // username -> { avatar_url, avatar_color, role }
   const [sidebarUsers, setSidebarUsers] = useState([]);
-  const [showSidebar, setShowSidebar] = useState(true);
+  const [showSidebar, setShowSidebar] = useState(window.innerWidth >= 600);
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState('');
   const [replyTo, setReplyTo] = useState(null); // message being replied to
@@ -398,9 +398,20 @@ export default function CommunityChat({ onViewUser }) {
         </div>
       </div>
 
+      {/* Mobile sidebar backdrop */}
+      {showSidebar && window.innerWidth < 600 && (
+        <div onClick={() => setShowSidebar(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 499 }} />
+      )}
+
       {/* ── Sidebar ────────────────────────────────────────────────────────── */}
       {showSidebar && (
-        <div style={{ width: '150px', flexShrink: 0, borderLeft: '1px solid rgba(255,255,255,0.08)', overflowY: 'auto', background: 'rgba(0,0,0,0.2)' }}>
+        <div style={{ width: '150px', flexShrink: 0, borderLeft: '1px solid rgba(255,255,255,0.08)', overflowY: 'auto', background: 'rgba(0,0,0,0.2)', position: window.innerWidth < 600 ? 'fixed' : 'relative', top: window.innerWidth < 600 ? 0 : 'auto', right: window.innerWidth < 600 ? 0 : 'auto', bottom: window.innerWidth < 600 ? 0 : 'auto', zIndex: window.innerWidth < 600 ? 500 : 'auto', width: window.innerWidth < 600 ? '200px' : '150px', boxShadow: window.innerWidth < 600 ? '-4px 0 20px rgba(0,0,0,0.6)' : 'none' }}>
+          {/* Close button on mobile */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 10px 6px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+            <span style={{ fontSize: '12px', fontFamily: 'var(--font-head)', fontWeight: 700, color: 'rgba(255,255,255,0.5)' }}>Members</span>
+            <button onClick={() => setShowSidebar(false)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: '16px', lineHeight: 1 }}>✕</button>
+          </div>
+
           {/* Online now */}
           <div style={{ padding: '10px 10px 6px', fontSize: '10px', color: 'rgba(255,255,255,0.35)', fontFamily: 'var(--font-head)', letterSpacing: '1px', textTransform: 'uppercase', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
             🟢 Online Now ({sidebarUsers.filter(u => Date.now() - new Date(u.last_seen).getTime() < ONLINE_NOW_MS).length})

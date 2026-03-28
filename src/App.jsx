@@ -14,6 +14,7 @@ import { FireAnimation, TrashAnimation } from "./SwipeAnimations.jsx";
 import AboutPage from "./AboutPage.jsx";
 import SettingsPage from "./SettingsPage.jsx";
 import AnalyticsPage from "./AnalyticsPage.jsx";
+import StorefrontPage from "./StorefrontPage.jsx";
 import MessagesPage from "./MessagesPage.jsx";
 import LandingPage from "./LandingPage.jsx";
 import AuthPrompt from "./AuthPrompt.jsx";
@@ -130,6 +131,7 @@ export default function App() {
   const [showAbout, setShowAbout] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showAnalytics, setShowAnalytics] = useState(false);
+  const [storefrontUser, setStorefrontUser] = useState(null);
   const [messageThread, setMessageThread] = useState(null); // username to open DM with
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [guestMode, setGuestMode] = useState(false);
@@ -353,6 +355,16 @@ export default function App() {
     if (window.location.pathname === '/analytics') {
       history.replaceState(null, '', '/');
       setShowAnalytics(true);
+    }
+  }, []);
+
+  // Handle /store/:username route
+  useEffect(() => {
+    const match = window.location.pathname.match(/^\/store\/([^/]+)/);
+    if (match) {
+      const username = decodeURIComponent(match[1]);
+      history.replaceState(null, '', '/');
+      setStorefrontUser(username);
     }
   }, []);
 
@@ -1019,6 +1031,12 @@ export default function App() {
       {showAnalytics && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 600, background: 'var(--bg)', overflowY: 'auto' }}>
           <AnalyticsPage onBack={() => setShowAnalytics(false)} />
+        </div>
+      )}
+
+      {storefrontUser && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 600, overflowY: 'auto' }}>
+          <StorefrontPage username={storefrontUser} onBack={() => setStorefrontUser(null)} />
         </div>
       )}
 

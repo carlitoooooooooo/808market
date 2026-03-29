@@ -93,10 +93,9 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
     setTimeout(() => onSwipe(dir, track, rect), 350);
   }, [track, onSwipe]);
 
-  // ── Native touch/mouse handlers attached directly with passive:false ───────
+  // ── Native touch handlers (passive:false required for preventDefault) ───────
   useEffect(() => {
-    const el = cardRef.current;       // touch events on whole card
-    const front = frontFaceRef.current; // mouse events only on front face
+    const el = cardRef.current;
     if (!el || !isTop) return;
 
     const setTransform = (dx, dy) => {
@@ -177,85 +176,69 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
       }
     };
 
-    // Mouse support (desktop)
-    const onMouseDown = (e) => {
-      if (isFlying || isFlipped) return; // don't interfere with flipped card clicks
-      if (e.button !== 0) return; // left click only
-      gesture.current = {
-        active: true,
-        startX: e.clientX,
-        startY: e.clientY,
-        dx: 0, dy: 0,
-        isHorizontal: false,
-        decided: false,
-      };
-      // Don't use setPointerCapture — it steals clicks from back-face buttons
-    };
 
-    const onMouseMove = (e) => {
-      const g = gesture.current;
-      if (!g.active || isFlying || isFlipped) return;
-      const dx = e.clientX - g.startX;
-      const dy = e.clientY - g.startY;
-      if (!g.decided && (Math.abs(dx) > 5 || Math.abs(dy) > 5)) {
-        g.decided = true;
-        g.isHorizontal = Math.abs(dx) > Math.abs(dy);
-      }
-      if (g.decided && g.isHorizontal) {
-        g.dx = dx; g.dy = dy;
-        setTransform(dx, dy);
-        const ns = dx > 40 ? "❤️ LIKED" : dx < -40 ? "PASS 💨" : null;
-        setStamp(prev => prev !== ns ? ns : prev);
-      }
-    };
 
-    const onMouseUp = (e) => {
-      const g = gesture.current;
-      if (!g.active) return;
-      g.active = false;
-      if (isFlipped) return; // let back face buttons handle their own clicks
-      if (!g.decided) {
-        // Clean tap on front face — flip
-        setIsFlipped(true);
-        setStamp(null);
-        resetTransform();
-        return;
-      }
-      if (!g.isHorizontal) {
-        setStamp(null);
-        resetTransform();
-        return;
-      }
-      const dx = g.dx;
-      setStamp(null);
-      if (dx > SWIPE_THRESHOLD) triggerSwipe("right");
-      else if (dx < -SWIPE_THRESHOLD) triggerSwipe("left");
-      else resetTransform();
-    };
-
-    // Touch on full card (needs passive:false for preventDefault)
+    // Touch on full card
     el.addEventListener('touchstart', onTouchStart, { passive: true });
     el.addEventListener('touchmove', onTouchMove, { passive: false });
     el.addEventListener('touchend', onTouchEnd, { passive: true });
-
-    // Mouse ONLY on front face — back face buttons are unaffected
-    if (front) {
-      front.addEventListener('mousedown', onMouseDown);
-      window.addEventListener('mousemove', onMouseMove);
-      window.addEventListener('mouseup', onMouseUp);
-    }
 
     return () => {
       el.removeEventListener('touchstart', onTouchStart);
       el.removeEventListener('touchmove', onTouchMove);
       el.removeEventListener('touchend', onTouchEnd);
-      if (front) {
-        front.removeEventListener('mousedown', onMouseDown);
-        window.removeEventListener('mousemove', onMouseMove);
-        window.removeEventListener('mouseup', onMouseUp);
+    };
+  }, [isTop, isFlying, stackIndex, triggerSwipe]);
+
+  // ── Mouse handlers for desktop (React events on front face only) ──────────
+  const handleMouseDown = useCallback((e) => {
+    if (isFlying || e.button !== 0) return;
+    gesture.current = { active: true, startX: e.clientX, startY: e.clientY, dx: 0, dy: 0, isHorizontal: false, decided: false };
+  }, [isFlying]);
+
+  const handleMouseMove = useCallback((e) => {
+    const g = gesture.current;
+    if (!g.active || isFlying) return;
+    const dx = e.clientX - g.startX;
+    const dy = e.clientY - g.startY;
+    if (!g.decided && (Math.abs(dx) > 5 || Math.abs(dy) > 5)) {
+      g.decided = true;
+      g.isHorizontal = Math.abs(dx) > Math.abs(dy);
+    }
+    if (g.decided && g.isHorizontal) {
+      g.dx = dx; g.dy = dy;
+      if (outerRef.current) {
+        outerRef.current.style.transition = "none";
+        outerRef.current.style.transform = `translate(${dx}px, ${dy * 0.25}px) rotate(${dx * 0.08}deg)`;
+      }
+      const ns = dx > 40 ? "❤️ LIKED" : dx < -40 ? "PASS 💨" : null;
+      setStamp(prev => prev !== ns ? ns : prev);
+    }
+  }, [isFlying]);
+
+  const handleMouseUp = useCallback(() => {
+    const g = gesture.current;
+    if (!g.active) return;
+    g.active = false;
+    const reset = () => {
+      if (outerRef.current) {
+        outerRef.current.style.transition = "transform 0.3s cubic-bezier(0.25,0.46,0.45,0.94)";
+        outerRef.current.style.transform = `scale(${stackIndex === 0 ? 1 : 0.96 - stackIndex * 0.02})`;
       }
     };
-  }, [isTop, isFlying, isFlipped, stackIndex, triggerSwipe]);
+    if (!g.decided) {
+      setIsFlipped(true);
+      setStamp(null);
+      reset();
+      return;
+    }
+    if (!g.isHorizontal) { setStamp(null); reset(); return; }
+    const dx = g.dx;
+    setStamp(null);
+    if (dx > SWIPE_THRESHOLD) triggerSwipe("right");
+    else if (dx < -SWIPE_THRESHOLD) triggerSwipe("left");
+    else reset();
+  }, [isFlying, stackIndex, triggerSwipe]);
 
   // ── Checkout ───────────────────────────────────────────────────────────────
   async function handleCopIt(e) {
@@ -335,7 +318,12 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
         }}>
 
           {/* ── FRONT FACE ── */}
-          <div ref={frontFaceRef} className="swipe-card__face swipe-card__face--front">
+          <div ref={frontFaceRef} className="swipe-card__face swipe-card__face--front"
+            onMouseDown={isTop && !isFlipped ? handleMouseDown : undefined}
+            onMouseMove={isTop && !isFlipped ? handleMouseMove : undefined}
+            onMouseUp={isTop && !isFlipped ? handleMouseUp : undefined}
+            onMouseLeave={isTop && !isFlipped ? handleMouseUp : undefined}
+          >
             <div className="swipe-card__cover" style={{ backgroundImage: `url(${track.coverUrl})` }} />
             <div className="swipe-card__overlay" />
             <div className={`price-badge ${isFree ? "price-badge--free" : ""}`}>{priceLabel}</div>

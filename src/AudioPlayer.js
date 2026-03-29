@@ -32,7 +32,40 @@ export default class AudioPlayer {
     return this._audio;
   }
 
+  async _getPlayUrl() {
+    // If already a signed URL or not a Supabase public URL, use as-is
+    if (!this.audioUrl || this.audioUrl.includes('/sign/') || !this.audioUrl.includes('/object/public/')) {
+      return this.audioUrl;
+    }
+    try {
+      const res = await fetch('/api/sign-audio', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ audioUrl: this.audioUrl }),
+      });
+      const data = await res.json();
+      if (data.signedUrl) return data.signedUrl;
+    } catch (e) {
+      console.warn('Could not get signed URL, falling back to public URL');
+    }
+    return this.audioUrl;
+  }
+
   play() {
+    if (this._destroyed) return;
+    // Fetch signed URL then play
+    this._getPlayUrl().then(url => {
+      if (this._destroyed) return;
+      if (this._audio) {
+        this._audio.src = url;
+      } else {
+        this.audioUrl = url;
+      }
+      this._playInternal();
+    });
+  }
+
+  _playInternal() {
     if (this._destroyed) return;
     const audio = this._ensureAudio();
 

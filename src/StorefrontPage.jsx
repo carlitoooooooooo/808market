@@ -171,7 +171,7 @@ function ListingCard({ listing, accent, onBuy, onDelete, isOwner }) {
   );
 }
 
-function DrumkitCard({ kit, accent, onBuy, currentUser }) {
+function DrumkitCard({ kit, accent, onBuy, isOwner, onDelete }) {
   const isFree = !kit.price || kit.price === 0;
   return (
     <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '12px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', transition: 'border-color 0.2s' }}
@@ -185,17 +185,24 @@ function DrumkitCard({ kit, accent, onBuy, currentUser }) {
         </div>
         {kit.description && <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', fontFamily: 'var(--font-body)', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{kit.description}</div>}
       </div>
-      {isFree ? (
-        <a href={kit.file_url} target="_blank" rel="noreferrer"
-          style={{ flexShrink: 0, background: accent, color: '#000', border: 'none', borderRadius: '8px', padding: '6px 14px', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-head)', textDecoration: 'none', whiteSpace: 'nowrap' }}>
-          ⬇️ Free
-        </a>
-      ) : (
-        <button onClick={() => onBuy && onBuy({ ...kit, title: kit.name, artist: kit.uploaded_by_username, type: 'drumkit' })}
-          style={{ flexShrink: 0, background: `linear-gradient(135deg, ${accent}, #bf5fff)`, color: '#000', border: 'none', borderRadius: '8px', padding: '6px 14px', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-head)', whiteSpace: 'nowrap' }}>
-          🛒 Buy
-        </button>
-      )}
+      <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexShrink: 0 }}>
+        {isFree ? (
+          <a href={kit.file_url} target="_blank" rel="noreferrer"
+            style={{ background: accent, color: '#000', border: 'none', borderRadius: '8px', padding: '6px 14px', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-head)', textDecoration: 'none', whiteSpace: 'nowrap' }}>
+            ⬇️ Free
+          </a>
+        ) : (
+          <button onClick={() => onBuy && onBuy({ ...kit, title: kit.name, artist: kit.uploaded_by_username, type: 'drumkit' })}
+            style={{ background: `linear-gradient(135deg, ${accent}, #bf5fff)`, color: '#000', border: 'none', borderRadius: '8px', padding: '6px 14px', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-head)', whiteSpace: 'nowrap' }}>
+            🛒 Buy
+          </button>
+        )}
+        {isOwner && onDelete && (
+          <button onClick={onDelete} style={{ background: 'rgba(255,51,102,0.15)', border: '1px solid rgba(255,51,102,0.3)', color: '#ff3366', borderRadius: '8px', padding: '6px 8px', fontSize: '11px', cursor: 'pointer' }}>
+            🗑
+          </button>
+        )}
+      </div>
     </div>
   );
 }
@@ -753,6 +760,24 @@ export default function StorefrontPage({ username, onBack }) {
     }).catch(() => setLoading(false));
   }, [username]);
 
+  const handleDeleteDrumkit = async (id, isListing) => {
+    if (!confirm('Remove this drum kit from your storefront?')) return;
+    if (isListing) {
+      await fetch(`${SUPABASE_URL}/rest/v1/artist_listings?id=eq.${id}`, {
+        method: 'PATCH',
+        headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_active: false }),
+      });
+      setListings(prev => prev.filter(l => l.id !== id));
+    } else {
+      await fetch(`${SUPABASE_URL}/rest/v1/drumkits?id=eq.${id}`, {
+        method: 'DELETE',
+        headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` },
+      });
+      setDrumkits(prev => prev.filter(k => k.id !== id));
+    }
+  };
+
   const handleDeleteListing = async (id) => {
     if (!confirm('Remove this listing?')) return;
     await fetch(`${SUPABASE_URL}/rest/v1/artist_listings?id=eq.${id}`, {
@@ -957,9 +982,9 @@ export default function StorefrontPage({ username, onBack }) {
             <div key="drumkits" style={{ marginBottom: '32px' }}>
               <SectionHeader label={`🥁 Drum Kits (${drumkits.length + listedDrumkits.length})`} accent={accent} />
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {drumkits.map(k => <DrumkitCard key={k.id} kit={k} accent={accent} onBuy={handleBuy} />)}
+                {drumkits.map(k => <DrumkitCard key={k.id} kit={k} accent={accent} onBuy={handleBuy} isOwner={isOwner} onDelete={() => handleDeleteDrumkit(k.id, false)} />)}
                 {listedDrumkits.map(l => (
-                  <DrumkitCard key={l.id} accent={accent} onBuy={handleBuy}
+                  <DrumkitCard key={l.id} accent={accent} onBuy={handleBuy} isOwner={isOwner} onDelete={() => handleDeleteDrumkit(l.id, true)}
                     kit={{ id: l.id, name: l.title, price: l.price, file_url: l.audio_url, description: l.description }}
                   />
                 ))}

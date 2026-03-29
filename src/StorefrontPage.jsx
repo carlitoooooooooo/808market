@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "./AuthContext.jsx";
 import BannerCropper from "./BannerCropper.jsx";
+import { supabase } from "./supabase.js";
 
 const SUPABASE_URL = 'https://bkapxykeryzxbqpgjgab.supabase.co';
 const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
@@ -488,17 +489,9 @@ function ListingUpload({ username, userId, accent, onClose, onAdded }) {
           const ext = kitFile.name.split('.').pop().toLowerCase();
           const uploaderId = userId || username;
           const path = `${uploaderId}/${Date.now()}.${ext}`;
-          const fileUrl = await new Promise((resolve, reject) => {
-            const xhr = new XMLHttpRequest();
-            xhr.open('POST', `${SUPABASE_URL}/storage/v1/object/drumkits/${path}`);
-            xhr.setRequestHeader('Authorization', `Bearer ${ANON_KEY}`);
-            xhr.setRequestHeader('x-upsert', 'true');
-            xhr.setRequestHeader('Content-Type', 'application/octet-stream');
-            xhr.upload.onprogress = e => { if (e.lengthComputable) setKitProgress(Math.round(e.loaded / e.total * 100)); };
-            xhr.onload = () => xhr.status < 300 ? resolve(`${SUPABASE_URL}/storage/v1/object/public/drumkits/${path}`) : reject(new Error(`Upload failed: ${xhr.status} ${xhr.responseText}`));
-            xhr.onerror = () => reject(new Error('Network error'));
-            xhr.send(kitFile);
-          });
+          setKitProgress(50);
+          const fileUrl = await uploadFile('drumkits', path, kitFile);
+          setKitProgress(100);
           // Save to drumkits table
           await fetch(`${SUPABASE_URL}/rest/v1/drumkits`, {
             method: 'POST',
@@ -712,23 +705,10 @@ function ListingUpload({ username, userId, accent, onClose, onAdded }) {
   );
 }
 
-function uploadFile(bucket, path, file) {
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', `${SUPABASE_URL}/storage/v1/object/${bucket}/${path}`);
-    xhr.setRequestHeader('Authorization', `Bearer ${ANON_KEY}`);
-    xhr.setRequestHeader('x-upsert', 'true');
-    xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
-    xhr.onload = () => {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        resolve(`${SUPABASE_URL}/storage/v1/object/public/${bucket}/${path}`);
-      } else {
-        reject(new Error(`Upload failed (${xhr.status}): ${xhr.responseText}`));
-      }
-    };
-    xhr.onerror = () => reject(new Error('Network error'));
-    xhr.send(file);
-  });
+async function uploadFile(bucket, path, file) {
+  const { data, error } = await supabase.storage.from(bucket).upload(path, file, { upsert: true, contentType: file.type || 'application/octet-stream' });
+  if (error) throw new Error(error.message);
+  return `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${path}`;
 }
 
 // ─── Main Storefront Page ─────────────────────────────────────────────────────

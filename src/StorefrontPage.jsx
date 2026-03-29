@@ -487,8 +487,7 @@ function ListingUpload({ username, userId, accent, onClose, onAdded }) {
         setUploading(true); setKitProgress(0);
         try {
           const ext = kitFile.name.split('.').pop().toLowerCase();
-          const uploaderId = userId || username;
-          const path = `${uploaderId}/${Date.now()}.${ext}`;
+          const path = `${username}/${Date.now()}.${ext}`;
           setKitProgress(50);
           const fileUrl = await uploadFile('drumkits', path, kitFile);
           setKitProgress(100);
@@ -521,16 +520,15 @@ function ListingUpload({ username, userId, accent, onClose, onAdded }) {
 
       if (audioFile) {
         const ext = audioFile.name.split('.').pop();
-        const uploaderId = userId || username;
-        const path = `${uploaderId}/listing_${Date.now()}.${ext}`;
+        if (!userId) throw new Error('Not authenticated — please log out and back in');
+        const path = `${userId}/listing_${Date.now()}.${ext}`;
         audio_url = await uploadFile('audio', path, audioFile);
       }
 
       if (coverFile) {
         const ext = coverFile.name.split('.').pop();
-        const uploaderId = userId || username;
-        const path = `${uploaderId}/listing_cover_${Date.now()}.${ext}`;
-        cover_url = await uploadFile('covers', path, coverFile).catch(() => null);
+        const coverPath = userId ? `${userId}/listing_cover_${Date.now()}.${ext}` : `${username}/listing_cover_${Date.now()}.${ext}`;
+        cover_url = await uploadFile('covers', coverPath, coverFile).catch(() => null);
       }
 
       const listing = await dbPost('artist_listings', {

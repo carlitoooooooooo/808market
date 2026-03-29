@@ -195,8 +195,19 @@ export default function DrumkitSection({ username, isOwnProfile }) {
         headers: { apikey: ANON, Authorization: `Bearer ${ANON}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ download_count: (kit.download_count || 0) + 1 }),
       }).catch(() => {});
+      // Get signed URL to prevent direct file access
+      let downloadUrl = kit.file_url;
+      try {
+        const signRes = await fetch('/api/sign-audio', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ audioUrl: kit.file_url }),
+        });
+        const signData = await signRes.json();
+        if (signData.signedUrl) downloadUrl = signData.signedUrl;
+      } catch {}
       const a = document.createElement('a');
-      a.href = kit.file_url;
+      a.href = downloadUrl;
       a.download = `${kit.name}.${kit.file_url.split('.').pop()}`;
       a.target = '_blank';
       document.body.appendChild(a);

@@ -187,10 +187,23 @@ function DrumkitCard({ kit, accent, onBuy, isOwner, onDelete }) {
       </div>
       <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexShrink: 0 }}>
         {isFree ? (
-          <a href={kit.file_url} target="_blank" rel="noreferrer"
-            style={{ background: accent, color: '#000', border: 'none', borderRadius: '8px', padding: '6px 14px', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-head)', textDecoration: 'none', whiteSpace: 'nowrap' }}>
+          <button onClick={async () => {
+            let url = kit.file_url;
+            try {
+              const r = await fetch('/api/sign-audio', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ audioUrl: kit.file_url }) });
+              const d = await r.json();
+              if (d.signedUrl) url = d.signedUrl;
+            } catch {}
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = kit.name;
+            a.target = '_blank';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+          }} style={{ background: accent, color: '#000', border: 'none', borderRadius: '8px', padding: '6px 14px', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-head)', whiteSpace: 'nowrap' }}>
             ⬇️ Free
-          </a>
+          </button>
         ) : (
           <button onClick={() => onBuy && onBuy({ ...kit, title: kit.name, artist: kit.uploaded_by_username, type: 'drumkit' })}
             style={{ background: `linear-gradient(135deg, ${accent}, #bf5fff)`, color: '#000', border: 'none', borderRadius: '8px', padding: '6px 14px', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-head)', whiteSpace: 'nowrap' }}>

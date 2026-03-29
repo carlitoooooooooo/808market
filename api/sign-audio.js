@@ -21,9 +21,14 @@ export default async function handler(req, res) {
     const match = audioUrl.match(/\/storage\/v1\/object\/public\/([^?]+)/);
     if (!match) return res.status(400).json({ error: 'Invalid audio URL format' });
 
-    const fullPath = match[1]; // e.g. "audio/uuid/filename.mp3"
-    const bucket = fullPath.split('/')[0]; // "audio"
-    const path = fullPath.split('/').slice(1).join('/'); // "uuid/filename.mp3"
+    const fullPath = match[1]; // e.g. "audio/uuid/filename.mp3" or "drumkits/user/file.zip"
+    const bucket = fullPath.split('/')[0]; // "audio" or "drumkits"
+    const path = fullPath.split('/').slice(1).join('/'); // rest of path
+
+    // Only sign audio and drumkits buckets
+    if (!['audio', 'drumkits'].includes(bucket)) {
+      return res.status(400).json({ error: 'Unsupported bucket' });
+    }
 
     // Use service key to generate signed URL
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);

@@ -27,6 +27,7 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
   const playerRef = useRef(null);
   const outerRef = useRef(null);
   const cardRef = useRef(null);
+  const frontFaceRef = useRef(null);
 
   // All gesture state in refs — no state re-renders during drag
   const gesture = useRef({
@@ -94,7 +95,8 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
 
   // ── Native touch/mouse handlers attached directly with passive:false ───────
   useEffect(() => {
-    const el = cardRef.current;
+    const el = cardRef.current;       // touch events on whole card
+    const front = frontFaceRef.current; // mouse events only on front face
     if (!el || !isTop) return;
 
     const setTransform = (dx, dy) => {
@@ -231,23 +233,27 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
       else resetTransform();
     };
 
-    // Attach with passive:false so preventDefault works on mobile
+    // Touch on full card (needs passive:false for preventDefault)
     el.addEventListener('touchstart', onTouchStart, { passive: true });
     el.addEventListener('touchmove', onTouchMove, { passive: false });
     el.addEventListener('touchend', onTouchEnd, { passive: true });
-    el.addEventListener('mousedown', onMouseDown);
-    el.addEventListener('mousemove', onMouseMove);
-    el.addEventListener('mouseup', onMouseUp);
-    el.addEventListener('mouseleave', onMouseUp);
+
+    // Mouse ONLY on front face — back face buttons are unaffected
+    if (front) {
+      front.addEventListener('mousedown', onMouseDown);
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
+    }
 
     return () => {
       el.removeEventListener('touchstart', onTouchStart);
       el.removeEventListener('touchmove', onTouchMove);
       el.removeEventListener('touchend', onTouchEnd);
-      el.removeEventListener('mousedown', onMouseDown);
-      el.removeEventListener('mousemove', onMouseMove);
-      el.removeEventListener('mouseup', onMouseUp);
-      el.removeEventListener('mouseleave', onMouseUp);
+      if (front) {
+        front.removeEventListener('mousedown', onMouseDown);
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('mouseup', onMouseUp);
+      }
     };
   }, [isTop, isFlying, isFlipped, stackIndex, triggerSwipe]);
 
@@ -329,7 +335,7 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
         }}>
 
           {/* ── FRONT FACE ── */}
-          <div className="swipe-card__face swipe-card__face--front">
+          <div ref={frontFaceRef} className="swipe-card__face swipe-card__face--front">
             <div className="swipe-card__cover" style={{ backgroundImage: `url(${track.coverUrl})` }} />
             <div className="swipe-card__overlay" />
             <div className={`price-badge ${isFree ? "price-badge--free" : ""}`}>{priceLabel}</div>
@@ -373,8 +379,7 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
           </div>
 
           {/* ── BACK FACE ── */}
-          <div className="swipe-card__face swipe-card__face--back"
-            onMouseDown={e => e.stopPropagation()}>
+          <div className="swipe-card__face swipe-card__face--back">
             <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${track.coverUrl})`, backgroundSize: 'cover', backgroundPosition: 'center', filter: 'blur(20px) brightness(0.3)', borderRadius: 'inherit' }} />
             <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', height: '100%', padding: '20px', justifyContent: 'space-between' }}>
               <div>

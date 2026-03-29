@@ -177,7 +177,8 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
 
     // Mouse support (desktop)
     const onMouseDown = (e) => {
-      if (isFlying || isFlipped) return;
+      if (isFlying || isFlipped) return; // don't interfere with flipped card clicks
+      if (e.button !== 0) return; // left click only
       gesture.current = {
         active: true,
         startX: e.clientX,
@@ -186,12 +187,12 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
         isHorizontal: false,
         decided: false,
       };
-      el.setPointerCapture(e.pointerId);
+      // Don't use setPointerCapture — it steals clicks from back-face buttons
     };
 
     const onMouseMove = (e) => {
       const g = gesture.current;
-      if (!g.active || isFlying) return;
+      if (!g.active || isFlying || isFlipped) return;
       const dx = e.clientX - g.startX;
       const dy = e.clientY - g.startY;
       if (!g.decided && (Math.abs(dx) > 5 || Math.abs(dy) > 5)) {
@@ -206,12 +207,19 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
       }
     };
 
-    const onMouseUp = () => {
+    const onMouseUp = (e) => {
       const g = gesture.current;
       if (!g.active) return;
       g.active = false;
-      if (!g.decided || !g.isHorizontal) {
-        if (!g.decided) setIsFlipped(f => !f);
+      if (isFlipped) return; // let back face buttons handle their own clicks
+      if (!g.decided) {
+        // Clean tap on front face — flip
+        setIsFlipped(true);
+        setStamp(null);
+        resetTransform();
+        return;
+      }
+      if (!g.isHorizontal) {
         setStamp(null);
         resetTransform();
         return;

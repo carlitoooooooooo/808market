@@ -311,13 +311,13 @@ export default function CommunityChat({ onViewUser }) {
                     <>
                       {/* Message bubble + action buttons */}
                       <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexDirection: own ? 'row-reverse' : 'row' }}
-                        onMouseEnter={e => const a=e.currentTarget.querySelector('.msg-actions');if(a){a.style.opacity='1';a.style.visibility='visible';}}
-                        onMouseLeave={e => const a=e.currentTarget.querySelector('.msg-actions');if(a){a.style.opacity='0';a.style.visibility='hidden';}}>
+                        onMouseEnter={e => { const a = e.currentTarget.querySelector('.msg-actions'); if (a) { a.style.opacity = 1; a.style.visibility = 'visible'; } }}
+                        onMouseLeave={e => { const a = e.currentTarget.querySelector('.msg-actions'); if (a) { a.style.opacity = 0; a.style.visibility = 'hidden'; } }}>
                         <div style={{ background: own ? 'linear-gradient(135deg,#00f5ff,#bf5fff)' : 'rgba(255,255,255,0.08)', color: own ? '#000' : '#fff', padding: '9px 13px', borderRadius: own ? '18px 18px 4px 18px' : '18px 18px 18px 4px', fontSize: '14px', fontFamily: 'var(--font-body)', lineHeight: 1.4, wordBreak: 'break-word' }}
                           dangerouslySetInnerHTML={{ __html: bodyHighlighted }} />
 
                         {/* Action buttons */}
-                        <div className="msg-actions" style={{ position: 'absolute', right: own ? 'auto' : '-70px', left: own ? '-70px' : 'auto', top: 0, display: 'flex', gap: '5px', opacity: 0, visibility: 'hidden', transition: 'opacity 0.15s', flexDirection: 'column', zIndex: 10 }}>
+                        <div className="msg-actions" style={{ display: 'flex', gap: '5px', opacity: 0, visibility: 'hidden', transition: 'opacity 0.15s', flexDirection: 'column', position: 'absolute', [own ? 'left' : 'right']: '-68px', top: 0, zIndex: 10 }}>
                           <button onClick={() => setReplyTo(msg)} style={{ background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '6px', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontSize: '11px', padding: '6px 10px' }} title="Reply">↩</button>
                           <button onClick={() => setShowEmojiPicker(showEmojiPicker === msg.id ? null : msg.id)} style={{ background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '6px', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontSize: '11px', padding: '6px 10px' }} title="React">😊</button>
                           {own && <button onClick={() => startEdit(msg)} style={{ background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '6px', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontSize: '11px', padding: '6px 10px' }} title="Edit">✏️</button>}
@@ -455,7 +455,5 @@ function SidebarUser({ u, dotColor, profiles, onViewUser }) {
     </div>
   );
 }
-
-
 
 

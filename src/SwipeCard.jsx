@@ -373,7 +373,8 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
           </div>
 
           {/* ── BACK FACE ── */}
-          <div className="swipe-card__face swipe-card__face--back">
+          <div className="swipe-card__face swipe-card__face--back"
+            onMouseDown={e => e.stopPropagation()}>
             <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${track.coverUrl})`, backgroundSize: 'cover', backgroundPosition: 'center', filter: 'blur(20px) brightness(0.3)', borderRadius: 'inherit' }} />
             <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', height: '100%', padding: '20px', justifyContent: 'space-between' }}>
               <div>
@@ -392,6 +393,7 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <button
+                  onMouseDown={e => e.stopPropagation()}
                   onTouchStart={e => e.stopPropagation()}
                   onClick={handleCopIt}
                   disabled={checkoutLoading}
@@ -400,12 +402,14 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
                 </button>
                 <div style={{ display: 'flex', gap: '10px' }}>
                   <button
+                    onMouseDown={e => e.stopPropagation()}
                     onTouchStart={e => e.stopPropagation()}
                     onClick={e => { e.stopPropagation(); triggerSwipe("left"); }}
                     style={{ flex: 1, padding: '12px', background: 'rgba(255,51,102,0.15)', border: '1px solid rgba(255,51,102,0.4)', borderRadius: '12px', color: 'var(--red)', fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '13px', cursor: 'pointer' }}>
                     💨 Pass
                   </button>
                   <button
+                    onMouseDown={e => e.stopPropagation()}
                     onTouchStart={e => e.stopPropagation()}
                     onClick={e => { e.stopPropagation(); triggerSwipe("right"); }}
                     style={{ flex: 1, padding: '12px', background: 'rgba(0,245,255,0.15)', border: '1px solid rgba(0,245,255,0.4)', borderRadius: '12px', color: 'var(--cyan)', fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '13px', cursor: 'pointer' }}>
@@ -413,6 +417,7 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
                   </button>
                 </div>
                 <button
+                  onMouseDown={e => e.stopPropagation()}
                   onTouchStart={e => e.stopPropagation()}
                   onClick={e => { e.stopPropagation(); setIsFlipped(false); }}
                   style={{ width: '100%', padding: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '12px', color: 'rgba(255,255,255,0.5)', fontFamily: 'var(--font-head)', fontSize: '13px', cursor: 'pointer' }}>

@@ -385,17 +385,17 @@ export default function App() {
     }
   }, []);
 
-  // Handle /admin route
+  // Handle /admin route — store intent, open after auth loads
+  const adminIntentRef = useRef(window.location.pathname === '/admin');
   useEffect(() => {
-    if (window.location.pathname === '/admin') {
-      history.replaceState(null, '', '/');
-      const TEAM_MEMBERS = ['avalions'];
-      const isAdmin =
-        currentUser?.role?.toLowerCase() === 'admin' ||
-        TEAM_MEMBERS.includes(currentUser?.username);
-      if (isAdmin) setShowAdmin(true);
-    }
-  }, [currentUser]);
+    if (!adminIntentRef.current || authLoading) return;
+    adminIntentRef.current = false;
+    history.replaceState(null, '', '/');
+    const TEAM_MEMBERS = ['avalions'];
+    const isAdmin = currentUser?.role?.toLowerCase() === 'admin' || TEAM_MEMBERS.includes(currentUser?.username);
+    if (isAdmin) setShowAdmin(true);
+    else setToast({ message: '🚫 Access denied', visible: true });
+  }, [currentUser, authLoading]);
 
   // Load active announcements
   useEffect(() => {
@@ -1119,7 +1119,7 @@ export default function App() {
       )}
 
       {showSettings && (
-        <SettingsPage onClose={() => setShowSettings(false)} onOpenAnalytics={() => setShowAnalytics(true)} onOpenStorefront={() => setStorefrontUser(currentUser?.username)} />
+        <SettingsPage onClose={() => setShowSettings(false)} onOpenAnalytics={() => setShowAnalytics(true)} onOpenStorefront={() => setStorefrontUser(currentUser?.username)} onOpenAdmin={() => setShowAdmin(true)} />
       )}
 
       {showAnalytics && (
@@ -1204,32 +1204,41 @@ export default function App() {
         </div>
       )}
 
-      {/* Active Announcements Banner */}
+      {/* Active Announcements — Banner, Popup, or Notification based on type */}
       {announcements
         .filter(a => !dismissedAnnouncements.includes(a.id))
         .slice(0, 1)
-        .map(a => (
-          <div key={a.id} style={{
-            position: 'fixed', top: 0, left: 0, right: 0, zIndex: 8999,
-            background: 'linear-gradient(135deg, rgba(99,91,255,0.95), rgba(0,245,255,0.9))',
-            color: '#000', padding: '10px 16px', display: 'flex', alignItems: 'center',
-            gap: '10px', fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600,
-            boxShadow: '0 2px 12px rgba(0,245,255,0.3)',
-          }}>
-            <span style={{ fontSize: '16px' }}>📢</span>
-            <span style={{ flex: 1 }}>{a.body}</span>
-            <button
-              onClick={() => {
-                const next = [...dismissedAnnouncements, a.id];
-                setDismissedAnnouncements(next);
-                localStorage.setItem('dismissedAnnouncements', JSON.stringify(next));
-              }}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', color: '#000', padding: '2px 6px', fontWeight: 700 }}
-            >
-              ✕
-            </button>
-          </div>
-        ))}
+        .map(a => {
+          const dismiss = () => {
+            const next = [...dismissedAnnouncements, a.id];
+            setDismissedAnnouncements(next);
+            localStorage.setItem('dismissedAnnouncements', JSON.stringify(next));
+          };
+          if (a.type === 'popup') return (
+            <div key={a.id} style={{ position: 'fixed', inset: 0, zIndex: 8999, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+              <div style={{ background: '#111', border: '1px solid rgba(0,245,255,0.3)', borderRadius: '16px', padding: '28px 24px', maxWidth: '420px', width: '100%', textAlign: 'center' }}>
+                <div style={{ fontSize: '36px', marginBottom: '12px' }}>📢</div>
+                <div style={{ fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '18px', marginBottom: '12px', color: '#fff' }}>Announcement</div>
+                <div style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5, marginBottom: '20px' }}>{a.body}</div>
+                <button onClick={dismiss} style={{ background: 'linear-gradient(135deg,#00f5ff,#bf5fff)', border: 'none', borderRadius: '12px', color: '#000', fontWeight: 700, fontSize: '14px', padding: '12px 28px', cursor: 'pointer', fontFamily: 'var(--font-head)' }}>Got it ✓</button>
+              </div>
+            </div>
+          );
+          // Banner (default) and notification both show as top banner
+          return (
+            <div key={a.id} style={{
+              position: 'fixed', top: 0, left: 0, right: 0, zIndex: 8999,
+              background: 'linear-gradient(135deg, rgba(99,91,255,0.97), rgba(0,245,255,0.92))',
+              color: '#000', padding: '10px 16px', display: 'flex', alignItems: 'center',
+              gap: '10px', fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600,
+              boxShadow: '0 2px 12px rgba(0,245,255,0.3)',
+            }}>
+              <span style={{ fontSize: '16px' }}>{a.type === 'notification' ? '🔔' : '📢'}</span>
+              <span style={{ flex: 1 }}>{a.body}</span>
+              <button onClick={dismiss} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', color: '#000', padding: '2px 6px', fontWeight: 700 }}>✕</button>
+            </div>
+          );
+        })}
 
       {/* Purchase Success Modal */}
       {purchaseModal && (

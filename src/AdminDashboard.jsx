@@ -599,6 +599,7 @@ function BugsTab() {
 function AnnouncementsTab({ currentUser }) {
   const [announcements, setAnnouncements] = useState([]);
   const [body, setBody] = useState("");
+  const [annType, setAnnType] = useState("banner"); // banner | popup | notification
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
@@ -627,6 +628,7 @@ function AnnouncementsTab({ currentUser }) {
           body: body.trim(),
           created_by: currentUser?.username || "admin",
           is_active: true,
+          type: annType,
         }),
       });
       setBody("");
@@ -650,6 +652,20 @@ function AnnouncementsTab({ currentUser }) {
     <div className="admin-tab-content">
       <h3 className="admin-section-title">📢 New Announcement</h3>
       <form onSubmit={submit} className="admin-announce-form">
+        {/* Type selector */}
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '12px', flexWrap: 'wrap' }}>
+          {[
+            { v: 'banner', l: '📢 Banner', desc: 'Top of screen, dismissible' },
+            { v: 'popup', l: '💬 Popup', desc: 'Modal on first visit' },
+            { v: 'notification', l: '🔔 Notification', desc: 'Bell notification' },
+          ].map(t => (
+            <button key={t.v} type="button" onClick={() => setAnnType(t.v)}
+              style={{ flex: 1, minWidth: '100px', padding: '10px 12px', borderRadius: '10px', border: `2px solid ${annType === t.v ? '#00f5ff' : 'rgba(255,255,255,0.1)'}`, background: annType === t.v ? 'rgba(0,245,255,0.1)' : 'rgba(255,255,255,0.04)', color: annType === t.v ? '#00f5ff' : 'rgba(255,255,255,0.5)', cursor: 'pointer', fontFamily: 'var(--font-head)', fontWeight: 600, fontSize: '12px', textAlign: 'left' }}>
+              <div>{t.l}</div>
+              <div style={{ fontSize: '10px', fontWeight: 400, opacity: 0.7, marginTop: '2px' }}>{t.desc}</div>
+            </button>
+          ))}
+        </div>
         <textarea
           className="admin-announce-textarea"
           placeholder="Write an announcement for all users..."

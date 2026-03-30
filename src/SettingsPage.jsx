@@ -126,7 +126,7 @@ function BulkPriceEditor({ username }) {
   );
 }
 
-export default function SettingsPage({ onClose, onOpenAnalytics, onOpenStorefront }) {
+export default function SettingsPage({ onClose, onOpenAnalytics, onOpenStorefront, onOpenAdmin }) {
   const { currentUser, logout } = useAuth();
 
   const [section, setSection] = useState("account"); // "account" | "password" | "fun" | "creator" | "privacy" | "about"
@@ -548,6 +548,17 @@ export default function SettingsPage({ onClose, onOpenAnalytics, onOpenStorefron
                   </div>
                 )}
               </div>
+
+              {/* Admin Dashboard button — admin/team only */}
+              {(currentUser?.role?.toLowerCase() === 'admin' || ['avalions'].includes(currentUser?.username)) && (
+                <div style={{ borderTop: "1px solid var(--border)", paddingTop: "16px" }}>
+                  <button
+                    onClick={() => { onClose(); onOpenAdmin && onOpenAdmin(); }}
+                    style={{ width: "100%", padding: "12px", background: "rgba(255,51,102,0.1)", border: "1px solid rgba(255,51,102,0.3)", borderRadius: "12px", color: "#ff3366", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: "var(--font-head)" }}>
+                    🛡️ Admin Dashboard
+                  </button>
+                </div>
+              )}
 
               <div style={{ borderTop: "1px solid var(--border)", paddingTop: "16px", marginTop: "4px" }}>
                 <button

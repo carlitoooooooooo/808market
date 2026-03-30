@@ -210,9 +210,29 @@ export function AuthProvider({ children }) {
   const login = useCallback(async (username, password) => {
     if (!username || !password) return { error: "Username and password required" };
 
-    const email = usernameToEmail(username.trim().toLowerCase());
+    const normalizedUsername = username.trim().toLowerCase();
 
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    // First try the generated fake email (legacy accounts)
+    const fakeEmail = usernameToEmail(normalizedUsername);
+    let { data, error } = await supabase.auth.signInWithPassword({ email: fakeEmail, password });
+
+    // If that fails, check if they signed up with a real email
+    if (error) {
+      try {
+        const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
+        const profileRes = await fetch(
+          `https://bkapxykeryzxbqpgjgab.supabase.co/rest/v1/profiles?username=eq.${encodeURIComponent(normalizedUsername)}&select=email`,
+          { headers: { apikey: ANON, Authorization: `Bearer ${ANON}` } }
+        );
+        const profiles = await profileRes.json();
+        const realEmail = profiles?.[0]?.email;
+        if (realEmail && realEmail !== fakeEmail) {
+          const result = await supabase.auth.signInWithPassword({ email: realEmail, password });
+          data = result.data;
+          error = result.error;
+        }
+      } catch {}
+    }
 
     if (error) {
       return { error: "Wrong username or password" };

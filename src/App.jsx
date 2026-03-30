@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import "./App.css";
 import { useAuth } from "./AuthContext.jsx";
 import AuthScreen from "./AuthScreen.jsx";
+import AdminDashboard from "./AdminDashboard.jsx";
 import SwipeCard from "./SwipeCard.jsx";
 import LeaderboardPage from "./LeaderboardPage.jsx";
 import ProfilePage from "./ProfilePage.jsx";
@@ -131,6 +132,11 @@ export default function App() {
   const [showAbout, setShowAbout] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showAnalytics, setShowAnalytics] = useState(false);
+  const [showAdmin, setShowAdmin] = useState(false);
+  const [announcements, setAnnouncements] = useState([]);
+  const [dismissedAnnouncements, setDismissedAnnouncements] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('dismissedAnnouncements') || '[]'); } catch { return []; }
+  });
   const [storefrontUser, setStorefrontUser] = useState(null);
   const [messageThread, setMessageThread] = useState(null); // username to open DM with
   const [unreadMessages, setUnreadMessages] = useState(0);
@@ -377,6 +383,29 @@ export default function App() {
       history.replaceState(null, '', '/');
       setShowAnalytics(true);
     }
+  }, []);
+
+  // Handle /admin route
+  useEffect(() => {
+    if (window.location.pathname === '/admin') {
+      history.replaceState(null, '', '/');
+      const TEAM_MEMBERS = ['avalions'];
+      const isAdmin =
+        currentUser?.role?.toLowerCase() === 'admin' ||
+        TEAM_MEMBERS.includes(currentUser?.username);
+      if (isAdmin) setShowAdmin(true);
+    }
+  }, [currentUser]);
+
+  // Load active announcements
+  useEffect(() => {
+    const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
+    fetch('https://bkapxykeryzxbqpgjgab.supabase.co/rest/v1/announcements?is_active=eq.true&order=created_at.desc&limit=5', {
+      headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` }
+    })
+      .then(r => r.json())
+      .then(data => { if (Array.isArray(data)) setAnnouncements(data); })
+      .catch(() => {});
   }, []);
 
   // Handle /store/:username route
@@ -1167,6 +1196,40 @@ export default function App() {
         achievement={currentAchievement}
         onAnimationEnd={() => setCurrentAchievement(null)}
       />
+
+      {/* Admin Dashboard */}
+      {showAdmin && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 9000 }}>
+          <AdminDashboard onClose={() => setShowAdmin(false)} />
+        </div>
+      )}
+
+      {/* Active Announcements Banner */}
+      {announcements
+        .filter(a => !dismissedAnnouncements.includes(a.id))
+        .slice(0, 1)
+        .map(a => (
+          <div key={a.id} style={{
+            position: 'fixed', top: 0, left: 0, right: 0, zIndex: 8999,
+            background: 'linear-gradient(135deg, rgba(99,91,255,0.95), rgba(0,245,255,0.9))',
+            color: '#000', padding: '10px 16px', display: 'flex', alignItems: 'center',
+            gap: '10px', fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600,
+            boxShadow: '0 2px 12px rgba(0,245,255,0.3)',
+          }}>
+            <span style={{ fontSize: '16px' }}>📢</span>
+            <span style={{ flex: 1 }}>{a.body}</span>
+            <button
+              onClick={() => {
+                const next = [...dismissedAnnouncements, a.id];
+                setDismissedAnnouncements(next);
+                localStorage.setItem('dismissedAnnouncements', JSON.stringify(next));
+              }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', color: '#000', padding: '2px 6px', fontWeight: 700 }}
+            >
+              ✕
+            </button>
+          </div>
+        ))}
 
       {/* Purchase Success Modal */}
       {purchaseModal && (

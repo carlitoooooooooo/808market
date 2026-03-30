@@ -263,6 +263,14 @@ export default function UserProfilePage({ username, onClose, onOpenModal, userVo
                       letterSpacing: '1px', textTransform: 'uppercase',
                     }}>BETA TESTER</span>
                   )}
+                  {profile?.is_pro && profile?.role !== 'admin' && !TEAM_MEMBERS.includes(profile?.username) && (
+                    <span style={{
+                      background: 'linear-gradient(135deg, #ffd700, #ff9900)',
+                      color: '#000', fontSize: '9px', fontFamily: "'Space Grotesk', sans-serif",
+                      fontWeight: 700, padding: '2px 8px', borderRadius: '20px',
+                      letterSpacing: '1px', textTransform: 'uppercase',
+                    }}>💎 PRO</span>
+                  )}
                 </div>
                 {/* Follower/Following counts */}
                 <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', fontFamily: "'Space Grotesk', sans-serif", marginTop: '4px' }}>

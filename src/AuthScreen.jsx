@@ -89,7 +89,7 @@ export default function AuthScreen() {
 
       <div className="auth-logo">
         <Logo />
-        <div className="logo-sub">The Beat Marketplace</div>
+        <div className="logo-sub">🎵 Swipe, Discover, Sell 🛒</div>
       </div>
 
       <div className="auth-card">

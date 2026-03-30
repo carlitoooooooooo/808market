@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "./AuthContext.jsx";
-import { playMessageSound } from "./soundUtils.js";
+
 import CommunityChat from "./CommunityChat.jsx";
 
 const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
@@ -39,10 +39,7 @@ function ChatThread({ otherUsername, onBack, currentUser }) {
         
         setMessages(data);
         
-        // Play sound if new unread messages arrived
-        if (unread.length > prevUnreadCount && unread.length > 0) {
-          playMessageSound();
-        }
+
         
         // Mark received messages as read
         if (unread.length > 0) {
@@ -350,3 +347,4 @@ export default function MessagesPage({ initialThread, onUnreadChange, onViewUser
     </div>
   );
 }
+

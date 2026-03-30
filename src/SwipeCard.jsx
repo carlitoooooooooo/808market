@@ -100,17 +100,12 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
     setIsFlying(true);
     stopPlay();
     
-    // Haptic feedback immediately on swipe
+    // Haptic feedback
     try {
       const hapticEnabled = JSON.parse(localStorage.getItem('hapticEnabled') ?? 'true');
       if (hapticEnabled) {
-        if (navigator.vibrate) {
-          const pattern = dir === "right" ? [30] : 10;
-          navigator.vibrate(pattern);
-        } else if (navigator.webkitVibrate) {
-          const pattern = dir === "right" ? [30] : 10;
-          navigator.webkitVibrate(pattern);
-        }
+        const pattern = dir === "right" ? [40] : [20];
+        if (navigator.vibrate) navigator.vibrate(pattern);
       }
     } catch (e) {}
     

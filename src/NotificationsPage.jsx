@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "./AuthContext.jsx";
 import { dbSelect, dbUpdate } from "./dbHelper.js";
-import { playNotificationSound } from "./soundUtils.js";
+
 
 function timeAgo(iso) {
   const diff = (Date.now() - new Date(iso)) / 1000;
@@ -44,10 +44,7 @@ export default function NotificationsPage({ onNotificationsRead, onOpenTrack, on
   }, [loadNotifications]);
 
   async function markAsRead(notif) {
-    // Play sound if unread
-    if (!notif.read) {
-      playNotificationSound(notif.type);
-    }
+
     
     // Mark read
     if (!notif.read) {

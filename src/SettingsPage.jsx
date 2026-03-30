@@ -1,18 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "./AuthContext.jsx";
 import { supabase } from "./supabase.js";
-import { 
-  isSoundsEnabled, 
-  setSoundsEnabled, 
-  playNotificationSound, 
-  playMessageSound,
-  getNotificationSoundType,
-  setNotificationSoundType,
-  getNotificationVolume,
-  setNotificationVolume,
-  isAutoMuteEnabled,
-  setAutoMute
-} from "./soundUtils.js";
+// Sound utils removed — notification sounds disabled
 
 const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
 const URL = 'https://bkapxykeryzxbqpgjgab.supabase.co';
@@ -151,10 +140,10 @@ export default function SettingsPage({ onClose, onOpenAnalytics, onOpenStorefron
       return false;
     }
   });
-  const [soundsEnabled, setSoundsEnabledLocal] = useState(() => isSoundsEnabled());
-  const [soundType, setSoundTypeLocal] = useState(() => getNotificationSoundType());
-  const [soundVolume, setSoundVolumeLocal] = useState(() => getNotificationVolume());
-  const [autoMute, setAutoMuteLocal] = useState(() => isAutoMuteEnabled());
+  const [soundsEnabled] = useState(false);
+  const [soundType] = useState('none');
+  const [soundVolume] = useState(0);
+  const [autoMute] = useState(false);
 
   // Creator Tools state
   const [uploadCount, setUploadCount] = useState(0);
@@ -259,36 +248,12 @@ export default function SettingsPage({ onClose, onOpenAnalytics, onOpenStorefron
     }
   }
 
-  function handleSoundsToggle() {
-    const newValue = !soundsEnabled;
-    setSoundsEnabledLocal(newValue);
-    setSoundsEnabled(newValue);
-  }
-
-  function handleSoundTypeChange(type) {
-    setSoundTypeLocal(type);
-    setNotificationSoundType(type);
-  }
-
-  function handleVolumeChange(newVolume) {
-    const clamped = Math.max(0, Math.min(100, newVolume));
-    setSoundVolumeLocal(clamped);
-    setNotificationVolume(clamped);
-  }
-
-  function handleAutoMuteToggle() {
-    const newValue = !autoMute;
-    setAutoMuteLocal(newValue);
-    setAutoMute(newValue);
-  }
-
-  function playTestSound(type) {
-    if (type === 'notification') {
-      playNotificationSound('like');
-    } else if (type === 'message') {
-      playMessageSound();
-    }
-  }
+  // Sound functions stubbed out (sounds removed)
+  function handleSoundsToggle() {}
+  function handleSoundTypeChange() {}
+  function handleVolumeChange() {}
+  function handleAutoMuteToggle() {}
+  function playTestSound() {}
 
   // Load creator data
   useEffect(() => {

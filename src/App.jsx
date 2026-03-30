@@ -24,7 +24,7 @@ import AchievementPopup from "./AchievementPopup.jsx";
 import tracksData from "./tracks.js";
 import { supabase } from "./supabase.js";
 import { dbUpsert, dbSelect, dbUpdate, dbInsert } from "./dbHelper.js";
-import { resumeAudioContext, playMessageSound, playNotificationSound, isAutoMuteEnabled } from "./soundUtils.js";
+
 
 const TABS = [
   { id: "discover", label: "🎵 Discover" },
@@ -104,7 +104,7 @@ function BetaTag() {
       onClick={handleTap}
       style={{ cursor: 'pointer', userSelect: 'none' }}
     >
-      {spinning ? 'STILL BETA' : <><span>BETA</span><span style={{ fontSize: '8px', opacity: 0.6, marginLeft: '3px', fontWeight: 500, letterSpacing: '0.5px' }}>v1.8</span></>}
+      {spinning ? 'STILL BETA' : <><span>BETA</span><span style={{ fontSize: '8px', opacity: 0.6, marginLeft: '3px', fontWeight: 500, letterSpacing: '0.5px' }}>v1.9</span></>}
     </span>
   );
 }
@@ -180,31 +180,7 @@ export default function App() {
     } catch {}
   }, []);
 
-  // Handle foreground focus - resume audio and play sounds if unread notifications/messages
-  useEffect(() => {
-    function handleFocus() {
-      // Resume audio context on user interaction
-      resumeAudioContext();
-      
-      // If there are unread notifications or messages, play a reminder sound
-      // (unless auto-mute is enabled, in which case the sound function will handle it)
-      if (currentUser && (unreadCount > 0)) {
-        // Delay slightly to make it less jarring
-        setTimeout(() => {
-          playNotificationSound('follow');
-        }, 300);
-      }
-    }
 
-    window.addEventListener('focus', handleFocus);
-    // Also trigger on click/touch to ensure audio context is ready
-    window.addEventListener('click', resumeAudioContext, { once: true });
-
-    return () => {
-      window.removeEventListener('focus', handleFocus);
-      window.removeEventListener('click', resumeAudioContext);
-    };
-  }, [currentUser, unreadCount]);
 
   // Load tracks via direct REST (bypasses Supabase JS client auth)
   useEffect(() => {
@@ -1206,7 +1182,7 @@ export default function App() {
 
       {/* Active Announcements — Banner, Popup, or Notification based on type */}
       {announcements
-        .filter(a => !dismissedAnnouncements.includes(a.id))
+        .filter(a => !dismissedAnnouncements.includes(a.id) && (!a.expires_at || new Date(a.expires_at) > new Date()))
         .slice(0, 1)
         .map(a => {
           const dismiss = () => {
@@ -1286,3 +1262,4 @@ export default function App() {
     </div>
   );
 }
+

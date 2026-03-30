@@ -600,6 +600,7 @@ function AnnouncementsTab({ currentUser }) {
   const [announcements, setAnnouncements] = useState([]);
   const [body, setBody] = useState("");
   const [annType, setAnnType] = useState("banner"); // banner | popup | notification
+  const [duration, setDuration] = useState(""); // hours, empty = permanent
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
@@ -621,15 +622,20 @@ function AnnouncementsTab({ currentUser }) {
     if (!body.trim()) return;
     setSubmitting(true);
     try {
+      const payload = {
+        body: body.trim(),
+        created_by: currentUser?.username || "admin",
+        is_active: true,
+        type: annType,
+      };
+      if (duration && parseInt(duration) > 0) {
+        const expiresAt = new Date(Date.now() + parseInt(duration) * 60 * 60 * 1000).toISOString();
+        payload.expires_at = expiresAt;
+      }
       await sbFetch("/announcements", {
         method: "POST",
         headers: { Prefer: "return=representation" },
-        body: JSON.stringify({
-          body: body.trim(),
-          created_by: currentUser?.username || "admin",
-          is_active: true,
-          type: annType,
-        }),
+        body: JSON.stringify(payload),
       });
       setBody("");
       await load();
@@ -673,6 +679,23 @@ function AnnouncementsTab({ currentUser }) {
           onChange={(e) => setBody(e.target.value)}
           rows={4}
         />
+        {/* Duration */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          <label style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', fontFamily: 'var(--font-head)', fontWeight: 600 }}>Duration:</label>
+          {[
+            { v: '', l: 'Permanent' },
+            { v: '1', l: '1 hour' },
+            { v: '6', l: '6 hours' },
+            { v: '24', l: '24 hours' },
+            { v: '72', l: '3 days' },
+            { v: '168', l: '1 week' },
+          ].map(d => (
+            <button key={d.v} type="button" onClick={() => setDuration(d.v)}
+              style={{ padding: '5px 12px', borderRadius: '16px', border: `1px solid ${duration === d.v ? '#00f5ff' : 'rgba(255,255,255,0.15)'}`, background: duration === d.v ? 'rgba(0,245,255,0.12)' : 'transparent', color: duration === d.v ? '#00f5ff' : 'rgba(255,255,255,0.5)', fontSize: '11px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-head)' }}>
+              {d.l}
+            </button>
+          ))}
+        </div>
         <button
           type="submit"
           className="admin-btn admin-btn--pro"
@@ -698,21 +721,29 @@ function AnnouncementsTab({ currentUser }) {
               <div className="admin-announce-meta">
                 <span>by @{a.created_by}</span>
                 <span>{a.created_at ? new Date(a.created_at).toLocaleString() : "—"}</span>
-                <span
-                  className={`admin-badge ${a.is_active ? "admin-badge--active" : "admin-badge--inactive"}`}
-                >
-                  {a.is_active ? "Live" : "Inactive"}
+                <span className={`admin-badge ${a.is_active ? "admin-badge--active" : "admin-badge--inactive"}`}>
+                  {a.is_active ? "🟢 Live" : "⚫ Inactive"}
                 </span>
+                {a.type && <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)' }}>{a.type}</span>}
+                {a.expires_at && <span style={{ fontSize: '10px', color: '#ffd700', fontFamily: 'var(--font-head)' }}>⏰ Expires {new Date(a.expires_at).toLocaleString()}</span>}
               </div>
               <p className="admin-announce-body">{a.body}</p>
-              {a.is_active && (
+              <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                {a.is_active && (
+                  <button className="admin-btn admin-btn--delete" onClick={() => deactivate(a.id)}>
+                    Deactivate
+                  </button>
+                )}
                 <button
-                  className="admin-btn admin-btn--delete"
-                  onClick={() => deactivate(a.id)}
-                >
-                  Deactivate
+                  onClick={async () => {
+                    if (!confirm('Permanently delete this announcement?')) return;
+                    await sbFetch(`/announcements?id=eq.${a.id}`, { method: 'DELETE' });
+                    setAnnouncements(prev => prev.filter(x => x.id !== a.id));
+                  }}
+                  style={{ padding: '5px 12px', background: 'rgba(255,51,102,0.15)', border: '1px solid rgba(255,51,102,0.3)', borderRadius: '8px', color: '#ff3366', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-head)', fontWeight: 600 }}>
+                  🗑 Delete
                 </button>
-              )}
+              </div>
             </div>
           ))}
         </div>

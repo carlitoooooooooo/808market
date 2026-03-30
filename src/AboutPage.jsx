@@ -2,6 +2,28 @@ import { useState } from "react";
 
 const CHANGELOG = [
   {
+    version: "1.9.0", date: "Mar 30, 2026", items: [
+      "🛡️ Admin Dashboard — analytics, user management, content moderation, finance, bug reports, announcements",
+      "📢 Announcements system — banner, popup, and notification types with duration control",
+      "💎 PRO accounts — paid upgrade with exclusive name glows (Diamond, Aurora, Platinum, Solar)",
+      "🏪 Storefronts — create your own storefront at 808market.app/store/username",
+      "🌐 Community Chat — global group chat with reactions, replies, @mentions, pin messages",
+      "🎤 Artist listings — sell open verses and features through your storefront",
+      "🥁 Drumkit selling — sell paid drum kits through storefronts",
+      "📊 Beat Analytics — plays, likes, passes, revenue per beat",
+      "🔍 Browse search — filter beats by title, producer, or BPM range",
+      "📱 Mobile swipe fix — butter-smooth swiping on all devices",
+      "💳 Stripe Connect — producers get 85% auto-paid with 7-day chargeback hold",
+      "🔒 Signed audio URLs — prevent MP3 ripping via inspect element",
+      "🛒 Purchase delivery — automatic beat delivery after checkout",
+      "30s snippets — previews extended from 15s to 30s",
+      "🔐 Email account recovery — optional email on signup",
+      "🎨 Profile redesign — stable layout that won't break on updates",
+      "✨ More name glows — Wave, Shock, Mystic, Crown, Neon, Hologram",
+      "🏷️ Profile Badge — custom badge with 9 color options (admin/team)",
+    ]
+  },
+  {
     version: "1.7.0", date: "Mar 25, 2026", items: [
       "🎨 Theme packs: Cyberpunk, Synthwave, Ocean, Forest, Sunset",
       "🎉 Party Mode: rainbow chaos UI toggle",

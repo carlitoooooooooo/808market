@@ -143,6 +143,7 @@ export default function App() {
   const [deepLinkTrack, setDeepLinkTrack] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const [discoverFeed, setDiscoverFeed] = useState("foryou"); // "foryou" | "following" | "browse"
+  const [showStripeReminder, setShowStripeReminder] = useState(false);
   const [browseTrack, setBrowseTrack] = useState(null);
   const [browseLimit, setBrowseLimit] = useState(50); // Max cards to show, increases with "Show More"
   const [browseSearch, setBrowseSearch] = useState('');
@@ -350,6 +351,26 @@ export default function App() {
     return () => clearInterval(interval);
   }, [currentUser?.username]);
 
+  // Check if producer needs Stripe reminder
+  useEffect(() => {
+    if (!currentUser?.username) return;
+    if (localStorage.getItem(`stripeReminderDismissed_${currentUser.username}`)) return;
+    const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
+    // Check if they have beats but no stripe account
+    fetch(`https://bkapxykeryzxbqpgjgab.supabase.co/rest/v1/profiles?username=eq.${encodeURIComponent(currentUser.username)}&select=stripe_account_id`, {
+      headers: { apikey: ANON, Authorization: `Bearer ${ANON}` }
+    }).then(r => r.json()).then(data => {
+      const hasStripe = data?.[0]?.stripe_account_id;
+      if (!hasStripe) {
+        fetch(`https://bkapxykeryzxbqpgjgab.supabase.co/rest/v1/tracks?uploaded_by_username=eq.${encodeURIComponent(currentUser.username)}&select=id&limit=1`, {
+          headers: { apikey: ANON, Authorization: `Bearer ${ANON}` }
+        }).then(r => r.json()).then(tracks => {
+          if (Array.isArray(tracks) && tracks.length > 0) setShowStripeReminder(true);
+        });
+      }
+    }).catch(() => {});
+  }, [currentUser?.username]);
+
   // Handle /analytics route
   useEffect(() => {
     if (window.location.pathname === '/analytics') {
@@ -365,6 +386,16 @@ export default function App() {
       const username = decodeURIComponent(match[1]);
       history.replaceState(null, '', '/');
       setStorefrontUser(username);
+    }
+  }, []);
+
+  // PRO upgrade success handler
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('pro') === 'success') {
+      history.replaceState(null, '', '/');
+      setToast({ message: '💎 Welcome to PRO! Your exclusive features are now unlocked.', visible: true });
+      setTimeout(() => setToast(t => ({ ...t, visible: false })), 6000);
     }
   }, []);
 
@@ -726,6 +757,24 @@ export default function App() {
       <main className="app-main">
         {activeTab === "discover" && (
           <div className="discover-view">
+            {/* Stripe Connect Reminder Banner */}
+            {showStripeReminder && currentUser && (
+              <div style={{ margin: '8px 12px 0', background: 'linear-gradient(135deg, rgba(99,91,255,0.15), rgba(0,245,255,0.1))', border: '1px solid rgba(99,91,255,0.4)', borderRadius: '12px', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '18px' }}>💳</span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '13px', color: '#fff' }}>Get paid automatically</div>
+                  <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', fontFamily: 'var(--font-body)' }}>Connect Stripe to receive 85% of every sale directly to your bank</div>
+                </div>
+                <button onClick={() => { setShowStripeReminder(false); setShowSettings(true); }}
+                  style={{ background: 'linear-gradient(135deg, #635bff, #00f5ff)', color: '#fff', border: 'none', borderRadius: '20px', padding: '6px 14px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-head)', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                  Connect →
+                </button>
+                <button onClick={() => { setShowStripeReminder(false); localStorage.setItem(`stripeReminderDismissed_${currentUser.username}`, '1'); }}
+                  style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontSize: '16px', padding: '2px', flexShrink: 0 }}>
+                  ✕
+                </button>
+              </div>
+            )}
             {/* For You / Following / Browse toggle */}
             {currentUser && (
               <div className="feed-toggle">

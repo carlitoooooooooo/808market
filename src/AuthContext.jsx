@@ -119,15 +119,17 @@ export function AuthProvider({ children }) {
     const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
     let role = data.role || "user";
     let isBetaTester = data.is_beta_tester || false;
+    let isPro = data.is_pro || false;
     let avatarUrl = data.avatar_url || null;
     try {
-      const res = await fetch(`https://bkapxykeryzxbqpgjgab.supabase.co/rest/v1/profiles?id=eq.${userId}&select=role,is_beta_tester,avatar_url`, {
+      const res = await fetch(`https://bkapxykeryzxbqpgjgab.supabase.co/rest/v1/profiles?id=eq.${userId}&select=role,is_beta_tester,is_pro,avatar_url`, {
         headers: { apikey: ANON, Authorization: `Bearer ${ANON}` }
       });
       const rows = await res.json();
       if (Array.isArray(rows) && rows[0]) {
         role = rows[0].role || role;
         isBetaTester = rows[0].is_beta_tester ?? isBetaTester;
+        isPro = rows[0].is_pro ?? isPro;
         avatarUrl = rows[0].avatar_url || avatarUrl;
       }
     } catch {}
@@ -140,6 +142,7 @@ export function AuthProvider({ children }) {
       bio: data.bio || "",
       role,
       isBetaTester,
+      isPro,
     };
     localStorage.setItem(SESSION_KEY, JSON.stringify(user));
     setCurrentUser(user);

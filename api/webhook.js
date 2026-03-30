@@ -34,8 +34,24 @@ export default async function handler(req, res) {
     const session = event.data.object;
     const {
       trackId, trackTitle, artist, licenseType, buyerUsername,
-      producerUsername, producerStripeAccountId, producerPayoutCents, holdDays
+      producerUsername, producerStripeAccountId, producerPayoutCents, holdDays,
+      type: sessionType, username: proUsername
     } = session.metadata || {};
+
+    // Handle PRO upgrade
+    if (sessionType === 'pro_upgrade' && proUsername) {
+      try {
+        await fetch(`${SUPABASE_URL}/rest/v1/profiles?username=eq.${encodeURIComponent(proUsername)}`, {
+          method: 'PATCH',
+          headers: { apikey: SUPABASE_SERVICE_KEY, Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ is_pro: true }),
+        });
+        console.log(`PRO activated for @${proUsername}`);
+      } catch (err) {
+        console.error('Failed to activate PRO:', err);
+      }
+      return res.status(200).json({ received: true });
+    }
 
     const amountPaid = session.amount_total / 100;
     const buyerEmail = session.customer_details?.email || null;

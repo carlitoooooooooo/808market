@@ -17,6 +17,33 @@ import {
 const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
 const URL = 'https://bkapxykeryzxbqpgjgab.supabase.co';
 
+function ProUpgradeButton({ currentUser, onSuccess }) {
+  const [loading, setLoading] = React.useState(false);
+
+  const handleUpgrade = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/pro-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: currentUser?.username }),
+      });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+    } catch (err) {
+      alert('Failed to start checkout: ' + err.message);
+    }
+    setLoading(false);
+  };
+
+  return (
+    <button onClick={handleUpgrade} disabled={loading}
+      style={{ width: '100%', padding: '12px', background: 'linear-gradient(135deg, #ffd700, #ff9900)', border: 'none', borderRadius: '10px', color: '#000', fontWeight: 700, fontSize: '14px', cursor: loading ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-head)', opacity: loading ? 0.7 : 1 }}>
+      {loading ? 'Opening...' : '💎 Get PRO — $9.99/mo'}
+    </button>
+  );
+}
+
 function BulkPriceEditor({ username }) {
   const [beats, setBeats] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -500,6 +527,28 @@ export default function SettingsPage({ onClose, onOpenAnalytics, onOpenStorefron
                 <label className="settings-label">Beta Tester</label>
                 <div className="settings-value">{currentUser?.isBetaTester ? "✓ Yes" : "No"}</div>
               </div>
+
+              {/* PRO Status */}
+              <div style={{ borderTop: "1px solid var(--border)", paddingTop: "16px" }}>
+                {currentUser?.isPro ? (
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px", background: "rgba(255,215,0,0.07)", border: "1px solid rgba(255,215,0,0.25)", borderRadius: "12px", padding: "14px 16px" }}>
+                    <span style={{ fontSize: "22px" }}>💎</span>
+                    <div>
+                      <div style={{ fontFamily: "var(--font-head)", fontWeight: 700, fontSize: "14px", color: "#ffd700" }}>PRO Member</div>
+                      <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)", fontFamily: "var(--font-body)" }}>Exclusive glows, badges & more unlocked</div>
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ background: "rgba(255,215,0,0.05)", border: "1px solid rgba(255,215,0,0.2)", borderRadius: "12px", padding: "16px" }}>
+                    <div style={{ fontFamily: "var(--font-head)", fontWeight: 700, fontSize: "15px", marginBottom: "6px" }}>💎 Upgrade to PRO</div>
+                    <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)", fontFamily: "var(--font-body)", marginBottom: "14px", lineHeight: 1.5 }}>
+                      Unlock exclusive name glows, profile customization, and more perks as we grow.
+                    </div>
+                    <ProUpgradeButton currentUser={currentUser} onSuccess={() => window.location.reload()} />
+                  </div>
+                )}
+              </div>
+
               <div style={{ borderTop: "1px solid var(--border)", paddingTop: "16px", marginTop: "4px" }}>
                 <button
                   onClick={async () => { await logout(); onClose(); }}

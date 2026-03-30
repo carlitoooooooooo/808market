@@ -653,6 +653,9 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
               {currentUser.isBetaTester && currentUser.role !== 'admin' && !TEAM_MEMBERS.includes(currentUser.username) && (
                 <span style={{ background: 'linear-gradient(135deg, #ff9900, #ff3366)', color: '#fff', fontSize: '9px', fontFamily: 'var(--font-head)', fontWeight: 700, padding: '2px 8px', borderRadius: '20px', letterSpacing: '1px', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>BETA</span>
               )}
+              {currentUser.isPro && currentUser.role !== 'admin' && !TEAM_MEMBERS.includes(currentUser.username) && (
+                <span style={{ background: 'linear-gradient(135deg, #ffd700, #ff9900)', color: '#000', fontSize: '9px', fontFamily: 'var(--font-head)', fontWeight: 700, padding: '2px 8px', borderRadius: '20px', letterSpacing: '1px', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>💎 PRO</span>
+              )}
             </div>
 
             {/* Profile Badge */}
@@ -1272,6 +1275,31 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
                     </div>
                   </div>
                   {/* Admin/Team Only */}
+                  {/* PRO exclusive glows */}
+                  {(currentUser.isPro || currentUser.role === 'admin' || TEAM_MEMBERS.includes(currentUser.username)) && (
+                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '14px', marginTop: '6px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                        <div style={{ flex: 1, height: '1px', background: 'linear-gradient(90deg, transparent, rgba(255,215,0,0.3))' }} />
+                        <span style={{ fontSize: '10px', color: '#ffd700', fontFamily: 'var(--font-head)', fontWeight: 700, letterSpacing: '1.5px', whiteSpace: 'nowrap' }}>💎 PRO EXCLUSIVE</span>
+                        <div style={{ flex: 1, height: '1px', background: 'linear-gradient(90deg, rgba(255,215,0,0.3), transparent)' }} />
+                      </div>
+                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                        {[
+                          { value: 'diamond',  label: '💎 Diamond', style: { background: 'linear-gradient(135deg, #b9f2ff, #fff, #ffd700)', color: '#000' } },
+                          { value: 'aurora',   label: '🌌 Aurora',  style: { background: 'linear-gradient(135deg, #00ff88, #00f5ff, #bf5fff)', color: '#000' } },
+                          { value: 'platinum', label: '⚪ Platinum', style: { background: 'linear-gradient(135deg, #e5e4e2, #fff)', color: '#000' } },
+                          { value: 'solar',    label: '🌞 Solar',   style: { background: 'linear-gradient(135deg, #ff9900, #ffd700)', color: '#000' } },
+                        ].map(g => (
+                          <button key={g.value} type="button"
+                            onClick={() => setProfileExtra(prev => ({ ...prev, name_glow: g.value }))}
+                            style={{ ...g.style, border: `2px solid ${profileExtra.name_glow === g.value ? '#fff' : 'transparent'}`, borderRadius: '20px', padding: '4px 12px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-head)' }}>
+                            {g.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {(currentUser.role === 'admin' || TEAM_MEMBERS.includes(currentUser.username)) && (
                     <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '14px', marginTop: '6px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>

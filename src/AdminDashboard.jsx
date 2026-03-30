@@ -72,7 +72,15 @@ function AnalyticsTab() {
           : 0;
 
         const purchasesData = await purchasesRes.json();
-        const totalRevenue = Array.isArray(purchasesData)
+        // Also fetch from Stripe directly for accurate revenue (DB may be missing entries)
+        let stripeRevenue = null;
+        try {
+          const stripeRes = await fetch('/api/admin-stats');
+          const stripeData = await stripeRes.json();
+          if (stripeData.totalRevenue !== undefined) stripeRevenue = stripeData.totalRevenue;
+        } catch {}
+        const totalRevenue = stripeRevenue !== null ? stripeRevenue
+          : Array.isArray(purchasesData)
           ? purchasesData.reduce((s, p) => s + parseFloat(p.amount_paid || 0), 0)
           : 0;
 
@@ -465,17 +473,20 @@ function ContentTab() {
 
 function FinanceTab() {
   const [purchases, setPurchases] = useState([]);
+  const [stripeSales, setStripeSales] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
       setLoading(true);
       try {
-        const res = await sbFetch(
-          "/purchases?select=id,track_title,buyer_username,amount_paid,purchased_at,payout_transferred&order=purchased_at.desc"
-        );
-        const data = await res.json();
+        const [dbRes, stripeRes] = await Promise.all([
+          sbFetch("/purchases?select=id,track_title,buyer_username,amount_paid,purchased_at,payout_transferred&order=purchased_at.desc"),
+          fetch('/api/admin-stats').then(r => r.json()).catch(() => ({})),
+        ]);
+        const data = await dbRes.json();
         if (Array.isArray(data)) setPurchases(data);
+        if (stripeRes.recentSales) setStripeSales(stripeRes.recentSales);
       } finally {
         setLoading(false);
       }
@@ -483,8 +494,15 @@ function FinanceTab() {
     load();
   }, []);
 
-  const totalRevenue = purchases.reduce((s, p) => s + parseFloat(p.amount_paid || 0), 0);
+  const dbRevenue = purchases.reduce((s, p) => s + parseFloat(p.amount_paid || 0), 0);
+  const stripeRevenue = stripeSales.reduce((s, p) => s + parseFloat(p.amount || 0), 0);
+  const totalRevenue = dbRevenue > 0 ? dbRevenue : stripeRevenue;
   const platformCut = totalRevenue * 0.15;
+  // Use Stripe sales if DB purchases are empty
+  const displayPurchases = purchases.length > 0 ? purchases : stripeSales.map(s => ({
+    id: s.id, track_title: s.track_title, buyer_username: s.buyer_username,
+    amount_paid: s.amount, purchased_at: s.date, payout_transferred: false,
+  }));
 
   if (loading) return <AdminLoading />;
 
@@ -521,7 +539,7 @@ function FinanceTab() {
             </tr>
           </thead>
           <tbody>
-            {purchases.map((p) => (
+            {displayPurchases.map((p) => (
               <tr key={p.id}>
                 <td>{p.track_title || "—"}</td>
                 <td>@{p.buyer_username || "—"}</td>

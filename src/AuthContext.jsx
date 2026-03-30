@@ -223,31 +223,23 @@ export function AuthProvider({ children }) {
     if (!username || !password) return { error: "Username and password required" };
 
     const normalizedUsername = username.trim().toLowerCase();
+    const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
 
-    // First try the generated fake email (legacy accounts)
-    const fakeEmail = usernameToEmail(normalizedUsername);
-    let { data, error } = await supabase.auth.signInWithPassword({ email: fakeEmail, password });
+    // Look up which email to use — real email takes priority over fake one
+    let emailToUse = usernameToEmail(normalizedUsername);
+    try {
+      const profileRes = await fetch(
+        `https://bkapxykeryzxbqpgjgab.supabase.co/rest/v1/profiles?username=eq.${encodeURIComponent(normalizedUsername)}&select=email`,
+        { headers: { apikey: ANON, Authorization: `Bearer ${ANON}` } }
+      );
+      const profiles = await profileRes.json();
+      const realEmail = profiles?.[0]?.email;
+      if (realEmail) emailToUse = realEmail;
+    } catch {}
 
-    // If that fails, check if they signed up with a real email
-    if (error) {
-      try {
-        const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
-        const profileRes = await fetch(
-          `https://bkapxykeryzxbqpgjgab.supabase.co/rest/v1/profiles?username=eq.${encodeURIComponent(normalizedUsername)}&select=email`,
-          { headers: { apikey: ANON, Authorization: `Bearer ${ANON}` } }
-        );
-        const profiles = await profileRes.json();
-        const realEmail = profiles?.[0]?.email;
-        if (realEmail && realEmail !== fakeEmail) {
-          const result = await supabase.auth.signInWithPassword({ email: realEmail, password });
-          data = result.data;
-          error = result.error;
-        }
-      } catch {}
-    }
+    const { data, error } = await supabase.auth.signInWithPassword({ email: emailToUse, password });
 
     if (error) {
-      console.error('Login error:', error.message, error.status);
       return { error: "Wrong username or password" };
     }
 

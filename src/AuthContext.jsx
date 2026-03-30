@@ -235,6 +235,7 @@ export function AuthProvider({ children }) {
     }
 
     if (error) {
+      console.error('Login error:', error.message, error.status);
       return { error: "Wrong username or password" };
     }
 

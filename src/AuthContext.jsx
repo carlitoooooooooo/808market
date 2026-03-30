@@ -54,15 +54,23 @@ export function AuthProvider({ children }) {
       }
     }, 3000); // reduced from 8s to 3s
 
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session }, error }) => {
       if (settled) return;
       settled = true;
       clearTimeout(fallbackTimer);
 
+      if (error || !session) {
+        // Clear any stale tokens including Supabase's own storage
+        localStorage.removeItem(SESSION_KEY);
+        Object.keys(localStorage).forEach(k => {
+          if (k.startsWith('sb-')) localStorage.removeItem(k);
+        });
+        await supabase.auth.signOut().catch(() => {});
+      }
+
       if (session?.user) {
         await loadAndSetProfile(session.user.id);
       } else {
-        // No active session - clear any stale localStorage
         localStorage.removeItem(SESSION_KEY);
       }
       setAuthLoading(false);
@@ -80,8 +88,12 @@ export function AuthProvider({ children }) {
 
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === "SIGNED_OUT") {
+      if (event === "SIGNED_OUT" || event === "TOKEN_REFRESHED" && !session) {
         localStorage.removeItem(SESSION_KEY);
+        // Also clear Supabase's own stale tokens
+        Object.keys(localStorage).forEach(k => {
+          if (k.startsWith('sb-') || k.includes('supabase')) localStorage.removeItem(k);
+        });
         setCurrentUser(null);
       } else if (event === "SIGNED_IN" && session?.user) {
         await loadAndSetProfile(session.user.id);

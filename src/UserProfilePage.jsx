@@ -263,7 +263,7 @@ export default function UserProfilePage({ username, onClose, onOpenModal, userVo
                       letterSpacing: '1px', textTransform: 'uppercase',
                     }}>BETA TESTER</span>
                   )}
-                  {profile?.is_pro && profile?.role !== 'admin' && !TEAM_MEMBERS.includes(profile?.username) && (
+                  {profile?.is_pro && (
                     <span style={{
                       background: 'linear-gradient(135deg, #ffd700, #ff9900)',
                       color: '#000', fontSize: '9px', fontFamily: "'Space Grotesk', sans-serif",

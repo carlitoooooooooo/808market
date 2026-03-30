@@ -38,7 +38,7 @@ export function AuthProvider({ children }) {
           }).then(r => r.json()).then(data => {
             const p = Array.isArray(data) ? data[0] : data;
             if (p) {
-              const updated = { ...cached, role: p.role || 'user', isBetaTester: p.is_beta_tester || false, avatarUrl: p.avatar_url || cached.avatarUrl || null };
+              const updated = { ...cached, role: p.role || 'user', isBetaTester: p.is_beta_tester || false, isPro: p.is_pro || false, avatarUrl: p.avatar_url || cached.avatarUrl || null };
               localStorage.setItem(SESSION_KEY, JSON.stringify(updated));
               setCurrentUser(updated);
             }

@@ -653,7 +653,7 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
               {currentUser.isBetaTester && currentUser.role !== 'admin' && !TEAM_MEMBERS.includes(currentUser.username) && (
                 <span style={{ background: 'linear-gradient(135deg, #ff9900, #ff3366)', color: '#fff', fontSize: '9px', fontFamily: 'var(--font-head)', fontWeight: 700, padding: '2px 8px', borderRadius: '20px', letterSpacing: '1px', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>BETA</span>
               )}
-              {currentUser.isPro && currentUser.role !== 'admin' && !TEAM_MEMBERS.includes(currentUser.username) && (
+              {currentUser.isPro && (
                 <span style={{ background: 'linear-gradient(135deg, #ffd700, #ff9900)', color: '#000', fontSize: '9px', fontFamily: 'var(--font-head)', fontWeight: 700, padding: '2px 8px', borderRadius: '20px', letterSpacing: '1px', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>💎 PRO</span>
               )}
             </div>

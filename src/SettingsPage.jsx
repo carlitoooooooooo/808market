@@ -115,7 +115,7 @@ function BulkPriceEditor({ username }) {
   );
 }
 
-export default function SettingsPage({ onClose, onOpenAnalytics, onOpenStorefront, onOpenAdmin }) {
+export default function SettingsPage({ onClose, onOpenAnalytics, onOpenStorefront, onOpenAdmin, onOpenAbout }) {
   const { currentUser, logout } = useAuth();
 
   const [section, setSection] = useState("account"); // "account" | "password" | "fun" | "creator" | "privacy" | "about"
@@ -1122,8 +1122,8 @@ export default function SettingsPage({ onClose, onOpenAnalytics, onOpenStorefron
 
               {/* Links */}
               <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "10px" }}>
-                <a
-                  href="/about"
+                <button
+                  onClick={() => { onClose(); onOpenAbout && onOpenAbout(); }}
                   style={{
                     padding: "12px",
                     background: "rgba(0,245,255,0.1)",
@@ -1142,7 +1142,7 @@ export default function SettingsPage({ onClose, onOpenAnalytics, onOpenStorefron
                   onMouseLeave={e => e.currentTarget.style.background = "rgba(0,245,255,0.1)"}
                 >
                   📖 Changelog
-                </a>
+                </button>
               </div>
 
               {/* Bug Report Form */}

@@ -1095,7 +1095,7 @@ export default function App() {
       )}
 
       {showSettings && (
-        <SettingsPage onClose={() => setShowSettings(false)} onOpenAnalytics={() => setShowAnalytics(true)} onOpenStorefront={() => setStorefrontUser(currentUser?.username)} onOpenAdmin={() => setShowAdmin(true)} />
+        <SettingsPage onClose={() => setShowSettings(false)} onOpenAnalytics={() => setShowAnalytics(true)} onOpenStorefront={() => setStorefrontUser(currentUser?.username)} onOpenAdmin={() => setShowAdmin(true)} onOpenAbout={() => setShowAbout(true)} />
       )}
 
       {showAnalytics && (

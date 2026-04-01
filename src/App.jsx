@@ -167,7 +167,6 @@ export default function App() {
     }
   });
   const [showOnboarding, setShowOnboarding] = useState(false); // Show onboarding modal
-  const [onboardingStep, setOnboardingStep] = useState(1); // Track current onboarding step
   const onboardingCheckedRef = useRef(false); // Track if we've checked onboarding status
   const toastTimer = useRef(null);
   const notifTimer = useRef(null);
@@ -760,14 +759,12 @@ export default function App() {
         <OnboardingModal
           onComplete={() => {
             setShowOnboarding(false);
-            setOnboardingStep(1);
             if (currentUser?.username) {
               localStorage.setItem(`onboarding_completed_${currentUser.username}`, '1');
             }
           }}
           onSkip={() => {
             setShowOnboarding(false);
-            setOnboardingStep(1);
             if (currentUser?.username) {
               localStorage.setItem(`onboarding_completed_${currentUser.username}`, '1');
             }

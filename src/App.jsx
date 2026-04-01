@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import "./App.css";
 import { useAuth } from "./AuthContext.jsx";
+import { initEasterEggs, triggerLogoClickEasterEgg, checkSearchEasterEgg, checkVoteStreak } from "./EasterEggs.js";
 import AuthScreen from "./AuthScreen.jsx";
 import AdminDashboard from "./AdminDashboard.jsx";
 import SwipeCard from "./SwipeCard.jsx";
@@ -171,8 +172,9 @@ export default function App() {
   const toastTimer = useRef(null);
   const notifTimer = useRef(null);
   const startOverRef = useRef(false); // Flag to bypass queue rebuild during reset
+  const logoClicksRef = useRef(0); // Track logo clicks for easter egg
 
-  // Apply theme on mount
+  // Apply theme on mount + initialize easter eggs
   useEffect(() => {
     try {
       const selectedTheme = localStorage.getItem('selectedTheme') || 'default';
@@ -182,6 +184,9 @@ export default function App() {
         document.documentElement.classList.add('cursor-animation-enabled');
       }
     } catch {}
+    
+    // Init easter eggs
+    initEasterEggs();
   }, []);
 
 
@@ -676,6 +681,14 @@ export default function App() {
 
     // Optimistic update
     setUserVotes(prev => ({ ...prev, [track.id]: dir }));
+    
+    // Check vote milestone easter egg
+    const newVoteCount = Object.keys(userVotes).length + 1;
+    const milestone = checkVoteStreak(newVoteCount);
+    if (milestone) {
+      showToast(milestone);
+    }
+    
     setTracks(prev =>
       prev.map(t => {
         if (t.id !== track.id) return t;
@@ -812,7 +825,16 @@ export default function App() {
 
       <header className="app-header">
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <Logo />
+          <div onClick={() => {
+            logoClicksRef.current++;
+            if (logoClicksRef.current === 5) {
+              triggerLogoClickEasterEgg();
+              showToast('🌈 RAINBOW MODE ACTIVATED! 🌈');
+              logoClicksRef.current = 0;
+            }
+          }} style={{ cursor: 'pointer' }}>
+            <Logo />
+          </div>
           <BetaTag />
         </div>
 

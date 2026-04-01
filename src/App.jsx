@@ -398,16 +398,21 @@ export default function App() {
     })
       .then(r => r.json())
       .then(data => {
+        console.log('Onboarding check - Fetched data:', data);
         if (Array.isArray(data) && data.length > 0) {
           const hasCompleted = data[0]?.has_completed_onboarding;
+          console.log('Has completed onboarding:', hasCompleted);
           // Show if NOT completed (false, null, or undefined = new user)
           if (!hasCompleted) {
+            console.log('Showing onboarding modal');
             setShowOnboarding(true);
           }
+        } else {
+          console.log('No profile data returned or not an array');
         }
       })
       .catch(err => {
-        console.debug('Onboarding check skipped:', err);
+        console.log('Onboarding fetch error:', err);
       })
       .finally(() => clearTimeout(timeout));
   }, [currentUser?.username, authLoading]);

@@ -868,15 +868,41 @@ export default function App() {
     <div className="app">
       <div className="app-bg" />
 
-      {/* Onboarding Modal */}
+      {/* Onboarding Modal - TEST DIV */}
       {showOnboarding && (
-        <OnboardingModal
-          onComplete={completeOnboarding}
-          onSkip={() => {
-            setShowOnboarding(false);
-            completeOnboarding();
-          }}
-        />
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(0, 0, 0, 0.9)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+        }}>
+          <div style={{
+            background: '#000',
+            border: '3px solid #00f5ff',
+            padding: '40px',
+            borderRadius: '20px',
+            textAlign: 'center',
+            maxWidth: '400px',
+          }}>
+            <h1 style={{ color: '#00f5ff', fontSize: '32px', marginBottom: '20px' }}>🎵 ONBOARDING TEST</h1>
+            <p style={{ color: '#fff', fontSize: '18px', marginBottom: '20px' }}>If you see this, the modal works!</p>
+            <button onClick={() => setShowOnboarding(false)} style={{
+              background: '#00f5ff',
+              color: '#000',
+              border: 'none',
+              padding: '10px 20px',
+              borderRadius: '10px',
+              fontSize: '16px',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+            }}>
+              Close
+            </button>
+          </div>
+        </div>
       )}
 
       <header className="app-header">

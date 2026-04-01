@@ -854,27 +854,6 @@ export default function App() {
       <main className="app-main">
         {activeTab === "discover" && (
           <div className="discover-view">
-            {/* TEST: Onboarding button (remove later) */}
-            {currentUser && (
-              <button 
-                onClick={() => setShowOnboarding(true)}
-                style={{
-                  margin: '8px 12px 0',
-                  padding: '10px 14px',
-                  background: 'rgba(0,245,255,0.15)',
-                  border: '1px solid rgba(0,245,255,0.4)',
-                  borderRadius: '12px',
-                  color: '#00f5ff',
-                  fontSize: '12px',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  fontFamily: 'var(--font-head)',
-                }}
-              >
-                📖 Show Onboarding
-              </button>
-            )}
-
             {/* Stripe Connect Reminder Banner */}
             {showStripeReminder && currentUser && (
               <div style={{ margin: '8px 12px 0', background: 'linear-gradient(135deg, rgba(99,91,255,0.15), rgba(0,245,255,0.1))', border: '1px solid rgba(99,91,255,0.4)', borderRadius: '12px', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>

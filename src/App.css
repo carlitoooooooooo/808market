@@ -48,41 +48,10 @@ body {
   z-index: 0;
   pointer-events: none;
   background: #000;
-  background-image: 
-    radial-gradient(ellipse 120vw 100vh at 10% 10%, rgba(255, 0, 127, 0.08) 0%, transparent 50%),
-    radial-gradient(ellipse 100vw 90vh at 90% 20%, rgba(0, 245, 255, 0.06) 0%, transparent 50%),
-    radial-gradient(ellipse 80vw 100vh at 50% 100%, rgba(191, 95, 255, 0.05) 0%, transparent 60%);
   overflow: hidden;
 }
 
-.app-bg::before {
-  content: '';
-  position: absolute;
-  inset: -50%;
-  background:
-    radial-gradient(ellipse 80vw 60vh at 20% 20%, rgba(0,245,255,0.08) 0%, transparent 60%),
-    radial-gradient(ellipse 70vw 80vh at 80% 80%, rgba(191,95,255,0.07) 0%, transparent 60%),
-    radial-gradient(ellipse 60vw 60vh at 50% 50%, rgba(0,255,136,0.03) 0%, transparent 70%);
-  animation: bgShift 12s ease-in-out infinite alternate;
-}
 
-@keyframes bgShift {
-  0%   { transform: translate(0, 0) scale(1); }
-  33%  { transform: translate(-3%, 2%) scale(1.02); }
-  66%  { transform: translate(2%, -3%) scale(0.99); }
-  100% { transform: translate(-1%, 1%) scale(1.01); }
-}
-
-.app-bg::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-  background-size: 60px 60px;
-  pointer-events: none;
-}
 
 /* ===== LANDING PAGE ===== */
 .landing-page {
@@ -4134,99 +4103,4 @@ html.party-mode .auth-submit {
   animation: nameGlowPulse 2.5s ease-in-out infinite;
 }
 
-/* ===== Y2K CHAOS THEME ===== */
-/* Bold gradient borders on interactive elements */
-.btn-primary, .auth-submit {
-  background: linear-gradient(135deg, #ff0080, #00f5ff) !important;
-  color: #000 !important;
-  border: none !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.5px !important;
-  transition: all 0.2s !important;
-  box-shadow: 0 0 20px rgba(255, 0, 128, 0.3) !important;
-}
 
-.btn-primary:hover, .auth-submit:hover {
-  box-shadow: 0 0 40px rgba(255, 0, 128, 0.6) !important;
-  transform: scale(1.02) !important;
-}
-
-/* Neon glowing tabs */
-.tab-button {
-  position: relative;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  transition: all 0.2s;
-}
-
-.tab-button.active {
-  background: linear-gradient(135deg, rgba(255, 0, 128, 0.15), rgba(0, 245, 255, 0.15)) !important;
-  border-bottom: 3px solid #ff0080 !important;
-  color: #00f5ff !important;
-  text-shadow: 0 0 10px rgba(0, 245, 255, 0.5);
-}
-
-/* Glowing cards and modals */
-.modal-card, .card-item, .swipe-card {
-  border: 1px solid rgba(0, 245, 255, 0.2);
-  transition: all 0.2s;
-}
-
-.modal-card:hover, .card-item:hover, .swipe-card:hover {
-  border-color: #00f5ff;
-  box-shadow: 0 0 20px rgba(0, 245, 255, 0.2), inset 0 0 20px rgba(0, 245, 255, 0.05);
-}
-
-/* Animated grid background */
-.discover-view::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: 
-    repeating-linear-gradient(0deg, transparent, transparent 100px, rgba(0, 245, 255, 0.03) 100px, rgba(0, 245, 255, 0.03) 101px),
-    repeating-linear-gradient(90deg, transparent, transparent 100px, rgba(191, 95, 255, 0.02) 100px, rgba(191, 95, 255, 0.02) 101px);
-  pointer-events: none;
-  z-index: -1;
-}
-
-/* Button styling upgrades */
-button {
-  transition: all 0.2s !important;
-}
-
-button:not(.btn-primary):not(.auth-submit):not(.tab-button) {
-  border-color: rgba(0, 245, 255, 0.3) !important;
-}
-
-button:not(.btn-primary):not(.auth-submit):not(.tab-button):hover {
-  border-color: #00f5ff !important;
-  box-shadow: 0 0 10px rgba(0, 245, 255, 0.2) !important;
-}
-
-/* Input field glow */
-input, textarea {
-  border-color: rgba(0, 245, 255, 0.2) !important;
-  transition: all 0.2s !important;
-}
-
-input:focus, textarea:focus {
-  border-color: #00f5ff !important;
-  box-shadow: 0 0 10px rgba(0, 245, 255, 0.3) inset !important;
-  outline: none !important;
-}
-
-/* Section headers with gradient */
-.section-title, .page-title, h1, h2, h3 {
-  letter-spacing: -0.5px;
-}
-
-/* Add neon border accents */
-.app::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  border: 2px solid transparent;
-  border-image: linear-gradient(135deg, rgba(255, 0, 128, 0.3), rgba(0, 245, 255, 0.3), rgba(191, 95, 255, 0.3)) 1;
-  pointer-events: none;
-  z-index: 999;
-}

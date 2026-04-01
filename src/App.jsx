@@ -550,6 +550,67 @@ export default function App() {
     // Score and sort tracks
     const scored = unvoted.map(t => ({ track: t, score: scoreTrack(t) }));
     
+    // Helper: interleave tracks to prevent same-producer clustering
+    function diversifyByProducer(tracks, maxConsecutive = 2) {
+      const result = [];
+      const byProducer = {};
+      
+      // Group by producer
+      tracks.forEach(t => {
+        const producer = t.uploadedBy;
+        if (!byProducer[producer]) byProducer[producer] = [];
+        byProducer[producer].push(t);
+      });
+      
+      // Interleave: take 1-2 from each producer in round-robin
+      const producers = Object.keys(byProducer);
+      let producerIdx = 0;
+      let consecutiveCount = 0;
+      
+      while (result.length < tracks.length) {
+        let placed = false;
+        let attempts = 0;
+        
+        // Try to place from next producer (cycling through)
+        while (attempts < producers.length && !placed) {
+          const producer = producers[producerIdx % producers.length];
+          
+          if (byProducer[producer].length > 0) {
+            const track = byProducer[producer].shift();
+            
+            // Check if adding this would violate max consecutive
+            const lastProducer = result.length > 0 ? result[result.length - 1].uploadedBy : null;
+            if (lastProducer !== producer) {
+              consecutiveCount = 1;
+              result.push(track);
+              placed = true;
+            } else if (consecutiveCount < maxConsecutive) {
+              consecutiveCount++;
+              result.push(track);
+              placed = true;
+            }
+          }
+          
+          if (!placed) {
+            producerIdx++;
+            attempts++;
+          }
+        }
+        
+        if (!placed) {
+          // Fallback: just add whatever's left if we hit edge case
+          for (const producer in byProducer) {
+            if (byProducer[producer].length > 0) {
+              result.push(byProducer[producer].shift());
+              break;
+            }
+          }
+        }
+      }
+      
+      return result;
+    }
+    
     // For very new users (< 5 votes), weight top 10 by cops, then smart for rest
     let ordered;
     if (voteCount < 5) {
@@ -557,17 +618,20 @@ export default function App() {
       const topPopular = byPopularity.slice(0, 10); // top 10 established hits
       const restScored = scored.filter(s => !topPopular.includes(s.track));
       const restSorted = restScored.sort((a, b) => b.score - a.score);
-      ordered = [...topPopular, ...restSorted.map(s => s.track)];
+      // Diversify rest to avoid producer clustering
+      const diverseRest = diversifyByProducer(restSorted.map(s => s.track), 2);
+      ordered = [...topPopular, ...diverseRest];
     } else {
-      // Experienced user: pure smart scoring with slight randomization for ties
-      ordered = scored
+      // Experienced user: smart scoring + producer diversity
+      const sorted = scored
         .sort((a, b) => {
           const scoreDiff = b.score - a.score;
-          // If scores are within 0.05, random shuffle (allows discovery)
           if (Math.abs(scoreDiff) < 0.05) return Math.random() - 0.5;
           return scoreDiff;
         })
         .map(s => s.track);
+      // Interleave to prevent same-producer clustering (max 2 in a row)
+      ordered = diversifyByProducer(sorted, 2);
     }
     
     setQueue(ordered);

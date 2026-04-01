@@ -230,8 +230,11 @@ export default function UserProfilePage({ username, onClose, onOpenModal, userVo
                 }
               </div>
               <div className="user-profile-info">
-                <div className={`user-profile-username ${profile?.name_glow && profile.name_glow !== 'none' ? `name-glow-${profile.name_glow}` : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                  @{username}
+                {/* Username + online dot only — badges moved outside glow container */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                  <span className={`user-profile-username ${profile?.name_glow && profile.name_glow !== 'none' ? `name-glow-${profile.name_glow}` : ''}`}>
+                    @{username}
+                  </span>
                   {/* Online indicator */}
                   {!profile?.hide_activity && profile?.last_seen && (() => {
                     const diff = (Date.now() - new Date(profile.last_seen).getTime()) / 1000 / 60;
@@ -239,6 +242,9 @@ export default function UserProfilePage({ username, onClose, onOpenModal, userVo
                     if (diff < 30) return <span title={`Active ${Math.round(diff)}m ago`} style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ffd700', boxShadow: '0 0 6px #ffd700', display: 'inline-block', flexShrink: 0 }} />;
                     return null;
                   })()}
+                </div>
+                {/* Role badges — outside glow container so color isn't inherited */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginTop: '2px' }}>
                   {profile?.role === 'admin' && (
                     <span style={{
                       background: 'linear-gradient(135deg, #00f5ff, #bf5fff)',

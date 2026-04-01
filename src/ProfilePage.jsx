@@ -585,7 +585,7 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
   };
 
   return (
-    <div className="profile-page" style={{ background: PROFILE_BG_STYLES[profileExtra.profile_bg] || 'transparent' }}>
+    <div className={`profile-page ${profileExtra.profile_bg?.startsWith('animated-') ? `profile-bg-${profileExtra.profile_bg}` : ''}`} style={{ background: !profileExtra.profile_bg?.startsWith('animated-') ? (PROFILE_BG_STYLES[profileExtra.profile_bg] || 'transparent') : 'transparent' }}>
       {/* LEFT COLUMN: identity, stats, pinned, badges */}
       <div className="profile-left-col">
 
@@ -1289,6 +1289,12 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
                           { value: 'aurora',   label: '🌌 Aurora',  style: { background: 'linear-gradient(135deg, #00ff88, #00f5ff, #bf5fff)', color: '#000' } },
                           { value: 'platinum', label: '⚪ Platinum', style: { background: 'linear-gradient(135deg, #e5e4e2, #fff)', color: '#000' } },
                           { value: 'solar',    label: '🌞 Solar',   style: { background: 'linear-gradient(135deg, #ff9900, #ffd700)', color: '#000' } },
+                          { value: 'neon-cyan', label: '⚡ Neon Cyan', style: { background: 'linear-gradient(135deg, #00f5ff, #00ffff)', color: '#000', textShadow: '0 0 10px #00f5ff' } },
+                          { value: 'neon-purple', label: '⚡ Neon Purple', style: { background: 'linear-gradient(135deg, #bf5fff, #ff00ff)', color: '#fff', textShadow: '0 0 10px #bf5fff' } },
+                          { value: 'hologram', label: '✨ Hologram', style: { background: 'linear-gradient(135deg, #ff3366, #00f5ff, #bf5fff, #00ff88, #ffd700)', color: '#fff' } },
+                          { value: 'plasma', label: '🔥 Plasma', style: { background: 'linear-gradient(135deg, #ff0080, #ff8c00, #ffff00)', color: '#000' } },
+                          { value: 'void', label: '🌌 Void', style: { background: 'linear-gradient(135deg, #0a0a0a, #1a0033, #000080)', color: '#00f5ff' } },
+                          { value: 'cosmic', label: '🚀 Cosmic', style: { background: 'linear-gradient(135deg, #ff006e, #8338ec, #3a86ff)', color: '#fff' } },
                         ].map(g => (
                           <button key={g.value} type="button"
                             onClick={() => setProfileExtra(prev => ({ ...prev, name_glow: g.value }))}
@@ -1406,6 +1412,28 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
                 </div>
               )}
             </div>
+
+            {/* PRO Animated Backgrounds */}
+            {(currentUser.isPro || currentUser.role === 'admin' || TEAM_MEMBERS.includes(currentUser.username)) && (
+              <div>
+                <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,215,0,0.7)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '10px', textTransform: 'uppercase' }}>✨ PRO Animated Backgrounds</label>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  {[
+                    { value: 'animated-neon-grid', label: '⚡ Neon Grid', style: { background: 'repeating-linear-gradient(0deg, rgba(0,245,255,0.1) 0px, rgba(0,245,255,0.1) 1px, transparent 1px, transparent 2px), repeating-linear-gradient(90deg, rgba(0,245,255,0.1) 0px, rgba(0,245,255,0.1) 1px, transparent 1px, transparent 2px)', color: '#00f5ff', animation: 'pulse 3s ease-in-out infinite' } },
+                    { value: 'animated-gradient-shift', label: '🌈 Gradient Shift', style: { background: 'linear-gradient(135deg, rgba(255,51,102,0.15), rgba(255,153,0,0.15), rgba(0,245,255,0.15), rgba(191,95,255,0.15))', color: '#fff', animation: 'pulse 4s ease-in-out infinite' } },
+                    { value: 'animated-waves', label: '🌊 Waves', style: { background: 'linear-gradient(180deg, rgba(0,245,255,0.12) 0%, transparent 50%, rgba(191,95,255,0.12) 100%)', color: '#00f5ff', animation: 'pulse 3s ease-in-out infinite' } },
+                    { value: 'animated-particles', label: '✨ Particles', style: { background: 'radial-gradient(circle at 20% 50%, rgba(0,245,255,0.1) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(191,95,255,0.1) 0%, transparent 50%)', color: '#bf5fff', animation: 'pulse 4s ease-in-out infinite' } },
+                    { value: 'animated-aurora', label: '🌌 Aurora', style: { background: 'linear-gradient(135deg, rgba(0,255,136,0.12), rgba(0,245,255,0.12), rgba(191,95,255,0.12))', color: '#00ff88', animation: 'pulse 5s ease-in-out infinite' } },
+                    { value: 'animated-plasma', label: '🔥 Plasma', style: { background: 'linear-gradient(135deg, rgba(255,0,128,0.15), rgba(255,128,0,0.15), rgba(255,215,0,0.15))', color: '#ff8000', animation: 'pulse 3s ease-in-out infinite' } },
+                  ].map(b => (
+                    <button key={b.value} type="button" onClick={() => setProfileExtra(prev => ({ ...prev, profile_bg: b.value }))}
+                      style={{ ...b.style, border: `2px solid ${profileExtra.profile_bg === b.value ? '#fff' : 'transparent'}`, borderRadius: '20px', padding: '4px 12px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-head)' }}>
+                      {b.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Avatar border picker */}
             <div>

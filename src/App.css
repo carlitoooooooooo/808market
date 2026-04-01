@@ -3967,3 +3967,43 @@ html.party-mode .auth-submit {
     width: 100%;
   }
 }
+
+/* PRO Animated Background Styles */
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1.2;
+  }
+}
+
+.profile-bg-animated-neon-grid {
+  background: repeating-linear-gradient(0deg, rgba(0,245,255,0.1) 0px, rgba(0,245,255,0.1) 1px, transparent 1px, transparent 2px), repeating-linear-gradient(90deg, rgba(0,245,255,0.1) 0px, rgba(0,245,255,0.1) 1px, transparent 1px, transparent 2px) !important;
+  animation: pulseGlow 3s ease-in-out infinite;
+}
+
+.profile-bg-animated-gradient-shift {
+  background: linear-gradient(135deg, rgba(255,51,102,0.15), rgba(255,153,0,0.15), rgba(0,245,255,0.15), rgba(191,95,255,0.15)) !important;
+  animation: pulseGlow 4s ease-in-out infinite;
+}
+
+.profile-bg-animated-waves {
+  background: linear-gradient(180deg, rgba(0,245,255,0.12) 0%, transparent 50%, rgba(191,95,255,0.12) 100%) !important;
+  animation: pulseGlow 3s ease-in-out infinite;
+}
+
+.profile-bg-animated-particles {
+  background: radial-gradient(circle at 20% 50%, rgba(0,245,255,0.1) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(191,95,255,0.1) 0%, transparent 50%) !important;
+  animation: pulseGlow 4s ease-in-out infinite;
+}
+
+.profile-bg-animated-aurora {
+  background: linear-gradient(135deg, rgba(0,255,136,0.12), rgba(0,245,255,0.12), rgba(191,95,255,0.12)) !important;
+  animation: pulseGlow 5s ease-in-out infinite;
+}
+
+.profile-bg-animated-plasma {
+  background: linear-gradient(135deg, rgba(255,0,128,0.15), rgba(255,128,0,0.15), rgba(255,215,0,0.15)) !important;
+  animation: pulseGlow 3s ease-in-out infinite;
+}

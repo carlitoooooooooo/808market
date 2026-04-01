@@ -68,9 +68,9 @@ export default function LeaderboardPage({ tracks, onVote, userVotes, onViewUser,
   async function loadProducers() {
     setProducersLoading(true);
     try {
-      // Fetch all tracks to group by producer (include listedAt for time filtering)
+      // Fetch all tracks to group by producer (fetch all fields to get date info)
       const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/tracks?select=uploaded_by_username,cops,listedAt,created_at&uploaded_by_username=not.is.null`,
+        `${SUPABASE_URL}/rest/v1/tracks?select=*&uploaded_by_username=not.is.null`,
         { headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` } }
       );
       const data = await res.json();
@@ -135,7 +135,7 @@ export default function LeaderboardPage({ tracks, onVote, userVotes, onViewUser,
 
   // Filter producers by time range
   const filteredProducers = producers.map(p => {
-    if (timeRange === 'all') return p;
+    if (timeRange === 'all') return { ...p, displayLikes: p.totalLikes };
     
     // For time-based filtering, recalculate likes from tracks within date range
     const now = new Date();
@@ -143,7 +143,11 @@ export default function LeaderboardPage({ tracks, onVote, userVotes, onViewUser,
     
     if (Array.isArray(p.tracks)) {
       p.tracks.forEach(t => {
-        const listedDate = new Date(t.listedAt || t.created_at || new Date());
+        // Try multiple field names for date
+        let trackDate = t.listed_at || t.listedAt || t.created_at || t.createdAt;
+        if (!trackDate) return;
+        
+        const listedDate = new Date(trackDate);
         const daysOld = (now - listedDate) / (1000 * 60 * 60 * 24);
         
         if (timeRange === 'week' && daysOld <= 7) {
@@ -161,8 +165,8 @@ export default function LeaderboardPage({ tracks, onVote, userVotes, onViewUser,
   const sortedProducers = [...filteredProducers]
     .filter(p => timeRange === 'all' || (p.displayLikes > 0))
     .sort((a, b) => {
-      const likesA = timeRange === 'all' ? a.totalLikes : (a.displayLikes || 0);
-      const likesB = timeRange === 'all' ? b.totalLikes : (b.displayLikes || 0);
+      const likesA = a.displayLikes || 0;
+      const likesB = b.displayLikes || 0;
       return likesB - likesA;
     });
 

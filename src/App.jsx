@@ -167,6 +167,7 @@ export default function App() {
     }
   });
   const [showOnboarding, setShowOnboarding] = useState(false); // Show onboarding modal
+  const [onboardingStep, setOnboardingStep] = useState(1); // Track current onboarding step
   const toastTimer = useRef(null);
   const notifTimer = useRef(null);
   const startOverRef = useRef(false); // Flag to bypass queue rebuild during reset
@@ -739,14 +740,17 @@ export default function App() {
       {/* Onboarding Modal */}
       {showOnboarding && (
         <OnboardingModal
+          onStepChange={setOnboardingStep}
           onComplete={() => {
             setShowOnboarding(false);
+            setOnboardingStep(1);
             if (currentUser?.username) {
               localStorage.setItem(`onboarding_completed_${currentUser.username}`, '1');
             }
           }}
           onSkip={() => {
             setShowOnboarding(false);
+            setOnboardingStep(1);
             if (currentUser?.username) {
               localStorage.setItem(`onboarding_completed_${currentUser.username}`, '1');
             }
@@ -775,6 +779,82 @@ export default function App() {
       >
         📖 ONBOARDING
       </button>
+
+      {/* Onboarding Highlights */}
+      {showOnboarding && (
+        <>
+          {/* Step 3: Highlight "For You" button */}
+          {onboardingStep === 3 && (
+            <div style={{
+              position: 'fixed',
+              top: '70px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: '300px',
+              height: '50px',
+              border: '3px solid #00f5ff',
+              borderRadius: '12px',
+              boxShadow: '0 0 30px rgba(0, 245, 255, 0.6)',
+              pointerEvents: 'none',
+              zIndex: 9998,
+              animation: 'pulse-highlight 1.5s ease-in-out infinite',
+            }} />
+          )}
+          
+          {/* Step 4: Highlight leaderboard icon in nav */}
+          {onboardingStep === 4 && (
+            <div style={{
+              position: 'fixed',
+              top: '15px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: '120px',
+              height: '40px',
+              border: '3px solid #ff3366',
+              borderRadius: '12px',
+              boxShadow: '0 0 30px rgba(255, 51, 102, 0.6)',
+              pointerEvents: 'none',
+              zIndex: 9998,
+              animation: 'pulse-highlight 1.5s ease-in-out infinite',
+            }} />
+          )}
+          
+          {/* Step 5: Highlight "Create" tab */}
+          {onboardingStep === 5 && (
+            <div style={{
+              position: 'fixed',
+              bottom: '20px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: '120px',
+              height: '60px',
+              border: '3px solid #00ff88',
+              borderRadius: '12px',
+              boxShadow: '0 0 30px rgba(0, 255, 136, 0.6)',
+              pointerEvents: 'none',
+              zIndex: 9998,
+              animation: 'pulse-highlight 1.5s ease-in-out infinite',
+            }} />
+          )}
+          
+          {/* Step 6: Highlight settings gear */}
+          {onboardingStep === 6 && (
+            <div style={{
+              position: 'fixed',
+              top: '15px',
+              right: '80px',
+              width: '50px',
+              height: '50px',
+              border: '3px solid #bf5fff',
+              borderRadius: '12px',
+              boxShadow: '0 0 30px rgba(191, 95, 255, 0.6)',
+              pointerEvents: 'none',
+              zIndex: 9998,
+              animation: 'pulse-highlight 1.5s ease-in-out infinite',
+            }} />
+          )}
+        </>
+      )}
 
       <header className="app-header">
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>

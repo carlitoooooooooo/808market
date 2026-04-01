@@ -1361,7 +1361,7 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
                         {[
                           { value: 'crown', label: '👑 Crown', style: { background: 'linear-gradient(135deg, #ffd700, #ffed4e)', color: '#000' } },
                           { value: 'neon', label: '⚡ Neon', style: { background: 'linear-gradient(135deg, #00ff88, #00f5ff, #bf5fff)', color: '#000' } },
-                          { value: 'hologram', label: '✨ Hologram', style: { background: 'linear-gradient(135deg, #ff3366, #00f5ff, #bf5fff, #00ff88)', color: '#fff' } },
+                          { value: 'eclipse', label: '🌑 Eclipse', style: { background: 'linear-gradient(135deg, #1a1a1a, #ff3366, #1a1a1a)', color: '#ff3366' } },
                           { value: 'wave', label: '🌊 Wave', style: { background: 'linear-gradient(135deg, #00f5ff, #bf5fff, #00ff88)', color: '#000' } },
                           { value: 'shock', label: '⚡ Shock', style: { background: '#00f5ff', color: '#000' } },
                           { value: 'mystic', label: '🔮 Mystic', style: { background: 'linear-gradient(135deg, #6a0dad, #9b59b6)', color: '#fff' } },

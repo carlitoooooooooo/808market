@@ -819,15 +819,14 @@ export default function App() {
             }} />
           )}
           
-          {/* Step 5: Highlight "Create" tab */}
+          {/* Step 5: Highlight "LIST BEAT" button */}
           {onboardingStep === 5 && (
             <div style={{
               position: 'fixed',
-              bottom: '20px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: '120px',
-              height: '60px',
+              top: '15px',
+              right: '15px',
+              width: '140px',
+              height: '40px',
               border: '3px solid #00ff88',
               borderRadius: '12px',
               boxShadow: '0 0 30px rgba(0, 255, 136, 0.6)',
@@ -837,17 +836,35 @@ export default function App() {
             }} />
           )}
           
-          {/* Step 6: Highlight settings gear */}
+          {/* Step 6: Highlight "Create" tab in bottom nav */}
           {onboardingStep === 6 && (
+            <div style={{
+              position: 'fixed',
+              bottom: '20px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: '120px',
+              height: '60px',
+              border: '3px solid #bf5fff',
+              borderRadius: '12px',
+              boxShadow: '0 0 30px rgba(191, 95, 255, 0.6)',
+              pointerEvents: 'none',
+              zIndex: 9998,
+              animation: 'pulse-highlight 1.5s ease-in-out infinite',
+            }} />
+          )}
+          
+          {/* Step 7: Highlight settings gear */}
+          {onboardingStep === 7 && (
             <div style={{
               position: 'fixed',
               top: '15px',
               right: '80px',
               width: '50px',
               height: '50px',
-              border: '3px solid #bf5fff',
+              border: '3px solid #ff9500',
               borderRadius: '12px',
-              boxShadow: '0 0 30px rgba(191, 95, 255, 0.6)',
+              boxShadow: '0 0 30px rgba(255, 149, 0, 0.6)',
               pointerEvents: 'none',
               zIndex: 9998,
               animation: 'pulse-highlight 1.5s ease-in-out infinite',

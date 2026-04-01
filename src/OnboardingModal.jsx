@@ -36,10 +36,16 @@ export default function OnboardingModal({ onComplete, onSkip, onStepChange }) {
       image: "🏆",
     },
     {
-      title: "Upload & Sell Your Beats 🎹",
-      content: "Click the 🏪 Create tab to upload your beats. Set the price, choose your license (exclusive, lease, or free), and start getting paid. 90% of sales go directly to you.",
+      title: "List Your Beats 🎤",
+      content: "Click the '+ LIST BEAT' button to upload and sell your tracks. Set the price, choose your license (exclusive, lease, or free), add tags and BPM. Make your beat discoverable in seconds.",
+      highlight: "listbeat",
+      image: "📢",
+    },
+    {
+      title: "Customize Your Storefront 🏪",
+      content: "Create your own producer storefront! Sell individual beats, features, open verses, and drumkits. Customize your branding, layout, and pricing. Build your complete music business.",
       highlight: "create",
-      image: "📤",
+      image: "🛍️",
     },
     {
       title: "Connect Stripe to Get Paid 💳",
@@ -86,7 +92,7 @@ export default function OnboardingModal({ onComplete, onSkip, onStepChange }) {
             />
           </div>
           <div className="onboarding-progress-text">
-            Step {step} of {steps.length}
+            Step {step} of 8
           </div>
         </div>
 

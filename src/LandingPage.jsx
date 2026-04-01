@@ -11,7 +11,7 @@ export default function LandingPage({ onGetStarted, onBrowseAsGuest }) {
   const playerRef = useRef(null);
 
   useEffect(() => {
-    fetch(`${SUPABASE_URL}/rest/v1/tracks?order=listed_at.desc&limit=3`, {
+    fetch(`${SUPABASE_URL}/rest/v1/tracks?order=listed_at.desc&limit=6`, {
       headers: { apikey: ANON, Authorization: `Bearer ${ANON}` }
     }).then(r => r.json()).then(d => { if (Array.isArray(d)) setBeats(d); }).catch(() => {});
     return () => { if (playerRef.current) { playerRef.current.destroy(); playerRef.current = null; } };
@@ -29,141 +29,448 @@ export default function LandingPage({ onGetStarted, onBrowseAsGuest }) {
   }
 
   return (
-    <div style={{ minHeight: '100vh', height: '100%', background: '#000', color: '#fff', fontFamily: "'Inter', sans-serif", overflowY: 'auto', position: 'fixed', inset: 0, zIndex: 2 }}>
+    <div style={{
+      minHeight: '100vh',
+      height: '100%',
+      background: '#000',
+      color: '#fff',
+      fontFamily: "'Inter', sans-serif",
+      overflowY: 'auto',
+      position: 'fixed',
+      inset: 0,
+      zIndex: 2
+    }}>
 
-      {/* Gradient bg */}
-      <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
-        background: 'radial-gradient(ellipse 80vw 60vh at 20% 20%, rgba(0,245,255,0.07) 0%, transparent 60%), radial-gradient(ellipse 70vw 80vh at 80% 80%, rgba(191,95,255,0.07) 0%, transparent 60%)',
+      {/* Y2K Wild Gradient Background */}
+      <div style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 0,
+        pointerEvents: 'none',
+        background: `
+          radial-gradient(ellipse 120vw 100vh at 10% 10%, rgba(255, 0, 127, 0.15) 0%, transparent 50%),
+          radial-gradient(ellipse 100vw 90vh at 90% 20%, rgba(0, 245, 255, 0.12) 0%, transparent 50%),
+          radial-gradient(ellipse 80vw 100vh at 50% 100%, rgba(191, 95, 255, 0.1) 0%, transparent 60%)
+        `
       }} />
 
-      <div style={{ position: 'relative', zIndex: 1, maxWidth: '480px', margin: '0 auto', padding: '0 20px 60px' }}>
+      {/* Animated grid overlay */}
+      <div style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 0,
+        pointerEvents: 'none',
+        backgroundImage: `
+          repeating-linear-gradient(0deg, transparent, transparent 100px, rgba(0, 245, 255, 0.03) 100px, rgba(0, 245, 255, 0.03) 101px),
+          repeating-linear-gradient(90deg, transparent, transparent 100px, rgba(191, 95, 255, 0.02) 100px, rgba(191, 95, 255, 0.02) 101px)
+        `,
+        animation: 'slide 20s linear infinite'
+      }}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 0,
+        pointerEvents: 'none',
+        backgroundImage: `
+          repeating-linear-gradient(0deg, transparent, transparent 100px, rgba(0, 245, 255, 0.03) 100px, rgba(0, 245, 255, 0.03) 101px),
+          repeating-linear-gradient(90deg, transparent, transparent 100px, rgba(191, 95, 255, 0.02) 100px, rgba(191, 95, 255, 0.02) 101px)
+        `
+      }} />
 
-        {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 0 0' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <style>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-20px) rotate(2deg); }
+        }
+        @keyframes pulse-glow {
+          0%, 100% { filter: drop-shadow(0 0 10px rgba(0, 245, 255, 0.5)); }
+          50% { filter: drop-shadow(0 0 20px rgba(191, 95, 255, 0.6)); }
+        }
+        @keyframes spin-slow {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
+
+      <div style={{ position: 'relative', zIndex: 1, padding: '0 20px 60px', display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+
+        {/* HEADER */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: '20px 0',
+          borderBottom: '1px solid rgba(0, 245, 255, 0.1)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <Logo />
-            <span style={{ fontSize: '10px', border: '1px solid rgba(0,245,255,0.4)', color: '#00f5ff', borderRadius: '20px', padding: '2px 7px', fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600 }}>BETA</span>
+            <span style={{
+              fontSize: '11px',
+              background: 'linear-gradient(135deg, #ff0080, #00f5ff)',
+              color: '#fff',
+              borderRadius: '4px',
+              padding: '4px 10px',
+              fontFamily: "'Space Grotesk', sans-serif",
+              fontWeight: 700,
+              letterSpacing: '1px',
+              textTransform: 'uppercase'
+            }}>
+              BETA
+            </span>
           </div>
-          <button onClick={onGetStarted} style={{ background: 'none', border: '1px solid rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.7)', borderRadius: '20px', padding: '6px 14px', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>
-            Sign In
+          <button onClick={onGetStarted} style={{
+            background: 'linear-gradient(135deg, #ff0080, #00f5ff)',
+            border: 'none',
+            color: '#000',
+            borderRadius: '8px',
+            padding: '10px 20px',
+            fontSize: '13px',
+            fontWeight: 700,
+            cursor: 'pointer',
+            fontFamily: "'Space Grotesk', sans-serif",
+            letterSpacing: '0.5px'
+          }}>
+            SIGN IN →
           </button>
         </div>
 
-        {/* Hero */}
-        <div style={{ padding: '48px 0 40px' }}>
-          <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 'clamp(36px, 10vw, 52px)', lineHeight: 1.15, marginBottom: '20px', letterSpacing: '-1.5px' }}>
-            The Beat Marketplace<br />
-            <span style={{ background: 'linear-gradient(135deg, #00f5ff, #bf5fff)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Built Different.</span>
-          </h1>
-          <p style={{ fontSize: '16px', color: 'rgba(255,255,255,0.55)', lineHeight: 1.6, marginBottom: '32px', maxWidth: '340px' }}>
-            The beat marketplace built for producers and artists who move different.
-          </p>
-          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-            <button onClick={onGetStarted} style={{
-              background: 'linear-gradient(135deg, #00f5ff, #bf5fff)', border: 'none', color: '#000',
-              borderRadius: '50px', padding: '14px 28px', fontSize: '15px', fontWeight: 700,
-              cursor: 'pointer', fontFamily: "'Space Grotesk', sans-serif",
-            }}>Get Started →</button>
-            <button onClick={onBrowseAsGuest} style={{
-              background: 'transparent', border: '1px solid rgba(255,255,255,0.25)', color: '#fff',
-              borderRadius: '50px', padding: '14px 24px', fontSize: '15px',
-              cursor: 'pointer', fontFamily: "'Inter', sans-serif",
-            }}>Browse as Guest</button>
+        {/* HERO SECTION */}
+        <div style={{
+          padding: '60px 0 50px',
+          maxWidth: '1200px',
+          margin: '0 auto',
+          width: '100%'
+        }}>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            gap: '40px',
+            alignItems: 'center'
+          }}>
+            {/* Left: Hero Text */}
+            <div>
+              <h1 style={{
+                fontFamily: "'Space Grotesk', sans-serif",
+                fontWeight: 900,
+                fontSize: 'clamp(40px, 8vw, 72px)',
+                lineHeight: 1.1,
+                marginBottom: '24px',
+                letterSpacing: '-2px',
+                textTransform: 'uppercase',
+                background: `
+                  linear-gradient(135deg,
+                    #ff0080 0%,
+                    #00f5ff 25%,
+                    #bf5fff 50%,
+                    #ff0080 100%
+                  )
+                `,
+                backgroundSize: '200% auto',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text'
+              }}>
+                THE BEAT<br />
+                MARKETPLACE<br />
+                OF CHAOS
+              </h1>
+              <p style={{
+                fontSize: '18px',
+                color: 'rgba(255,255,255,0.7)',
+                lineHeight: 1.7,
+                marginBottom: '32px',
+                maxWidth: '400px',
+                fontStyle: 'italic'
+              }}>
+                💿 Discover beats. 🎵 Cop heat. 🚀 Get paid. <br />
+                No middlemen. Just pure audio art.
+              </p>
+              <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+                <button onClick={onGetStarted} style={{
+                  background: 'linear-gradient(135deg, #ff0080, #00f5ff)',
+                  border: 'none',
+                  color: '#000',
+                  borderRadius: '12px',
+                  padding: '16px 32px',
+                  fontSize: '16px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  fontFamily: "'Space Grotesk', sans-serif",
+                  letterSpacing: '1px',
+                  textTransform: 'uppercase',
+                  boxShadow: '0 0 30px rgba(255, 0, 128, 0.4)',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={e => e.target.style.transform = 'scale(1.05)'}
+                onMouseLeave={e => e.target.style.transform = 'scale(1)'}
+                >
+                  GET IN →
+                </button>
+                <button onClick={onBrowseAsGuest} style={{
+                  background: 'transparent',
+                  border: '2px solid #00f5ff',
+                  color: '#00f5ff',
+                  borderRadius: '12px',
+                  padding: '14px 28px',
+                  fontSize: '16px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  fontFamily: "'Space Grotesk', sans-serif",
+                  letterSpacing: '1px',
+                  textTransform: 'uppercase',
+                  boxShadow: '0 0 20px rgba(0, 245, 255, 0.2)',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={e => {
+                  e.target.style.background = 'rgba(0, 245, 255, 0.1)';
+                  e.target.style.boxShadow = '0 0 30px rgba(0, 245, 255, 0.4)';
+                }}
+                onMouseLeave={e => {
+                  e.target.style.background = 'transparent';
+                  e.target.style.boxShadow = '0 0 20px rgba(0, 245, 255, 0.2)';
+                }}
+                >
+                  LURK →
+                </button>
+              </div>
+
+              {/* Stats */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, 1fr)',
+                gap: '20px',
+                marginTop: '48px',
+                paddingTop: '32px',
+                borderTop: '1px solid rgba(0, 245, 255, 0.1)'
+              }}>
+                {[
+                  { label: 'Beats', value: '🎵' },
+                  { label: 'Artists', value: '🎤' },
+                  { label: 'Sold', value: '💰' }
+                ].map((stat, i) => (
+                  <div key={i}>
+                    <div style={{ fontSize: '28px', marginBottom: '8px' }}>{stat.value}</div>
+                    <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '1px' }}>{stat.label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Right: Featured Beats Grid */}
+            {beats.length > 0 && (
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, 1fr)',
+                gap: '16px'
+              }}>
+                {beats.slice(0, 4).map((beat, idx) => (
+                  <div
+                    key={beat.id}
+                    onClick={() => handlePlay(beat)}
+                    style={{
+                      background: `linear-gradient(135deg, rgba(0, 245, 255, ${0.05 + idx * 0.05}), rgba(191, 95, 255, ${0.05 + idx * 0.05}))`,
+                      border: `2px solid ${playingId === beat.id ? '#00f5ff' : 'rgba(0, 245, 255, 0.2)'}`,
+                      borderRadius: '12px',
+                      padding: '16px',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.borderColor = '#00f5ff';
+                      e.currentTarget.style.boxShadow = '0 0 20px rgba(0, 245, 255, 0.3)';
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.borderColor = playingId === beat.id ? '#00f5ff' : 'rgba(0, 245, 255, 0.2)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
+                  >
+                    {beat.cover_url && (
+                      <div style={{
+                        width: '100%',
+                        paddingBottom: '100%',
+                        background: `url(${beat.cover_url}) center/cover`,
+                        borderRadius: '8px',
+                        marginBottom: '12px'
+                      }} />
+                    )}
+                    <div style={{ fontSize: '13px', fontWeight: 700, color: '#fff' }}>{beat.title}</div>
+                    <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', marginTop: '4px' }}>@{beat.uploaded_by_username}</div>
+                    <div style={{
+                      fontSize: '11px',
+                      color: '#00f5ff',
+                      marginTop: '8px',
+                      fontWeight: 700,
+                      textTransform: 'uppercase'
+                    }}>
+                      {playingId === beat.id ? '⏸ PAUSE' : '▶ PLAY'}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* How it works */}
-        <div style={{ marginBottom: '48px' }}>
-          <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: '20px', marginBottom: '24px', color: 'rgba(255,255,255,0.9)' }}>How it works</h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
+        {/* HOW IT WORKS */}
+        <div style={{
+          maxWidth: '1200px',
+          margin: '0 auto',
+          width: '100%',
+          padding: '60px 0'
+        }}>
+          <h2 style={{
+            fontFamily: "'Space Grotesk', sans-serif",
+            fontWeight: 900,
+            fontSize: 'clamp(32px, 6vw, 48px)',
+            marginBottom: '40px',
+            textTransform: 'uppercase',
+            letterSpacing: '-1px'
+          }}>
+            How This<br />
+            <span style={{
+              background: 'linear-gradient(135deg, #bf5fff, #ff0080)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text'
+            }}>
+              Crazy Thing Works
+            </span>
+          </h2>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+            gap: '24px'
+          }}>
             {[
-              { icon: '🎵', title: 'Producers upload beats', desc: 'Set your price, license type, and let the world hear your work.' },
-              { icon: '👆', title: 'Swipe to discover', desc: 'Hear 15-second previews. Like what you hear, cop what you love.' },
-              { icon: '🛒', title: 'Cop the ones you love', desc: 'Buy direct. No middlemen. Producers get paid.' },
+              { icon: '🎹', num: '01', title: 'Upload Heat', desc: 'Producers drop beats. Set price, genre, vibe. Own your shit.' },
+              { icon: '👆', num: '02', title: 'Swipe Raw', desc: '15-second previews. Cop the ones that hit different. No BS.' },
+              { icon: '💳', num: '03', title: 'Pay Direct', desc: 'Checkout. No middlemen. 85% straight to producer bank.' },
+              { icon: '🎧', num: '04', title: 'Own Forever', desc: 'Exclusive lease or unlimited. Download & use yours forever.' },
             ].map((step, i) => (
-              <div key={i} style={{ display: 'flex', gap: '16px', padding: '16px 0', borderBottom: i < 2 ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
-                <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', flexShrink: 0 }}>
-                  {step.icon}
+              <div
+                key={i}
+                style={{
+                  background: `linear-gradient(135deg, rgba(255, 0, 128, 0.05), rgba(0, 245, 255, 0.05))`,
+                  border: '1px solid rgba(0, 245, 255, 0.15)',
+                  borderRadius: '16px',
+                  padding: '32px 24px',
+                  position: 'relative'
+                }}
+              >
+                <div style={{
+                  position: 'absolute',
+                  top: '-15px',
+                  left: '24px',
+                  background: 'linear-gradient(135deg, #ff0080, #00f5ff)',
+                  color: '#000',
+                  width: '50px',
+                  height: '50px',
+                  borderRadius: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '24px',
+                  fontWeight: 700
+                }}>
+                  {step.num}
                 </div>
-                <div>
-                  <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: '15px', marginBottom: '4px' }}>{step.title}</div>
-                  <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', lineHeight: 1.5 }}>{step.desc}</div>
-                </div>
+                <div style={{ fontSize: '32px', marginBottom: '12px', marginTop: '20px' }}>{step.icon}</div>
+                <h3 style={{
+                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontWeight: 700,
+                  fontSize: '18px',
+                  marginBottom: '12px',
+                  textTransform: 'uppercase'
+                }}>
+                  {step.title}
+                </h3>
+                <p style={{
+                  fontSize: '14px',
+                  color: 'rgba(255,255,255,0.6)',
+                  lineHeight: 1.6
+                }}>
+                  {step.desc}
+                </p>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Featured Beats */}
-        {beats.length > 0 && (
-          <div style={{ marginBottom: '48px' }}>
-            <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: '20px', marginBottom: '16px' }}>🔥 Featured Beats</h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {beats.map(beat => {
-                const isFree = !beat.price || beat.price === 0;
-                const isPlaying = playingId === beat.id;
-                return (
-                  <div key={beat.id} style={{
-                    background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
-                    borderRadius: '16px', overflow: 'hidden', display: 'flex', alignItems: 'center', gap: '14px', padding: '12px',
-                  }}>
-                    {/* Cover */}
-                    <div style={{
-                      width: '64px', height: '64px', borderRadius: '10px', flexShrink: 0,
-                      background: beat.cover_url ? `url(${beat.cover_url}) center/cover` : 'rgba(255,255,255,0.08)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      position: 'relative', overflow: 'hidden',
-                    }}>
-                      {!beat.cover_url && <span style={{ fontSize: '24px' }}>🎵</span>}
-                      {beat.audio_url && (
-                        <button onClick={() => handlePlay(beat)} style={{
-                          position: 'absolute', inset: 0, background: isPlaying ? 'rgba(0,245,255,0.3)' : 'rgba(0,0,0,0.5)',
-                          border: 'none', color: '#fff', fontSize: '20px', cursor: 'pointer',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        }}>{isPlaying ? '⏸' : '▶'}</button>
-                      )}
-                    </div>
-
-                    {/* Info */}
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: '14px', marginBottom: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{beat.title}</div>
-                      <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', marginBottom: '6px' }}>by {beat.artist || beat.uploaded_by_username}</div>
-                      <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                        {beat.genre && <span style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)', fontSize: '10px', padding: '2px 8px', borderRadius: '20px' }}>{beat.genre}</span>}
-                        <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: '13px', color: isFree ? '#00f5ff' : '#00ff88' }}>{isFree ? 'FREE' : `$${beat.price}`}</span>
-                      </div>
-                    </div>
-
-                    {/* CTA */}
-                    <button onClick={onGetStarted} style={{
-                      background: 'linear-gradient(135deg, #00f5ff, #bf5fff)', border: 'none', color: '#000',
-                      borderRadius: '30px', padding: '8px 14px', fontSize: '11px', fontWeight: 700,
-                      cursor: 'pointer', fontFamily: "'Space Grotesk', sans-serif", flexShrink: 0,
-                    }}>Cop It</button>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* Footer CTA */}
-        <div style={{ textAlign: 'center', padding: '12px 0 40px' }}>
-          <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '14px', lineHeight: 1.6, marginBottom: '24px' }}>
-            Join 808market — the beat marketplace built by producers, for producers.
-          </div>
+        {/* CTA FOOTER */}
+        <div style={{
+          maxWidth: '1200px',
+          margin: '60px auto 0',
+          width: '100%',
+          padding: '60px 0',
+          textAlign: 'center',
+          borderTop: '1px solid rgba(0, 245, 255, 0.1)'
+        }}>
+          <h2 style={{
+            fontFamily: "'Space Grotesk', sans-serif",
+            fontWeight: 900,
+            fontSize: 'clamp(28px, 5vw, 44px)',
+            marginBottom: '24px',
+            textTransform: 'uppercase'
+          }}>
+            Ready to<br />
+            <span style={{
+              background: 'linear-gradient(135deg, #00f5ff, #ff0080, #bf5fff)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text'
+            }}>
+              Move Different?
+            </span>
+          </h2>
+          <p style={{
+            fontSize: '16px',
+            color: 'rgba(255,255,255,0.6)',
+            marginBottom: '32px'
+          }}>
+            Join 1000+ producers & artists building the future.
+          </p>
           <button onClick={onGetStarted} style={{
-            background: 'linear-gradient(135deg, #00f5ff, #bf5fff)', border: 'none', color: '#000',
-            borderRadius: '50px', padding: '16px 40px', fontSize: '16px', fontWeight: 700,
-            cursor: 'pointer', fontFamily: "'Space Grotesk', sans-serif", width: '100%', maxWidth: '320px',
-          }}>Create Free Account →</button>
-          <div style={{ marginTop: '16px' }}>
-            <button onClick={onBrowseAsGuest} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>
-              or browse as guest
-            </button>
-          </div>
+            background: 'linear-gradient(135deg, #ff0080, #00f5ff)',
+            border: 'none',
+            color: '#000',
+            borderRadius: '12px',
+            padding: '18px 36px',
+            fontSize: '16px',
+            fontWeight: 700,
+            cursor: 'pointer',
+            fontFamily: "'Space Grotesk', sans-serif",
+            letterSpacing: '1px',
+            textTransform: 'uppercase',
+            boxShadow: '0 0 30px rgba(255, 0, 128, 0.5)',
+            transition: 'all 0.2s'
+          }}
+          onMouseEnter={e => {
+            e.target.style.transform = 'scale(1.08)';
+            e.target.style.boxShadow = '0 0 50px rgba(255, 0, 128, 0.7)';
+          }}
+          onMouseLeave={e => {
+            e.target.style.transform = 'scale(1)';
+            e.target.style.boxShadow = '0 0 30px rgba(255, 0, 128, 0.5)';
+          }}
+          >
+            SIGN UP NOW ✨
+          </button>
         </div>
 
+        {/* Footer */}
+        <div style={{
+          paddingTop: '40px',
+          marginTop: '40px',
+          borderTop: '1px solid rgba(0, 245, 255, 0.1)',
+          textAlign: 'center',
+          fontSize: '12px',
+          color: 'rgba(255,255,255,0.3)'
+        }}>
+          808market © 2026 • Built for the culture
+        </div>
       </div>
     </div>
   );

@@ -186,36 +186,6 @@ export default function LeaderboardPage({ tracks, onVote, userVotes, onViewUser,
         <p className="page-subtitle">
           {subTab === "beats" ? "Fan Favorites ❤️" : subTab === "storefronts" ? "Active storefronts" : "Most loved right now"}
         </p>
-        
-        {/* Time Range Filter — Beats Only */}
-        {subTab === "beats" && (
-          <div style={{ display: 'flex', gap: '8px', marginTop: '16px', marginBottom: '12px' }}>
-            {[
-              { value: 'all', label: 'All Time' },
-              { value: 'month', label: 'This Month' },
-              { value: 'week', label: 'This Week' },
-            ].map(option => (
-              <button
-                key={option.value}
-                onClick={() => setTimeRange(option.value)}
-                style={{
-                  background: timeRange === option.value ? 'linear-gradient(135deg, #00f5ff, #bf5fff)' : 'rgba(255,255,255,0.06)',
-                  border: timeRange === option.value ? 'none' : '1px solid rgba(255,255,255,0.12)',
-                  color: timeRange === option.value ? '#000' : 'rgba(255,255,255,0.6)',
-                  borderRadius: '20px',
-                  padding: '6px 16px',
-                  fontSize: '12px',
-                  fontWeight: '600',
-                  fontFamily: 'var(--font-head)',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s'
-                }}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-        )}
       </div>
 
       {/* ── DESKTOP: both columns always visible ── */}
@@ -224,6 +194,35 @@ export default function LeaderboardPage({ tracks, onVote, userVotes, onViewUser,
       {/* ── TOP BEATS ── */}
       <div className={`leaderboard-mobile-beats ${subTab !== "beats" ? "leaderboard-mobile-hidden" : ""}`}>
         <div className="leaderboard-col-header">🔥 Top Beats — Fan Favorites ❤️</div>
+        
+        {/* Time Range Filter */}
+        <div style={{ display: 'flex', gap: '8px', padding: '0 12px 12px', flexWrap: 'wrap' }}>
+          {[
+            { value: 'all', label: 'All Time' },
+            { value: 'month', label: 'This Month' },
+            { value: 'week', label: 'This Week' },
+          ].map(option => (
+            <button
+              key={option.value}
+              onClick={() => setTimeRange(option.value)}
+              style={{
+                background: timeRange === option.value ? 'linear-gradient(135deg, #00f5ff, #bf5fff)' : 'rgba(255,255,255,0.06)',
+                border: timeRange === option.value ? 'none' : '1px solid rgba(255,255,255,0.12)',
+                color: timeRange === option.value ? '#000' : 'rgba(255,255,255,0.6)',
+                borderRadius: '20px',
+                padding: '6px 14px',
+                fontSize: '12px',
+                fontWeight: '600',
+                fontFamily: 'var(--font-head)',
+                cursor: 'pointer',
+                transition: 'all 0.15s'
+              }}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+        
         <div className="leaderboard-list">
           {sorted.slice(0, beatsLimit).map((track, idx) => {
             const rank = idx + 1;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useAuth, AVATAR_COLORS } from "./AuthContext.jsx";
-import { BADGES } from "./badges.js";
+import { PRODUCER_BADGES, getEarnedBadges } from "./producerBadges.js";
 // MOCK_USERS removed — using real DB data for taste match
 import SnippetPicker from "./SnippetPicker.jsx";
 
@@ -758,25 +758,57 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
       {/* Taste tags */}
 
 
-      {/* Badges */}
-      <div className="profile-section">
-        <div className="section-title">BADGES</div>
-        <div className="badges-grid">
-          {BADGES.map((badge) => {
-            const earned = badge.check(badgeStats);
-            return (
-              <div
-                key={badge.id}
-                className={`badge-chip ${earned ? "badge-chip--earned" : "badge-chip--locked"}`}
-                title={badge.desc}
-              >
-                <span className="badge-emoji">{earned ? badge.emoji : "🔒"}</span>
-                <span className="badge-label">{badge.label}</span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+      {/* Producer Badges */}
+      {(() => {
+        const totalCops = myUploads.reduce((s, t) => s + (t.cops || 0), 0);
+        const totalSales = myUploads.reduce((s, t) => s + (t.sales || 0), 0);
+        const salesLast30 = myUploads.reduce((s, t) => {
+          const daysOld = (new Date() - new Date(t.listed_at || new Date())) / (1000 * 60 * 60 * 24);
+          return s + (daysOld <= 30 ? (t.sales || 0) : 0);
+        }, 0);
+        
+        const badgeStats = {
+          totalCops,
+          totalSales,
+          salesLast30,
+          isVerified: currentUser?.is_verified || false
+        };
+        
+        const earnedBadges = getEarnedBadges(badgeStats);
+        
+        if (earnedBadges.length === 0) return null;
+        
+        return (
+          <div className="profile-section">
+            <div className="section-title">🎖️ BADGES</div>
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+              {earnedBadges.map((badge) => (
+                <div
+                  key={badge.id}
+                  title={badge.description}
+                  style={{
+                    background: `rgba(255,255,255,0.06)`,
+                    border: `1px solid ${badge.color}`,
+                    borderRadius: '20px',
+                    padding: '8px 14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontSize: '13px',
+                    fontWeight: '600',
+                    fontFamily: 'var(--font-head)',
+                    color: badge.color,
+                    cursor: 'help'
+                  }}
+                >
+                  <span>{badge.emoji}</span>
+                  <span>{badge.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* My Purchases */}
       <div className="profile-section">

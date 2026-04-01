@@ -34,7 +34,7 @@ export default function LandingPage({ onGetStarted, onBrowseAsGuest }) {
       height: '100%',
       background: '#000',
       color: '#fff',
-      fontFamily: "'Outfit', sans-serif",
+      fontFamily: "'Inter', sans-serif",
       overflowY: 'auto',
       position: 'fixed',
       inset: 0,
@@ -46,7 +46,7 @@ export default function LandingPage({ onGetStarted, onBrowseAsGuest }) {
         position: 'fixed',
         inset: 0,
         zIndex: 0,
-        poOutfitEvents: 'none',
+        poInterEvents: 'none',
         background: `
           radial-gradient(ellipse 120vw 100vh at 10% 10%, rgba(255, 0, 127, 0.15) 0%, transparent 50%),
           radial-gradient(ellipse 100vw 90vh at 90% 20%, rgba(0, 245, 255, 0.12) 0%, transparent 50%),
@@ -59,7 +59,7 @@ export default function LandingPage({ onGetStarted, onBrowseAsGuest }) {
         position: 'fixed',
         inset: 0,
         zIndex: 0,
-        poOutfitEvents: 'none',
+        poInterEvents: 'none',
         backgroundImage: `
           repeating-linear-gradient(0deg, transparent, transparent 100px, rgba(0, 245, 255, 0.03) 100px, rgba(0, 245, 255, 0.03) 101px),
           repeating-linear-gradient(90deg, transparent, transparent 100px, rgba(191, 95, 255, 0.02) 100px, rgba(191, 95, 255, 0.02) 101px)
@@ -70,7 +70,7 @@ export default function LandingPage({ onGetStarted, onBrowseAsGuest }) {
         position: 'fixed',
         inset: 0,
         zIndex: 0,
-        poOutfitEvents: 'none',
+        poInterEvents: 'none',
         backgroundImage: `
           repeating-linear-gradient(0deg, transparent, transparent 100px, rgba(0, 245, 255, 0.03) 100px, rgba(0, 245, 255, 0.03) 101px),
           repeating-linear-gradient(90deg, transparent, transparent 100px, rgba(191, 95, 255, 0.02) 100px, rgba(191, 95, 255, 0.02) 101px)
@@ -110,7 +110,7 @@ export default function LandingPage({ onGetStarted, onBrowseAsGuest }) {
               color: '#fff',
               borderRadius: '4px',
               padding: '4px 10px',
-              fontFamily: "'Orbitron', sans-serif",
+              fontFamily: "'Space Grotesk', sans-serif",
               fontWeight: 700,
               letterSpacing: '1px',
               textTransform: 'uppercase'
@@ -126,8 +126,8 @@ export default function LandingPage({ onGetStarted, onBrowseAsGuest }) {
             padding: '10px 20px',
             fontSize: '13px',
             fontWeight: 700,
-            cursor: 'poOutfit',
-            fontFamily: "'Orbitron', sans-serif",
+            cursor: 'poInter',
+            fontFamily: "'Space Grotesk', sans-serif",
             letterSpacing: '0.5px'
           }}>
             SIGN IN →
@@ -150,7 +150,7 @@ export default function LandingPage({ onGetStarted, onBrowseAsGuest }) {
             {/* Left: Hero Text */}
             <div>
               <h1 style={{
-                fontFamily: "'Orbitron', sans-serif",
+                fontFamily: "'Space Grotesk', sans-serif",
                 fontWeight: 900,
                 fontSize: 'clamp(40px, 8vw, 72px)',
                 lineHeight: 1.1,
@@ -194,8 +194,8 @@ export default function LandingPage({ onGetStarted, onBrowseAsGuest }) {
                   padding: '16px 32px',
                   fontSize: '16px',
                   fontWeight: 700,
-                  cursor: 'poOutfit',
-                  fontFamily: "'Orbitron', sans-serif",
+                  cursor: 'poInter',
+                  fontFamily: "'Space Grotesk', sans-serif",
                   letterSpacing: '1px',
                   textTransform: 'uppercase',
                   boxShadow: '0 0 30px rgba(255, 0, 128, 0.4)',
@@ -214,8 +214,8 @@ export default function LandingPage({ onGetStarted, onBrowseAsGuest }) {
                   padding: '14px 28px',
                   fontSize: '16px',
                   fontWeight: 700,
-                  cursor: 'poOutfit',
-                  fontFamily: "'Orbitron', sans-serif",
+                  cursor: 'poInter',
+                  fontFamily: "'Space Grotesk', sans-serif",
                   letterSpacing: '1px',
                   textTransform: 'uppercase',
                   boxShadow: '0 0 20px rgba(0, 245, 255, 0.2)',
@@ -272,7 +272,7 @@ export default function LandingPage({ onGetStarted, onBrowseAsGuest }) {
                       border: `2px solid ${playingId === beat.id ? '#00f5ff' : 'rgba(0, 245, 255, 0.2)'}`,
                       borderRadius: '12px',
                       padding: '16px',
-                      cursor: 'poOutfit',
+                      cursor: 'poInter',
                       transition: 'all 0.2s',
                       position: 'relative',
                       overflow: 'hidden'
@@ -321,7 +321,7 @@ export default function LandingPage({ onGetStarted, onBrowseAsGuest }) {
           padding: '60px 0'
         }}>
           <h2 style={{
-            fontFamily: "'Orbitron', sans-serif",
+            fontFamily: "'Space Grotesk', sans-serif",
             fontWeight: 900,
             fontSize: 'clamp(32px, 6vw, 48px)',
             marginBottom: '40px',
@@ -379,7 +379,7 @@ export default function LandingPage({ onGetStarted, onBrowseAsGuest }) {
                 </div>
                 <div style={{ fontSize: '32px', marginBottom: '12px', marginTop: '20px' }}>{step.icon}</div>
                 <h3 style={{
-                  fontFamily: "'Orbitron', sans-serif",
+                  fontFamily: "'Space Grotesk', sans-serif",
                   fontWeight: 700,
                   fontSize: '18px',
                   marginBottom: '12px',
@@ -409,7 +409,7 @@ export default function LandingPage({ onGetStarted, onBrowseAsGuest }) {
           borderTop: '1px solid rgba(0, 245, 255, 0.1)'
         }}>
           <h2 style={{
-            fontFamily: "'Orbitron', sans-serif",
+            fontFamily: "'Space Grotesk', sans-serif",
             fontWeight: 900,
             fontSize: 'clamp(28px, 5vw, 44px)',
             marginBottom: '24px',
@@ -440,8 +440,8 @@ export default function LandingPage({ onGetStarted, onBrowseAsGuest }) {
             padding: '18px 36px',
             fontSize: '16px',
             fontWeight: 700,
-            cursor: 'poOutfit',
-            fontFamily: "'Orbitron', sans-serif",
+            cursor: 'poInter',
+            fontFamily: "'Space Grotesk', sans-serif",
             letterSpacing: '1px',
             textTransform: 'uppercase',
             boxShadow: '0 0 30px rgba(255, 0, 128, 0.5)',

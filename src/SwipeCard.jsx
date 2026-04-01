@@ -100,12 +100,19 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
     setIsFlying(true);
     stopPlay();
     
-    // Haptic feedback
+    // Haptic feedback - iOS + Android support
     try {
       const hapticEnabled = JSON.parse(localStorage.getItem('hapticEnabled') ?? 'true');
       if (hapticEnabled) {
         const pattern = dir === "right" ? [40] : [20];
-        if (navigator.vibrate) navigator.vibrate(pattern);
+        // Try standard API first (Android)
+        if (navigator.vibrate) {
+          navigator.vibrate(pattern);
+        } 
+        // Fallback to webkit for iOS
+        else if (navigator.webkitVibrate) {
+          navigator.webkitVibrate(pattern);
+        }
       }
     } catch (e) {}
     

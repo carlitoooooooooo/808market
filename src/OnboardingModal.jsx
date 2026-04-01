@@ -60,6 +60,8 @@ export default function OnboardingModal({ onComplete, onSkip }) {
     try {
       if (navigator.vibrate) {
         navigator.vibrate(duration);
+      } else if (navigator.webkitVibrate) {
+        navigator.webkitVibrate(duration);
       }
     } catch (e) {
       // Haptics not supported

@@ -2865,12 +2865,14 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    padding-top: env(safe-area-inset-top, 20px);
   }
   .settings-modal .settings-header {
     flex-shrink: 0;
     position: sticky;
     top: 0;
     z-index: 20;
+    padding: 16px 20px;
   }
   .settings-modal .settings-tabs {
     flex-shrink: 0;

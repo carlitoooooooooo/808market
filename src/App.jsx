@@ -545,33 +545,47 @@ export default function App() {
       byProducer[t.uploadedBy].push(t);
     });
     
-    const producers = Object.keys(byProducer);
+    const producers = Object.keys(byProducer).sort(); // Sort for consistency
     let lastProducer = null;
     let consecutiveCount = 0;
-    let idx = 0;
+    let producerIdx = 0;
     
     while (result.length < sorted.length) {
-      let attempts = 0;
-      let producer = producers[idx % producers.length];
+      // Get next producer in round-robin fashion
+      let producer = producers[producerIdx % producers.length];
       
-      // If we've already added 2 from this producer, skip to next
+      // If this producer has no beats left, find next one that does
+      while (byProducer[producer].length === 0 && result.length < sorted.length) {
+        producerIdx++;
+        producer = producers[producerIdx % producers.length];
+        
+        // Safety check: if we've cycled through all producers, break
+        if (producerIdx - (result.length / producers.length) > producers.length * 2) {
+          break;
+        }
+      }
+      
+      // If we've hit 2 from the same producer, force next producer
       if (producer === lastProducer && consecutiveCount >= 2) {
-        idx++;
-        producer = producers[idx % producers.length];
+        producerIdx++;
+        producer = producers[producerIdx % producers.length];
+        
+        // Skip to first producer with beats
+        let skipAttempts = 0;
+        while (byProducer[producer].length === 0 && skipAttempts < producers.length) {
+          producerIdx++;
+          producer = producers[producerIdx % producers.length];
+          skipAttempts++;
+        }
+        
         consecutiveCount = 0;
       }
       
-      // Keep trying producers until we find one with beats
-      while (attempts < producers.length && byProducer[producer].length === 0) {
-        idx++;
-        producer = producers[idx % producers.length];
-        attempts++;
-      }
-      
+      // Add beat from this producer if available
       if (byProducer[producer].length > 0) {
         result.push(byProducer[producer].shift());
         
-        // Track consecutive beats from same producer
+        // Update consecutive count
         if (producer === lastProducer) {
           consecutiveCount++;
         } else {
@@ -580,7 +594,7 @@ export default function App() {
         }
       }
       
-      idx++;
+      producerIdx++;
     }
     
     setQueue(result);

@@ -68,9 +68,9 @@ export default function LeaderboardPage({ tracks, onVote, userVotes, onViewUser,
   async function loadProducers() {
     setProducersLoading(true);
     try {
-      // Fetch all tracks to group by producer (include listed_at for time filtering)
+      // Fetch all tracks to group by producer (include listedAt for time filtering)
       const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/tracks?select=uploaded_by_username,cops,listed_at&uploaded_by_username=not.is.null`,
+        `${SUPABASE_URL}/rest/v1/tracks?select=uploaded_by_username,cops,listedAt,created_at&uploaded_by_username=not.is.null`,
         { headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` } }
       );
       const data = await res.json();
@@ -143,7 +143,7 @@ export default function LeaderboardPage({ tracks, onVote, userVotes, onViewUser,
     
     if (Array.isArray(p.tracks)) {
       p.tracks.forEach(t => {
-        const listedDate = new Date(t.listed_at || new Date());
+        const listedDate = new Date(t.listedAt || t.created_at || new Date());
         const daysOld = (now - listedDate) / (1000 * 60 * 60 * 24);
         
         if (timeRange === 'week' && daysOld <= 7) {

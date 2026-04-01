@@ -394,7 +394,7 @@ export default function App() {
       setShowOnboarding(true);
       triggerHaptic('medium');
     }
-  }, [currentUser?.username, authLoading, triggerHaptic]);
+  }, [currentUser?.username, authLoading]);
 
   // Load active announcements
   useEffect(() => {

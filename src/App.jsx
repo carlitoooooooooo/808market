@@ -537,7 +537,7 @@ export default function App() {
     // Sort by score
     const sorted = scored.sort((a, b) => b.score - a.score).map(s => s.track);
     
-    // Interleave by producer (simple version)
+    // Interleave by producer (max 2 consecutive beats from same producer)
     const result = [];
     const byProducer = {};
     sorted.forEach(t => {
@@ -546,12 +546,40 @@ export default function App() {
     });
     
     const producers = Object.keys(byProducer);
+    let lastProducer = null;
+    let consecutiveCount = 0;
     let idx = 0;
+    
     while (result.length < sorted.length) {
-      const producer = producers[idx % producers.length];
+      let attempts = 0;
+      let producer = producers[idx % producers.length];
+      
+      // If we've already added 2 from this producer, skip to next
+      if (producer === lastProducer && consecutiveCount >= 2) {
+        idx++;
+        producer = producers[idx % producers.length];
+        consecutiveCount = 0;
+      }
+      
+      // Keep trying producers until we find one with beats
+      while (attempts < producers.length && byProducer[producer].length === 0) {
+        idx++;
+        producer = producers[idx % producers.length];
+        attempts++;
+      }
+      
       if (byProducer[producer].length > 0) {
         result.push(byProducer[producer].shift());
+        
+        // Track consecutive beats from same producer
+        if (producer === lastProducer) {
+          consecutiveCount++;
+        } else {
+          lastProducer = producer;
+          consecutiveCount = 1;
+        }
       }
+      
       idx++;
     }
     

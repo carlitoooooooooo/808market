@@ -168,6 +168,7 @@ export default function App() {
   });
   const [showOnboarding, setShowOnboarding] = useState(false); // Show onboarding modal
   const [onboardingStep, setOnboardingStep] = useState(1); // Track current onboarding step
+  const onboardingCheckedRef = useRef(false); // Track if we've checked onboarding status
   const toastTimer = useRef(null);
   const notifTimer = useRef(null);
   const startOverRef = useRef(false); // Flag to bypass queue rebuild during reset
@@ -378,6 +379,21 @@ export default function App() {
   }, [currentUser, authLoading]);
 
 
+
+  // Auto-show onboarding for new users (first login)
+  useEffect(() => {
+    if (!currentUser?.username || authLoading || onboardingCheckedRef.current) return;
+    
+    onboardingCheckedRef.current = true;
+    
+    // Check localStorage flag
+    const completedKey = `onboarding_completed_${currentUser.username}`;
+    if (localStorage.getItem(completedKey)) return; // Already completed
+    
+    // Show onboarding automatically
+    setShowOnboarding(true);
+    triggerHaptic('medium');
+  }, [currentUser?.username, authLoading]);
 
   // Load active announcements
   useEffect(() => {
@@ -760,30 +776,7 @@ export default function App() {
         />
       )}
 
-      {/* TEST BUTTON - ALWAYS VISIBLE */}
-      <button 
-        onClick={() => {
-          triggerHaptic('medium');
-          setShowOnboarding(true);
-        }}
-        style={{
-          position: 'fixed',
-          bottom: '20px',
-          right: '20px',
-          padding: '12px 20px',
-          background: '#ff3366',
-          color: '#fff',
-          border: 'none',
-          borderRadius: '20px',
-          fontSize: '14px',
-          fontWeight: 'bold',
-          cursor: 'pointer',
-          zIndex: 100,
-          fontFamily: 'var(--font-head)',
-        }}
-      >
-        📖 ONBOARDING
-      </button>
+
 
       {/* Onboarding Spotlight Effect - Simple dark overlay */}
       {showOnboarding && (

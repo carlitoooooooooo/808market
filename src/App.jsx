@@ -379,20 +379,22 @@ export default function App() {
 
 
 
-  // Auto-show onboarding for new users (first login)
+  // Auto-show onboarding for new users (first login) — only once per session
   useEffect(() => {
     if (!currentUser?.username || authLoading || onboardingCheckedRef.current) return;
     
-    onboardingCheckedRef.current = true;
+    onboardingCheckedRef.current = true; // Prevent this from running again
     
-    // Check localStorage flag
+    // Check localStorage flag — if already completed, don't show again
     const completedKey = `onboarding_completed_${currentUser.username}`;
-    if (localStorage.getItem(completedKey)) return; // Already completed
+    const wasCompleted = localStorage.getItem(completedKey);
     
-    // Show onboarding automatically
-    setShowOnboarding(true);
-    triggerHaptic('medium');
-  }, [currentUser?.username, authLoading]);
+    // Only show if NOT completed before
+    if (!wasCompleted) {
+      setShowOnboarding(true);
+      triggerHaptic('medium');
+    }
+  }, [currentUser?.username, authLoading, triggerHaptic]);
 
   // Load active announcements
   useEffect(() => {

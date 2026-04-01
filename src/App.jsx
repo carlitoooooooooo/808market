@@ -21,6 +21,7 @@ import LandingPage from "./LandingPage.jsx";
 import AuthPrompt from "./AuthPrompt.jsx";
 import UserSearch from "./UserSearch.jsx";
 import AchievementPopup from "./AchievementPopup.jsx";
+import OnboardingModal from "./OnboardingModal.jsx";
 import tracksData from "./tracks.js";
 import { supabase } from "./supabase.js";
 import { dbUpsert, dbSelect, dbUpdate, dbInsert } from "./dbHelper.js";
@@ -165,6 +166,7 @@ export default function App() {
       return [];
     }
   });
+  const [showOnboarding, setShowOnboarding] = useState(false); // Show onboarding modal
   const toastTimer = useRef(null);
   const notifTimer = useRef(null);
   const startOverRef = useRef(false); // Flag to bypass queue rebuild during reset
@@ -373,6 +375,27 @@ export default function App() {
     if (isAdmin) setShowAdmin(true);
     else setToast({ message: '🚫 Access denied', visible: true });
   }, [currentUser, authLoading]);
+
+  // Check if user should see onboarding (first time login)
+  useEffect(() => {
+    if (!currentUser?.username || authLoading) return;
+    
+    // Check if they've completed onboarding
+    const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
+    fetch(`https://bkapxykeryzxbqpgjgab.supabase.co/rest/v1/profiles?username=eq.${encodeURIComponent(currentUser.username)}&select=has_completed_onboarding`, {
+      headers: { apikey: ANON, Authorization: `Bearer ${ANON}` }
+    })
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          const hasCompleted = data[0].has_completed_onboarding;
+          if (!hasCompleted) {
+            setShowOnboarding(true);
+          }
+        }
+      })
+      .catch(() => {});
+  }, [currentUser?.username, authLoading]);
 
   // Load active announcements
   useEffect(() => {
@@ -790,6 +813,23 @@ export default function App() {
     showToast("🔥 BEAT LISTED!");
   }, [showToast]);
 
+  // Mark onboarding as complete
+  const completeOnboarding = useCallback(async () => {
+    if (!currentUser?.username) return;
+    setShowOnboarding(false);
+    
+    try {
+      const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
+      await fetch(`https://bkapxykeryzxbqpgjgab.supabase.co/rest/v1/profiles?username=eq.${encodeURIComponent(currentUser.username)}`, {
+        method: 'PATCH',
+        headers: { apikey: ANON, Authorization: `Bearer ${ANON}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ has_completed_onboarding: true }),
+      });
+    } catch (err) {
+      console.error('Onboarding completion error:', err);
+    }
+  }, [currentUser?.username]);
+
 
 
   if (authLoading) {
@@ -830,6 +870,17 @@ export default function App() {
   return (
     <div className="app">
       <div className="app-bg" />
+
+      {/* Onboarding Modal */}
+      {showOnboarding && (
+        <OnboardingModal
+          onComplete={completeOnboarding}
+          onSkip={() => {
+            setShowOnboarding(false);
+            completeOnboarding();
+          }}
+        />
+      )}
 
       <header className="app-header">
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>

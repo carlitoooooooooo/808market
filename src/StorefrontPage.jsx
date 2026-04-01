@@ -276,6 +276,8 @@ function StorefrontEditor({ storefront, username, beats, onSave, onClose }) {
   // ensure bg is always a valid option value
   const [cardStyle, setCardStyle] = useState(storefront?.card_style || 'default');
   const [fontStyle, setFontStyle] = useState(storefront?.font_style || 'default');
+  const [showStats, setShowStats] = useState(storefront?.show_stats !== false);
+  const [gridLayout, setGridLayout] = useState(storefront?.grid_layout !== false);
   const [sectionOrder, setSectionOrder] = useState(() => {
     try { return JSON.parse(storefront?.section_order || '["beats","open_verses","features","drumkits"]'); }
     catch { return ['beats', 'open_verses', 'features', 'drumkits']; }
@@ -317,6 +319,7 @@ function StorefrontEditor({ storefront, username, beats, onSave, onClose }) {
       username, display_name: displayName, tagline, about_bio: aboutBio,
       accent_color: accent, bg_color: bg, banner_url, is_public: true,
       card_style: cardStyle, font_style: fontStyle,
+      show_stats: showStats, grid_layout: gridLayout,
       section_order: JSON.stringify(sectionOrder),
       featured_beat_id: featuredBeatId || null,
       instagram, twitter, soundcloud, youtube, bio_link: bioLink, bio_link_label: bioLinkLabel,
@@ -388,6 +391,40 @@ function StorefrontEditor({ storefront, username, beats, onSave, onClose }) {
               </button>
             ))}
           </div>
+        </EditorField>
+
+        {/* Font Style */}
+        <EditorField label="Font Style">
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            {FONT_STYLES.map(f => (
+              <button key={f.value} type="button" onClick={() => setFontStyle(f.value)}
+                style={{ padding: '7px 14px', borderRadius: '20px', border: `2px solid ${fontStyle === f.value ? accent : 'rgba(255,255,255,0.15)'}`, background: fontStyle === f.value ? `${accent}20` : 'transparent', color: fontStyle === f.value ? accent : 'rgba(255,255,255,0.5)', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: f.family }}>
+                {f.label}
+              </button>
+            ))}
+          </div>
+        </EditorField>
+
+        {/* Layout Options */}
+        <EditorField label="Layout">
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button type="button" onClick={() => setGridLayout(true)}
+              style={{ flex: 1, padding: '7px 14px', borderRadius: '20px', border: `2px solid ${gridLayout ? accent : 'rgba(255,255,255,0.15)'}`, background: gridLayout ? `${accent}20` : 'transparent', color: gridLayout ? accent : 'rgba(255,255,255,0.5)', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-head)' }}>
+              📊 Grid
+            </button>
+            <button type="button" onClick={() => setGridLayout(false)}
+              style={{ flex: 1, padding: '7px 14px', borderRadius: '20px', border: `2px solid ${!gridLayout ? accent : 'rgba(255,255,255,0.15)'}`, background: !gridLayout ? `${accent}20` : 'transparent', color: !gridLayout ? accent : 'rgba(255,255,255,0.5)', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-head)' }}>
+              📝 List
+            </button>
+          </div>
+        </EditorField>
+
+        {/* Show Stats Toggle */}
+        <EditorField label="Display Stats">
+          <button type="button" onClick={() => setShowStats(!showStats)}
+            style={{ width: '100%', padding: '7px 14px', borderRadius: '20px', border: `2px solid ${showStats ? accent : 'rgba(255,255,255,0.15)'}`, background: showStats ? `${accent}20` : 'transparent', color: showStats ? accent : 'rgba(255,255,255,0.5)', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-head)' }}>
+            {showStats ? '✓ Show Beat Stats' : '✗ Hide Beat Stats'}
+          </button>
         </EditorField>
 
 

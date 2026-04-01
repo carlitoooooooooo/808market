@@ -170,9 +170,9 @@ export default function LandingPage({ onGetStarted, onBrowseAsGuest }) {
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text'
               }}>
-                THE BEAT<br />
-                MARKETPLACE<br />
-                OF CHAOS
+                The Beat<br />
+                Marketplace<br />
+                Built Different
               </h1>
               <p style={{
                 fontSize: '18px',
@@ -328,14 +328,14 @@ export default function LandingPage({ onGetStarted, onBrowseAsGuest }) {
             textTransform: 'uppercase',
             letterSpacing: '-1px'
           }}>
-            How This<br />
+            How It<br />
             <span style={{
               background: 'linear-gradient(135deg, #bf5fff, #ff0080)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text'
             }}>
-              Crazy Thing Works
+              Works
             </span>
           </h2>
 

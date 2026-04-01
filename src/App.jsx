@@ -400,8 +400,8 @@ export default function App() {
       .then(data => {
         if (Array.isArray(data) && data.length > 0) {
           const hasCompleted = data[0]?.has_completed_onboarding;
-          // Only show if explicitly false (not if undefined/null)
-          if (hasCompleted === false) {
+          // Show if NOT completed (false, null, or undefined = new user)
+          if (!hasCompleted) {
             setShowOnboarding(true);
           }
         }

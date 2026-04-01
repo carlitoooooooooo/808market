@@ -4053,3 +4053,79 @@ html.party-mode .auth-submit {
   box-shadow: 0 0 10px #00ffff, inset 0 0 10px #00ffff;
   animation: borderPulse 2s ease-in-out infinite;
 }
+
+/* PRO Exclusive Name Glow Styles */
+@keyframes nameGlowPulse {
+  0%, 100% {
+    text-shadow: 0 0 8px currentColor, 0 0 12px currentColor;
+  }
+  50% {
+    text-shadow: 0 0 16px currentColor, 0 0 20px currentColor;
+  }
+}
+
+.name-glow-neon-cyan {
+  color: #00f5ff;
+  text-shadow: 0 0 8px #00f5ff, 0 0 12px #00f5ff;
+  animation: nameGlowPulse 2s ease-in-out infinite;
+}
+
+.name-glow-neon-purple {
+  color: #bf5fff;
+  text-shadow: 0 0 8px #bf5fff, 0 0 12px #bf5fff;
+  animation: nameGlowPulse 2s ease-in-out infinite;
+}
+
+.name-glow-plasma {
+  color: #ff8000;
+  text-shadow: 0 0 10px #ff0080, 0 0 15px #ff8000;
+  animation: nameGlowPulse 2s ease-in-out infinite;
+}
+
+.name-glow-void {
+  color: #00f5ff;
+  text-shadow: 0 0 6px rgba(0,245,255,0.5), 0 0 10px rgba(0,0,0,0.8), inset 0 0 4px rgba(0,245,255,0.3);
+  animation: nameGlowPulse 3s ease-in-out infinite;
+}
+
+.name-glow-cosmic {
+  background: linear-gradient(135deg, #ff006e, #8338ec, #3a86ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 10px rgba(255,0,110,0.4), 0 0 8px rgba(51,56,236,0.4);
+  animation: nameGlowPulse 2.5s ease-in-out infinite;
+}
+
+.name-glow-hologram {
+  background: linear-gradient(135deg, #ff3366, #00f5ff, #bf5fff, #00ff88, #ffd700);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 12px rgba(0,245,255,0.5), 0 0 8px rgba(191,95,255,0.5);
+  animation: nameGlowPulse 3s ease-in-out infinite;
+}
+
+.name-glow-diamond {
+  color: #b9f2ff;
+  text-shadow: 0 0 8px #00f5ff, 0 0 12px #ffd700, 0 0 6px #b9f2ff;
+  animation: nameGlowPulse 2.5s ease-in-out infinite;
+}
+
+.name-glow-aurora {
+  color: #00ff88;
+  text-shadow: 0 0 10px #00ff88, 0 0 8px #00f5ff, 0 0 6px #bf5fff;
+  animation: nameGlowPulse 2.5s ease-in-out infinite;
+}
+
+.name-glow-platinum {
+  color: #e5e4e2;
+  text-shadow: 0 0 10px rgba(229,228,226,0.6), 0 0 8px rgba(255,255,255,0.3);
+  animation: nameGlowPulse 2s ease-in-out infinite;
+}
+
+.name-glow-solar {
+  color: #ffd700;
+  text-shadow: 0 0 10px #ffd700, 0 0 8px #ff9900, 0 0 6px #ffff00;
+  animation: nameGlowPulse 2.5s ease-in-out infinite;
+}

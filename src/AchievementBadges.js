@@ -13,41 +13,41 @@ export const ACHIEVEMENTS = {
     },
     category: 'producer',
   },
-  TEN_COPS: {
-    id: 'ten_cops',
-    name: '10 Cops',
+  TEN_LIKES: {
+    id: 'ten_likes',
+    name: '10 Likes',
     emoji: '🔟',
-    description: 'Got 10 cops on a single beat',
+    description: 'Got 10 likes on a single beat',
     condition: (user, tracks) => {
       return tracks?.some(t => (t.cops || 0) >= 10) || false;
     },
     category: 'producer',
   },
-  FIFTY_COPS: {
-    id: 'fifty_cops',
+  FIFTY_LIKES: {
+    id: 'fifty_likes',
     name: 'Hot Beat',
     emoji: '🔥',
-    description: 'Got 50 cops on a single beat',
+    description: 'Got 50 likes on a single beat',
     condition: (user, tracks) => {
       return tracks?.some(t => (t.cops || 0) >= 50) || false;
     },
     category: 'producer',
   },
-  HUNDRED_COPS: {
-    id: 'hundred_cops',
+  HUNDRED_LIKES: {
+    id: 'hundred_likes',
     name: 'On Fire',
     emoji: '🌡️',
-    description: 'Got 100 cops on a single beat',
+    description: 'Got 100 likes on a single beat',
     condition: (user, tracks) => {
       return tracks?.some(t => (t.cops || 0) >= 100) || false;
     },
     category: 'producer',
   },
-  THOUSAND_COPS: {
-    id: 'thousand_cops',
+  THOUSAND_LIKES: {
+    id: 'thousand_likes',
     name: 'Legend',
     emoji: '👑',
-    description: 'Reached 1000 total cops',
+    description: 'Reached 1000 total likes',
     condition: (user, tracks) => {
       const totalCops = tracks?.reduce((sum, t) => sum + (t.cops || 0), 0) || 0;
       return totalCops >= 1000;

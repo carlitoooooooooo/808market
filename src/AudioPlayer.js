@@ -4,8 +4,9 @@
  * to avoid cross-origin fetch restrictions on audio files.
  */
 export default class AudioPlayer {
-  constructor(audioUrl, snippetStart = 0) {
+  constructor(audioUrl, snippetStart = 0, trackId = null) {
     this.audioUrl = audioUrl;
+    this.trackId = trackId;
     this.snippetStart = snippetStart;
     this.snippetDuration = 30;
     this._timeUpdateCb = null;
@@ -33,7 +34,20 @@ export default class AudioPlayer {
   }
 
   async _getPlayUrl() {
-    // If already a signed URL or not a Supabase public URL, use as-is
+    // If we have a track ID, fetch signed URL by track ID
+    if (this.trackId && !this.audioUrl) {
+      try {
+        const res = await fetch('/api/sign-audio', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ trackId: this.trackId }),
+        });
+        const data = await res.json();
+        if (data.signedUrl) return data.signedUrl;
+      } catch {}
+      return null;
+    }
+    // If we have a raw URL, sign it
     if (!this.audioUrl || this.audioUrl.includes('/sign/') || !this.audioUrl.includes('/object/public/')) {
       return this.audioUrl;
     }
@@ -45,9 +59,7 @@ export default class AudioPlayer {
       });
       const data = await res.json();
       if (data.signedUrl) return data.signedUrl;
-    } catch (e) {
-      console.warn('Could not get signed URL, falling back to public URL');
-    }
+    } catch {}
     return this.audioUrl;
   }
 

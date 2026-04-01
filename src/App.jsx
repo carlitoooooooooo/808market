@@ -188,7 +188,8 @@ export default function App() {
       setTracksLoading(true);
       try {
         const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
-        const res = await fetch('https://bkapxykeryzxbqpgjgab.supabase.co/rest/v1/tracks?order=listed_at.desc', {
+        // Exclude audio_url from main fetch — only fetched via signed URL when user plays
+        const res = await fetch('https://bkapxykeryzxbqpgjgab.supabase.co/rest/v1/tracks?order=listed_at.desc&select=id,title,artist,genre,bpm,beat_key,cops,passes,play_count,price,license_type,cover_url,snippet_start,uploaded_by,uploaded_by_username,listed_at,is_soundcloud,soundcloud_url,embed_url,producer_notes,tags', {
           headers: { 'apikey': ANON, 'Authorization': `Bearer ${ANON}` }
         });
         const data = await res.json();

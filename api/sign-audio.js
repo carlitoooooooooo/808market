@@ -11,7 +11,20 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).end();
 
-  const { trackId, audioUrl } = req.body;
+  let { trackId, audioUrl } = req.body;
+
+  // If trackId provided, look up audio_url from DB
+  if (trackId && !audioUrl) {
+    try {
+      const trackRes = await fetch(
+        `${SUPABASE_URL}/rest/v1/tracks?id=eq.${trackId}&select=audio_url`,
+        { headers: { apikey: SUPABASE_SERVICE_KEY, Authorization: `Bearer ${SUPABASE_SERVICE_KEY}` } }
+      );
+      const tracks = await trackRes.json();
+      audioUrl = tracks?.[0]?.audio_url;
+    } catch {}
+  }
+
   if (!audioUrl) return res.status(400).json({ error: 'Missing audioUrl' });
 
   try {

@@ -54,7 +54,7 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
 
   function startPlay() {
     stopPlay();
-    const p = new AudioPlayer(track.audioUrl, track.snippetStart);
+    const p = new AudioPlayer(track.audioUrl || null, track.snippetStart, track.id);
     p.onTimeUpdate((prog) => setProgress(prog));
     p.onEnded(() => { setIsPlaying(false); setProgress(0); });
     playerRef.current = p;

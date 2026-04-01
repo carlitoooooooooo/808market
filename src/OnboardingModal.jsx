@@ -64,6 +64,10 @@ export default function OnboardingModal({ onComplete, onSkip, onStepChange }) {
   const currentStep = steps[step - 1];
 
   const handleNext = () => {
+    // Trigger haptic
+    if (navigator.vibrate) {
+      navigator.vibrate(20);
+    }
     if (step < steps.length) {
       setStep(step + 1);
     } else {
@@ -72,6 +76,10 @@ export default function OnboardingModal({ onComplete, onSkip, onStepChange }) {
   };
 
   const handleSkip = () => {
+    // Trigger haptic
+    if (navigator.vibrate) {
+      navigator.vibrate(10);
+    }
     onSkip();
   };
 

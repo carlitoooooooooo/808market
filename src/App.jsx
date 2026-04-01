@@ -556,7 +556,9 @@ export default function App() {
   // Haptic feedback utility
   const triggerHaptic = useCallback((pattern = "light") => {
     try {
-      const hapticEnabled = JSON.parse(localStorage.getItem('hapticEnabled') || 'true');
+      // Default to true (enabled) if not set
+      const hapticEnabledStr = localStorage.getItem('hapticEnabled');
+      const hapticEnabled = hapticEnabledStr === null ? true : JSON.parse(hapticEnabledStr);
       if (!hapticEnabled) return;
       
       const patterns = {
@@ -760,7 +762,10 @@ export default function App() {
 
       {/* TEST BUTTON - ALWAYS VISIBLE */}
       <button 
-        onClick={() => setShowOnboarding(true)}
+        onClick={() => {
+          triggerHaptic('medium');
+          setShowOnboarding(true);
+        }}
         style={{
           position: 'fixed',
           bottom: '20px',

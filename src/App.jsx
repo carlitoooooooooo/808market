@@ -477,11 +477,11 @@ export default function App() {
     }
   }, []);
 
-  // Build queue - SIMPLE VERSION (no smart algorithm - for testing)
+  // Build queue with optimized smart algorithm
   useEffect(() => {
     if (!currentUser || tracksLoading || votesLoading || tracks.length === 0) return;
     
-    // Skip rebuild if Start Over just cleared votes (use manual shuffle instead)
+    // Skip rebuild if Start Over just cleared votes
     if (startOverRef.current) {
       startOverRef.current = false;
       return;
@@ -489,10 +489,55 @@ export default function App() {
     
     const votedIds = new Set(Object.keys(userVotes).map(String));
     const unvoted = tracks.filter(t => !votedIds.has(String(t.id)));
+    const voteCount = Object.keys(userVotes).length;
     
-    // Just shuffle - no complex algorithm
-    const shuffled = [...unvoted].sort(() => Math.random() - 0.5);
-    setQueue(shuffled);
+    // Calculate genre & producer preferences ONCE (not for every track)
+    const genrePrefs = {};
+    const producerPrefs = {};
+    Object.keys(userVotes).forEach(trackId => {
+      const track = tracks.find(t => String(t.id) === trackId);
+      if (!track || userVotes[trackId] !== 'right') return;
+      genrePrefs[track.genre] = (genrePrefs[track.genre] || 0) + 1;
+      producerPrefs[track.uploadedBy] = (producerPrefs[track.uploadedBy] || 0) + 1;
+    });
+    
+    const totalLikes = Object.keys(userVotes).filter(id => userVotes[id] === 'right').length || 1;
+    
+    // Score each track once
+    const scored = unvoted.map(track => {
+      const genre = genrePrefs[track.genre] ? (genrePrefs[track.genre] / totalLikes) : 0.2;
+      const engagement = track.cops || 0 > 0 ? ((track.cops || 0) / ((track.cops || 0) + (track.passes || 0))) : 0.5;
+      const producer = producerPrefs[track.uploadedBy] ? (producerPrefs[track.uploadedBy] / totalLikes) : 0.1;
+      const daysSince = (new Date() - new Date(track.listedAt)) / (1000 * 60 * 60 * 24);
+      const freshness = Math.max(0, 1 - (daysSince / 7));
+      const serendipity = Math.random() * 0.1;
+      
+      const score = (0.35 * genre + 0.25 * engagement + 0.20 * producer + 0.10 * freshness + 0.10 * serendipity);
+      return { track, score };
+    });
+    
+    // Sort by score
+    const sorted = scored.sort((a, b) => b.score - a.score).map(s => s.track);
+    
+    // Interleave by producer (simple version)
+    const result = [];
+    const byProducer = {};
+    sorted.forEach(t => {
+      if (!byProducer[t.uploadedBy]) byProducer[t.uploadedBy] = [];
+      byProducer[t.uploadedBy].push(t);
+    });
+    
+    const producers = Object.keys(byProducer);
+    let idx = 0;
+    while (result.length < sorted.length) {
+      const producer = producers[idx % producers.length];
+      if (byProducer[producer].length > 0) {
+        result.push(byProducer[producer].shift());
+      }
+      idx++;
+    }
+    
+    setQueue(result);
   }, [currentUser?.id, tracksLoading, votesLoading, tracks.length, JSON.stringify(userVotes)]);
 
   const showToast = useCallback((msg) => {

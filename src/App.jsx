@@ -188,8 +188,7 @@ export default function App() {
       setTracksLoading(true);
       try {
         const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
-        // Exclude audio_url from main fetch — only fetched via signed URL when user plays
-        const res = await fetch('https://bkapxykeryzxbqpgjgab.supabase.co/rest/v1/tracks?order=listed_at.desc&select=id,title,artist,genre,bpm,beat_key,cops,passes,play_count,price,license_type,cover_url,snippet_start,uploaded_by,uploaded_by_username,listed_at,is_soundcloud,soundcloud_url,embed_url,producer_notes,tags', {
+        const res = await fetch('https://bkapxykeryzxbqpgjgab.supabase.co/rest/v1/tracks?order=listed_at.desc', {
           headers: { 'apikey': ANON, 'Authorization': `Bearer ${ANON}` }
         });
         const data = await res.json();
@@ -473,79 +472,23 @@ export default function App() {
     }
   }, []);
 
-  const skipQueueRebuild = useRef(false);
-
-  // Build smart queue
+  // Build queue
   useEffect(() => {
-    if (skipQueueRebuild.current) { skipQueueRebuild.current = false; return; }
     if (!currentUser || tracksLoading || votesLoading || tracks.length === 0) return;
     const votedIds = new Set(Object.keys(userVotes).map(String));
     const unvoted = tracks.filter(t => !votedIds.has(String(t.id)));
     const voteCount = Object.keys(userVotes).length;
 
-    // --- Genre affinity: learn from liked beats ---
-    const likedGenres = {};
-    Object.entries(userVotes).forEach(([id, vote]) => {
-      if (vote === 'right') {
-        const t = tracks.find(tr => String(tr.id) === id);
-        if (t?.genre) likedGenres[t.genre] = (likedGenres[t.genre] || 0) + 1;
-      }
-    });
-    const topGenres = Object.entries(likedGenres).sort((a,b) => b[1]-a[1]).map(e => e[0]);
-
-    // --- Scoring function ---
-    const now = Date.now();
-    const scoreTrack = (t) => {
-      let score = 0;
-
-      // Freshness boost: beats uploaded in last 7 days get +3, last 30 days +1
-      const ageMs = now - new Date(t.listedAt || t.listed_at || 0).getTime();
-      const ageDays = ageMs / (1000 * 60 * 60 * 24);
-      if (ageDays < 7) score += 3;
-      else if (ageDays < 30) score += 1;
-
-      // Engagement quality: cops/plays ratio (avoid raw cop count)
-      const plays = t.play_count || t.playCount || 1;
-      const cops = t.cops || 0;
-      const engagementRate = cops / plays;
-      score += engagementRate * 5;
-
-      // Genre affinity: boost beats in genres user likes
-      if (topGenres.length > 0) {
-        const genreRank = topGenres.indexOf(t.genre);
-        if (genreRank === 0) score += 2;
-        else if (genreRank === 1) score += 1;
-      }
-
-      // Serendipity: add random noise so low-score beats occasionally surface
-      score += Math.random() * 1.5;
-
-      return score;
-    };
-
+    let ordered;
     if (voteCount < 5) {
-      // New user: show top quality beats first, then scored rest
+      // New user — show most liked beats first, then shuffle the rest
       const sorted = [...unvoted].sort((a, b) => (b.cops || 0) - (a.cops || 0));
-      const topN = sorted.slice(0, 10);
-      const rest = sorted.slice(10).sort((a, b) => scoreTrack(b) - scoreTrack(a));
-      var ordered = [...topN, ...rest];
+      const topN = sorted.slice(0, 10); // top 10 most liked, in order
+      const rest = sorted.slice(10).sort(() => Math.random() - 0.5);
+      ordered = [...topN, ...rest];
     } else {
-      // Experienced user: smart scoring with serendipity
-      var scored = [...unvoted].sort((a, b) => scoreTrack(b) - scoreTrack(a));
-
-      // Producer diversity: cap 2 consecutive beats from same producer
-      var ordered = [];
-      const recentProducers = [];
-      for (const t of scored) {
-        const producer = t.uploadedBy || t.artist;
-        const recentCount = recentProducers.slice(-4).filter(p => p === producer).length;
-        if (recentCount < 2) {
-          ordered.push(t);
-          recentProducers.push(producer);
-        } else {
-          ordered.push(t); // still add but deprioritized naturally by score
-        }
-      }
+      // Experienced user — full shuffle
+      ordered = [...unvoted].sort(() => Math.random() - 0.5);
     }
     setQueue(ordered);
   }, [currentUser?.id, tracksLoading, votesLoading, tracks.length, JSON.stringify(userVotes)]);
@@ -1028,11 +971,10 @@ export default function App() {
                     className="btn-primary"
                     style={{ marginTop: "20px" }}
                     onClick={() => {
-                      saveSeen(currentUser.username, []);
-                      skipQueueRebuild.current = true;
                       const shuffled = [...tracks].sort(() => Math.random() - 0.5);
-                      setUserVotes({});
                       setQueue(shuffled);
+                      saveSeen(currentUser.username, []);
+                      setUserVotes({});
                     }}
                   >
                     🔄 Start Over

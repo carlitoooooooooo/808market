@@ -780,58 +780,69 @@ export default function App() {
         📖 ONBOARDING
       </button>
 
-      {/* Onboarding Highlights */}
+      {/* Onboarding Highlights - Darken background except highlight */}
+      {showOnboarding && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(0, 0, 0, 0.7)',
+          pointerEvents: 'none',
+          zIndex: 9997,
+        }} />
+      )}
+
+      {/* Highlight Boxes */}
       {showOnboarding && (
         <>
           {/* Step 3: Highlight "For You" button */}
           {onboardingStep === 3 && (
             <div style={{
               position: 'fixed',
-              top: '70px',
+              top: '75px',
               left: '50%',
               transform: 'translateX(-50%)',
-              width: '300px',
-              height: '50px',
-              border: '3px solid #00f5ff',
-              borderRadius: '12px',
-              boxShadow: '0 0 30px rgba(0, 245, 255, 0.6)',
+              width: '320px',
+              height: '55px',
+              border: '4px solid #00f5ff',
+              borderRadius: '14px',
+              boxShadow: '0 0 40px rgba(0, 245, 255, 0.8), inset 0 0 20px rgba(0, 245, 255, 0.2)',
               pointerEvents: 'none',
-              zIndex: 9998,
+              zIndex: 9999,
               animation: 'pulse-highlight 1.5s ease-in-out infinite',
             }} />
           )}
           
-          {/* Step 4: Highlight leaderboard icon in nav */}
+          {/* Step 4: Highlight leaderboard tab - adjust to actual nav position */}
           {onboardingStep === 4 && (
             <div style={{
               position: 'fixed',
-              top: '15px',
+              top: '13px',
               left: '50%',
-              transform: 'translateX(-50%)',
-              width: '120px',
-              height: '40px',
-              border: '3px solid #ff3366',
-              borderRadius: '12px',
-              boxShadow: '0 0 30px rgba(255, 51, 102, 0.6)',
+              transform: 'translateX(calc(-50% + 60px))',
+              width: '110px',
+              height: '44px',
+              border: '4px solid #ff3366',
+              borderRadius: '14px',
+              boxShadow: '0 0 40px rgba(255, 51, 102, 0.8), inset 0 0 20px rgba(255, 51, 102, 0.2)',
               pointerEvents: 'none',
-              zIndex: 9998,
+              zIndex: 9999,
               animation: 'pulse-highlight 1.5s ease-in-out infinite',
             }} />
           )}
           
-          {/* Step 5: Highlight "LIST BEAT" button */}
+          {/* Step 5: Highlight "+ LIST BEAT" button (top right) */}
           {onboardingStep === 5 && (
             <div style={{
               position: 'fixed',
-              top: '15px',
-              right: '15px',
-              width: '140px',
-              height: '40px',
-              border: '3px solid #00ff88',
-              borderRadius: '12px',
-              boxShadow: '0 0 30px rgba(0, 255, 136, 0.6)',
+              top: '13px',
+              right: '130px',
+              width: '130px',
+              height: '44px',
+              border: '4px solid #00ff88',
+              borderRadius: '14px',
+              boxShadow: '0 0 40px rgba(0, 255, 136, 0.8), inset 0 0 20px rgba(0, 255, 136, 0.2)',
               pointerEvents: 'none',
-              zIndex: 9998,
+              zIndex: 9999,
               animation: 'pulse-highlight 1.5s ease-in-out infinite',
             }} />
           )}
@@ -840,33 +851,33 @@ export default function App() {
           {onboardingStep === 6 && (
             <div style={{
               position: 'fixed',
-              bottom: '20px',
+              bottom: '16px',
               left: '50%',
-              transform: 'translateX(-50%)',
-              width: '120px',
-              height: '60px',
-              border: '3px solid #bf5fff',
-              borderRadius: '12px',
-              boxShadow: '0 0 30px rgba(191, 95, 255, 0.6)',
+              transform: 'translateX(calc(-50% - 60px))',
+              width: '90px',
+              height: '70px',
+              border: '4px solid #bf5fff',
+              borderRadius: '14px',
+              boxShadow: '0 0 40px rgba(191, 95, 255, 0.8), inset 0 0 20px rgba(191, 95, 255, 0.2)',
               pointerEvents: 'none',
-              zIndex: 9998,
+              zIndex: 9999,
               animation: 'pulse-highlight 1.5s ease-in-out infinite',
             }} />
           )}
           
-          {/* Step 7: Highlight settings gear */}
+          {/* Step 7: Highlight settings gear (top right) */}
           {onboardingStep === 7 && (
             <div style={{
               position: 'fixed',
-              top: '15px',
-              right: '80px',
+              top: '13px',
+              right: '13px',
               width: '50px',
               height: '50px',
-              border: '3px solid #ff9500',
-              borderRadius: '12px',
-              boxShadow: '0 0 30px rgba(255, 149, 0, 0.6)',
+              border: '4px solid #ff9500',
+              borderRadius: '14px',
+              boxShadow: '0 0 40px rgba(255, 149, 0, 0.8), inset 0 0 20px rgba(255, 149, 0, 0.2)',
               pointerEvents: 'none',
-              zIndex: 9998,
+              zIndex: 9999,
               animation: 'pulse-highlight 1.5s ease-in-out infinite',
             }} />
           )}

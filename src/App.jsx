@@ -550,57 +550,41 @@ export default function App() {
     let consecutiveCount = 0;
     let producerIdx = 0;
     
-    while (result.length < sorted.length) {
-      // If we've hit 2 from the same producer, FORCE next different producer
-      if (consecutiveCount >= 2 && lastProducer !== null) {
-        // Skip the last producer entirely until we pick a different one
-        let nextProducerIdx = 0;
-        let foundDifferent = false;
-        
-        for (let i = 0; i < producers.length; i++) {
-          const candidateProducer = producers[(producerIdx + i + 1) % producers.length];
-          if (candidateProducer !== lastProducer && byProducer[candidateProducer].length > 0) {
-            producerIdx = (producerIdx + i + 1) % producers.length;
-            foundDifferent = true;
+    // Max 2 consecutive beats from same producer - STRICT
+    for (let beat of sorted) {
+      // If we already have 2 from lastProducer, must switch to different one
+      if (consecutiveCount >= 2 && beat.uploadedBy === lastProducer) {
+        // Find first different producer with remaining beats
+        let switched = false;
+        for (let otherProducer in byProducer) {
+          if (otherProducer !== lastProducer && byProducer[otherProducer].length > 0) {
+            lastProducer = otherProducer;
+            consecutiveCount = 0;
+            switched = true;
             break;
           }
         }
-        
-        if (!foundDifferent) break; // No other producers with beats
-        consecutiveCount = 0;
+        // If no other producers have beats, skip this beat
+        if (!switched) continue;
       }
       
-      // Get next producer in round-robin fashion
-      let producer = producers[producerIdx % producers.length];
-      
-      // If this producer has no beats left, find next one that does
-      while (byProducer[producer].length === 0 && result.length < sorted.length) {
-        producerIdx++;
-        producer = producers[producerIdx % producers.length];
-        
-        // Safety: if we've gone through all producers once, we're done
-        if (producerIdx >= producers.length && result.length < sorted.length) {
-          break;
-        }
+      // Add beat if it's from the current producer (or first producer if starting)
+      if (result.length === 0) {
+        // First beat: just take it
+        result.push(beat);
+        lastProducer = beat.uploadedBy;
+        consecutiveCount = 1;
+      } else if (beat.uploadedBy === lastProducer && consecutiveCount < 2) {
+        // Same producer, under limit: take it
+        result.push(beat);
+        consecutiveCount++;
+      } else if (beat.uploadedBy !== lastProducer) {
+        // Different producer: take it and reset counter
+        result.push(beat);
+        lastProducer = beat.uploadedBy;
+        consecutiveCount = 1;
       }
-      
-      // Add beat from this producer if available
-      if (byProducer[producer].length > 0) {
-        result.push(byProducer[producer].shift());
-        
-        // Update consecutive count
-        if (producer === lastProducer) {
-          consecutiveCount++;
-        } else {
-          lastProducer = producer;
-          consecutiveCount = 1;
-        }
-      } else {
-        // Producer exhausted, move to next
-        producerIdx++;
-      }
-      
-      producerIdx++;
+      // else: skip beat (same producer but already have 2)
     }
     
     setQueue(result);

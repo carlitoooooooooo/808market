@@ -92,7 +92,7 @@ export default function LandingPage({ onGetStarted, onBrowseAsGuest }) {
         }
       `}</style>
 
-      <div style={{ position: 'relative', zIndex: 1, padding: '0 20px 60px', display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <div style={{ position: 'relative', zIndex: 1, padding: '0 16px 60px', display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
 
         {/* HEADER */}
         <div style={{
@@ -175,7 +175,7 @@ export default function LandingPage({ onGetStarted, onBrowseAsGuest }) {
                 Built Different
               </h1>
               <p style={{
-                fontSize: '18px',
+                fontSize: 'clamp(14px, 4vw, 18px)',
                 color: 'rgba(255,255,255,0.7)',
                 lineHeight: 1.7,
                 marginBottom: '32px',
@@ -185,21 +185,22 @@ export default function LandingPage({ onGetStarted, onBrowseAsGuest }) {
                 💿 Discover beats. 🎵 Cop heat. 🚀 Get paid. <br />
                 No middlemen. Just pure audio art.
               </p>
-              <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                 <button onClick={onGetStarted} style={{
                   background: 'linear-gradient(135deg, #ff0080, #00f5ff)',
                   border: 'none',
                   color: '#000',
                   borderRadius: '12px',
-                  padding: '16px 32px',
-                  fontSize: '16px',
+                  padding: 'clamp(12px, 3vw, 16px) clamp(20px, 5vw, 32px)',
+                  fontSize: 'clamp(14px, 3vw, 16px)',
                   fontWeight: 700,
-                  cursor: 'poInter',
+                  cursor: 'pointer',
                   fontFamily: "'Space Grotesk', sans-serif",
                   letterSpacing: '1px',
                   textTransform: 'uppercase',
                   boxShadow: '0 0 30px rgba(255, 0, 128, 0.4)',
-                  transition: 'all 0.2s'
+                  transition: 'all 0.2s',
+                  minHeight: '44px'
                 }}
                 onMouseEnter={e => e.target.style.transform = 'scale(1.05)'}
                 onMouseLeave={e => e.target.style.transform = 'scale(1)'}
@@ -211,15 +212,16 @@ export default function LandingPage({ onGetStarted, onBrowseAsGuest }) {
                   border: '2px solid #00f5ff',
                   color: '#00f5ff',
                   borderRadius: '12px',
-                  padding: '14px 28px',
-                  fontSize: '16px',
+                  padding: 'clamp(12px, 3vw, 14px) clamp(18px, 5vw, 28px)',
+                  fontSize: 'clamp(14px, 3vw, 16px)',
                   fontWeight: 700,
-                  cursor: 'poInter',
+                  cursor: 'pointer',
                   fontFamily: "'Space Grotesk', sans-serif",
                   letterSpacing: '1px',
                   textTransform: 'uppercase',
                   boxShadow: '0 0 20px rgba(0, 245, 255, 0.2)',
-                  transition: 'all 0.2s'
+                  transition: 'all 0.2s',
+                  minHeight: '44px'
                 }}
                 onMouseEnter={e => {
                   e.target.style.background = 'rgba(0, 245, 255, 0.1)';
@@ -426,7 +428,7 @@ export default function LandingPage({ onGetStarted, onBrowseAsGuest }) {
             </span>
           </h2>
           <p style={{
-            fontSize: '16px',
+            fontSize: 'clamp(14px, 3vw, 16px)',
             color: 'rgba(255,255,255,0.6)',
             marginBottom: '32px'
           }}>
@@ -437,15 +439,16 @@ export default function LandingPage({ onGetStarted, onBrowseAsGuest }) {
             border: 'none',
             color: '#000',
             borderRadius: '12px',
-            padding: '18px 36px',
-            fontSize: '16px',
+            padding: 'clamp(14px, 3vw, 18px) clamp(24px, 6vw, 36px)',
+            fontSize: 'clamp(14px, 3vw, 16px)',
             fontWeight: 700,
-            cursor: 'poInter',
+            cursor: 'pointer',
             fontFamily: "'Space Grotesk', sans-serif",
             letterSpacing: '1px',
             textTransform: 'uppercase',
             boxShadow: '0 0 30px rgba(255, 0, 128, 0.5)',
-            transition: 'all 0.2s'
+            transition: 'all 0.2s',
+            minHeight: '44px'
           }}
           onMouseEnter={e => {
             e.target.style.transform = 'scale(1.08)';

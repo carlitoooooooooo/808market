@@ -1,5 +1,5 @@
 /* ===== GOOGLE FONTS ===== */
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Outfit:wght@400;500;600;700&display=swap');
 
 /* ===== CSS VARIABLES ===== */
 :root {
@@ -13,8 +13,8 @@
   --green: #00ff88;
   --red: #ff3366;
   --blue: #00f5ff;
-  --font-head: 'Space Grotesk', sans-serif;
-  --font-body: 'Inter', sans-serif;
+  --font-head: 'Orbitron', sans-serif;
+  --font-body: 'Outfit', sans-serif;
   --border: rgba(255,255,255,0.08);
   --border-hover: rgba(255,255,255,0.18);
   --glass-bg: rgba(255,255,255,0.04);

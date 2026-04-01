@@ -53,6 +53,13 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
   const [editing, setEditing] = useState(false);
   const [showAppearance, setShowAppearance] = useState(false);
   const [showSocials, setShowSocials] = useState(false);
+  const [hideBadges, setHideBadges] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('hideBadges') || 'false');
+    } catch {
+      return false;
+    }
+  });
   const [editBio, setEditBio] = useState(currentUser?.bio || "");
   const [editColor, setEditColor] = useState(currentUser?.avatarColor || AVATAR_COLORS[0]);
   const [profileExtra, setProfileExtra] = useState({ location: '', tagline: '', instagram: '', twitter: '', soundcloud: '', youtube: '', spotify_url: '', influenced_by: '', avatar_border: 'none', name_glow: 'none', profile_bg: 'none', bio_link: '', bio_link_label: '', profile_badge: '', profile_badge_color: 'cyan-purple' });
@@ -644,17 +651,21 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
               {!JSON.parse(localStorage.getItem('hideActivityStatus') || 'false') && (
                 <span title="Online" style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#00ff88', boxShadow: '0 0 6px #00ff88', display: 'inline-block', flexShrink: 0 }} />
               )}
-              {currentUser.role?.toLowerCase() === 'admin' && (
-                <span style={{ background: 'linear-gradient(135deg, #00f5ff, #bf5fff)', color: '#000', fontSize: '9px', fontFamily: 'var(--font-head)', fontWeight: 700, padding: '2px 8px', borderRadius: '20px', letterSpacing: '1px', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>ADMIN</span>
-              )}
-              {TEAM_MEMBERS.includes(currentUser.username) && currentUser.role !== 'admin' && (
-                <span style={{ background: 'linear-gradient(135deg, #00ff88, #00f5ff)', color: '#000', fontSize: '9px', fontFamily: 'var(--font-head)', fontWeight: 700, padding: '2px 8px', borderRadius: '20px', letterSpacing: '1px', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>TEAM</span>
-              )}
-              {currentUser.isBetaTester && currentUser.role !== 'admin' && !TEAM_MEMBERS.includes(currentUser.username) && (
-                <span style={{ background: 'linear-gradient(135deg, #ff9900, #ff3366)', color: '#fff', fontSize: '9px', fontFamily: 'var(--font-head)', fontWeight: 700, padding: '2px 8px', borderRadius: '20px', letterSpacing: '1px', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>BETA</span>
-              )}
-              {currentUser.isPro && (
-                <span style={{ background: 'linear-gradient(135deg, #ffd700, #ff9900)', color: '#000', fontSize: '9px', fontFamily: 'var(--font-head)', fontWeight: 700, padding: '2px 8px', borderRadius: '20px', letterSpacing: '1px', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>💎 PRO</span>
+              {!hideBadges && (
+                <>
+                  {currentUser.role?.toLowerCase() === 'admin' && (
+                    <span style={{ background: 'linear-gradient(135deg, #00f5ff, #bf5fff)', color: '#000', fontSize: '9px', fontFamily: 'var(--font-head)', fontWeight: 700, padding: '2px 8px', borderRadius: '20px', letterSpacing: '1px', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>ADMIN</span>
+                  )}
+                  {TEAM_MEMBERS.includes(currentUser.username) && currentUser.role !== 'admin' && (
+                    <span style={{ background: 'linear-gradient(135deg, #00ff88, #00f5ff)', color: '#000', fontSize: '9px', fontFamily: 'var(--font-head)', fontWeight: 700, padding: '2px 8px', borderRadius: '20px', letterSpacing: '1px', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>TEAM</span>
+                  )}
+                  {currentUser.isBetaTester && currentUser.role !== 'admin' && !TEAM_MEMBERS.includes(currentUser.username) && (
+                    <span style={{ background: 'linear-gradient(135deg, #ff9900, #ff3366)', color: '#fff', fontSize: '9px', fontFamily: 'var(--font-head)', fontWeight: 700, padding: '2px 8px', borderRadius: '20px', letterSpacing: '1px', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>BETA</span>
+                  )}
+                  {currentUser.isPro && (
+                    <span style={{ background: 'linear-gradient(135deg, #ffd700, #ff9900)', color: '#000', fontSize: '9px', fontFamily: 'var(--font-head)', fontWeight: 700, padding: '2px 8px', borderRadius: '20px', letterSpacing: '1px', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>💎 PRO</span>
+                  )}
+                </>
               )}
               {currentUser.is_verified && (
                 <span title="Verified Producer" style={{ background: 'linear-gradient(135deg, #00f5ff, #bf5fff)', color: '#000', fontSize: '11px', fontFamily: 'var(--font-head)', fontWeight: 700, padding: '2px 8px', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', whiteSpace: 'nowrap' }}>✓</span>
@@ -1237,6 +1248,23 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
               </button>
             </div>
             {showAppearance && <>
+            {/* Hide Badges Toggle */}
+            <div style={{ marginBottom: '12px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', fontFamily: 'var(--font-body)' }}>
+                <input
+                  type="checkbox"
+                  checked={hideBadges}
+                  onChange={e => {
+                    setHideBadges(e.target.checked);
+                    localStorage.setItem('hideBadges', JSON.stringify(e.target.checked));
+                  }}
+                  style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                />
+                Hide Admin/PRO/Team/Beta Badges
+              </label>
+              <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', marginTop: '4px' }}>Keep your profile clean without status badges</div>
+            </div>
+
             {/* Name glow picker */}
             <div>
               <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>

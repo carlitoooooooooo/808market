@@ -1025,10 +1025,12 @@ export default function App() {
                     className="btn-primary"
                     style={{ marginTop: "20px" }}
                     onClick={() => {
-                      const shuffled = [...tracks].sort(() => Math.random() - 0.5);
-                      setQueue(shuffled);
+                      // Clear votes and seen, then let the queue effect rebuild
                       saveSeen(currentUser.username, []);
                       setUserVotes({});
+                      // Force a fresh shuffle immediately
+                      const shuffled = [...tracks].sort(() => Math.random() - 0.5);
+                      setQueue(shuffled);
                     }}
                   >
                     🔄 Start Over

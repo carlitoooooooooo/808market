@@ -3787,13 +3787,13 @@ html.party-mode .auth-submit {
 
 .onboarding-modal {
   position: relative;
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.95) 0%, rgba(20, 10, 40, 0.9) 100%);
-  border: 1px solid rgba(0, 245, 255, 0.2);
+  background: #000000;
+  border: 2px solid #00f5ff;
   border-radius: 20px;
   padding: 40px;
   max-width: 500px;
   width: 100%;
-  box-shadow: 0 0 40px rgba(0, 245, 255, 0.1), inset 0 0 20px rgba(191, 95, 255, 0.05);
+  box-shadow: 0 0 40px rgba(0, 245, 255, 0.5);
   animation: onboarding-slide-up 0.4s ease-out;
 }
 

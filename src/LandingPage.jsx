@@ -170,9 +170,9 @@ export default function LandingPage({ onGetStarted, onBrowseAsGuest }) {
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text'
               }}>
-                The Beat<br />
-                Marketplace<br />
-                Built Different
+                THE ARTIST<br />
+                MARKETPLACE<br />
+                FROM THE FUTURE
               </h1>
               <p style={{
                 fontSize: 'clamp(14px, 4vw, 18px)',

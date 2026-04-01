@@ -780,15 +780,64 @@ export default function App() {
         📖 ONBOARDING
       </button>
 
-      {/* Onboarding Highlights - Darken background except highlight */}
+      {/* Onboarding Spotlight Effect - Darkens everything except highlighted area */}
       {showOnboarding && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          background: 'rgba(0, 0, 0, 0.7)',
-          pointerEvents: 'none',
-          zIndex: 9997,
-        }} />
+        <>
+          {/* Step 3: Spotlight on "For You" */}
+          {onboardingStep === 3 && (
+            <div style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'radial-gradient(circle 200px at 50% 100px, transparent 0%, rgba(0,0,0,0.8) 100%)',
+              pointerEvents: 'none',
+              zIndex: 9997,
+            }} />
+          )}
+          
+          {/* Step 4: Spotlight on leaderboard */}
+          {onboardingStep === 4 && (
+            <div style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'radial-gradient(circle 180px at calc(50% + 80px) 35px, transparent 0%, rgba(0,0,0,0.8) 100%)',
+              pointerEvents: 'none',
+              zIndex: 9997,
+            }} />
+          )}
+          
+          {/* Step 5: Spotlight on "+ LIST BEAT" */}
+          {onboardingStep === 5 && (
+            <div style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'radial-gradient(circle 180px at calc(100% - 95px) 35px, transparent 0%, rgba(0,0,0,0.8) 100%)',
+              pointerEvents: 'none',
+              zIndex: 9997,
+            }} />
+          )}
+          
+          {/* Step 6: Spotlight on "Create" tab */}
+          {onboardingStep === 6 && (
+            <div style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'radial-gradient(circle 200px at calc(50% - 80px) calc(100% - 40px), transparent 0%, rgba(0,0,0,0.8) 100%)',
+              pointerEvents: 'none',
+              zIndex: 9997,
+            }} />
+          )}
+          
+          {/* Step 7: Spotlight on settings gear */}
+          {onboardingStep === 7 && (
+            <div style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'radial-gradient(circle 150px at calc(100% - 40px) 35px, transparent 0%, rgba(0,0,0,0.8) 100%)',
+              pointerEvents: 'none',
+              zIndex: 9997,
+            }} />
+          )}
+        </>
       )}
 
       {/* Highlight Boxes */}
@@ -805,14 +854,14 @@ export default function App() {
               height: '55px',
               border: '4px solid #00f5ff',
               borderRadius: '14px',
-              boxShadow: '0 0 40px rgba(0, 245, 255, 0.8), inset 0 0 20px rgba(0, 245, 255, 0.2)',
+              boxShadow: '0 0 50px rgba(0, 245, 255, 1)',
               pointerEvents: 'none',
-              zIndex: 9999,
+              zIndex: 9998,
               animation: 'pulse-highlight 1.5s ease-in-out infinite',
             }} />
           )}
           
-          {/* Step 4: Highlight leaderboard tab - adjust to actual nav position */}
+          {/* Step 4: Highlight leaderboard tab */}
           {onboardingStep === 4 && (
             <div style={{
               position: 'fixed',
@@ -823,14 +872,14 @@ export default function App() {
               height: '44px',
               border: '4px solid #ff3366',
               borderRadius: '14px',
-              boxShadow: '0 0 40px rgba(255, 51, 102, 0.8), inset 0 0 20px rgba(255, 51, 102, 0.2)',
+              boxShadow: '0 0 50px rgba(255, 51, 102, 1)',
               pointerEvents: 'none',
-              zIndex: 9999,
+              zIndex: 9998,
               animation: 'pulse-highlight 1.5s ease-in-out infinite',
             }} />
           )}
           
-          {/* Step 5: Highlight "+ LIST BEAT" button (top right) */}
+          {/* Step 5: Highlight "+ LIST BEAT" button */}
           {onboardingStep === 5 && (
             <div style={{
               position: 'fixed',
@@ -840,9 +889,9 @@ export default function App() {
               height: '44px',
               border: '4px solid #00ff88',
               borderRadius: '14px',
-              boxShadow: '0 0 40px rgba(0, 255, 136, 0.8), inset 0 0 20px rgba(0, 255, 136, 0.2)',
+              boxShadow: '0 0 50px rgba(0, 255, 136, 1)',
               pointerEvents: 'none',
-              zIndex: 9999,
+              zIndex: 9998,
               animation: 'pulse-highlight 1.5s ease-in-out infinite',
             }} />
           )}
@@ -858,14 +907,14 @@ export default function App() {
               height: '70px',
               border: '4px solid #bf5fff',
               borderRadius: '14px',
-              boxShadow: '0 0 40px rgba(191, 95, 255, 0.8), inset 0 0 20px rgba(191, 95, 255, 0.2)',
+              boxShadow: '0 0 50px rgba(191, 95, 255, 1)',
               pointerEvents: 'none',
-              zIndex: 9999,
+              zIndex: 9998,
               animation: 'pulse-highlight 1.5s ease-in-out infinite',
             }} />
           )}
           
-          {/* Step 7: Highlight settings gear (top right) */}
+          {/* Step 7: Highlight settings gear */}
           {onboardingStep === 7 && (
             <div style={{
               position: 'fixed',
@@ -875,9 +924,9 @@ export default function App() {
               height: '50px',
               border: '4px solid #ff9500',
               borderRadius: '14px',
-              boxShadow: '0 0 40px rgba(255, 149, 0, 0.8), inset 0 0 20px rgba(255, 149, 0, 0.2)',
+              boxShadow: '0 0 50px rgba(255, 149, 0, 1)',
               pointerEvents: 'none',
-              zIndex: 9999,
+              zIndex: 9998,
               animation: 'pulse-highlight 1.5s ease-in-out infinite',
             }} />
           )}

@@ -24,6 +24,18 @@
   --shadow-purple: 0 0 20px rgba(191,95,255,0.25);
 }
 
+/* Light mode */
+[data-theme='light'] {
+  --bg: #ffffff;
+  --bg2: rgba(0,0,0,0.03);
+  --bg3: rgba(0,0,0,0.06);
+  --text: #000000;
+  --text-dim: rgba(0,0,0,0.5);
+  --border: rgba(0,0,0,0.08);
+  --border-hover: rgba(0,0,0,0.18);
+  --glass-bg: rgba(0,0,0,0.04);
+}
+
 /* ===== RESET ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { height: 100%; height: -webkit-fill-available; }

@@ -379,7 +379,11 @@ export default function App() {
   // Check if user should see onboarding (first time login)
   const onboardingCheckedRef = useRef(false); // Prevent duplicate checks
   useEffect(() => {
-    if (!currentUser?.username || authLoading || onboardingCheckedRef.current) return;
+    console.log('Onboarding check useEffect ran - currentUser:', currentUser?.username, 'authLoading:', authLoading, 'checked:', onboardingCheckedRef.current);
+    if (!currentUser?.username || authLoading || onboardingCheckedRef.current) {
+      console.log('Early return from onboarding check');
+      return;
+    }
     
     onboardingCheckedRef.current = true; // Mark as checked to prevent re-running
     

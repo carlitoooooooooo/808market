@@ -167,6 +167,7 @@ export default function App() {
   });
   const toastTimer = useRef(null);
   const notifTimer = useRef(null);
+  const startOverRef = useRef(false); // Flag to bypass queue rebuild during reset
 
   // Apply theme on mount
   useEffect(() => {
@@ -472,24 +473,103 @@ export default function App() {
     }
   }, []);
 
-  // Build queue
+  // Build queue with smart algorithm
   useEffect(() => {
     if (!currentUser || tracksLoading || votesLoading || tracks.length === 0) return;
+    
+    // Skip rebuild if Start Over just cleared votes (use manual shuffle instead)
+    if (startOverRef.current) {
+      startOverRef.current = false;
+      return;
+    }
+    
     const votedIds = new Set(Object.keys(userVotes).map(String));
     const unvoted = tracks.filter(t => !votedIds.has(String(t.id)));
     const voteCount = Object.keys(userVotes).length;
 
+    // Helper: calculate user's genre preferences from voting history
+    function getGenrePreferences() {
+      const genreCounts = {};
+      Object.keys(userVotes).forEach(trackId => {
+        const track = tracks.find(t => String(t.id) === trackId);
+        if (!track || userVotes[trackId] !== 'right') return; // only count likes
+        genreCounts[track.genre] = (genreCounts[track.genre] || 0) + 1;
+      });
+      return genreCounts;
+    }
+
+    // Helper: calculate user's producer preferences
+    function getProducerPreferences() {
+      const producerLikes = {};
+      Object.keys(userVotes).forEach(trackId => {
+        const track = tracks.find(t => String(t.id) === trackId);
+        if (!track || userVotes[trackId] !== 'right') return;
+        producerLikes[track.uploadedBy] = (producerLikes[track.uploadedBy] || 0) + 1;
+      });
+      return producerLikes;
+    }
+
+    // Smart scoring for each track
+    function scoreTrack(track) {
+      const genrePrefs = getGenrePreferences();
+      const producerPrefs = getProducerPreferences();
+      
+      // Genre affinity (0-1): how much this genre matches user's preferences
+      const totalLikes = voteCount > 0 ? Object.keys(userVotes).filter(id => 
+        userVotes[id] === 'right'
+      ).length : 1;
+      const genreAffinity = genrePrefs[track.genre] ? (genrePrefs[track.genre] / totalLikes) : 0.2;
+      
+      // Engagement rate (0-1): cops / (cops + passes), floors at 0.3 for unvoted tracks
+      const totalVotes = (track.cops || 0) + (track.passes || 0);
+      const engagementRate = totalVotes > 0 ? (track.cops || 0) / totalVotes : 0.5;
+      
+      // Producer preference (0-1): do they like this producer?
+      const producerReputation = producerPrefs[track.uploadedBy] ? 
+        (producerPrefs[track.uploadedBy] / totalLikes) : 0.1;
+      
+      // Freshness (0-1): newer beats get slight boost (within last 7 days = 1.0)
+      const daysSinceUpload = (new Date() - new Date(track.listedAt)) / (1000 * 60 * 60 * 24);
+      const freshness = Math.max(0, 1 - (daysSinceUpload / 7));
+      
+      // Serendipity (0-0.1): small random boost so algorithm isn't too deterministic
+      const serendipity = Math.random() * 0.1;
+      
+      // Combined score
+      const score = (
+        0.35 * genreAffinity +
+        0.25 * engagementRate +
+        0.20 * producerReputation +
+        0.10 * freshness +
+        0.10 * serendipity
+      );
+      
+      return score;
+    }
+
+    // Score and sort tracks
+    const scored = unvoted.map(t => ({ track: t, score: scoreTrack(t) }));
+    
+    // For very new users (< 5 votes), weight top 10 by cops, then smart for rest
     let ordered;
     if (voteCount < 5) {
-      // New user — show most liked beats first, then shuffle the rest
-      const sorted = [...unvoted].sort((a, b) => (b.cops || 0) - (a.cops || 0));
-      const topN = sorted.slice(0, 10); // top 10 most liked, in order
-      const rest = sorted.slice(10).sort(() => Math.random() - 0.5);
-      ordered = [...topN, ...rest];
+      const byPopularity = [...unvoted].sort((a, b) => (b.cops || 0) - (a.cops || 0));
+      const topPopular = byPopularity.slice(0, 10); // top 10 established hits
+      const restScored = scored.filter(s => !topPopular.includes(s.track));
+      const restSorted = restScored.sort((a, b) => b.score - a.score);
+      ordered = [...topPopular, ...restSorted.map(s => s.track)];
     } else {
-      // Experienced user — full shuffle
-      ordered = [...unvoted].sort(() => Math.random() - 0.5);
+      // Experienced user: pure smart scoring with slight randomization for ties
+      ordered = scored
+        .sort((a, b) => {
+          const scoreDiff = b.score - a.score;
+          // If scores are within 0.05, random shuffle (allows discovery)
+          if (Math.abs(scoreDiff) < 0.05) return Math.random() - 0.5;
+          return scoreDiff;
+        })
+        .map(s => s.track);
     }
+    
     setQueue(ordered);
   }, [currentUser?.id, tracksLoading, votesLoading, tracks.length, JSON.stringify(userVotes)]);
 
@@ -971,6 +1051,7 @@ export default function App() {
                     className="btn-primary"
                     style={{ marginTop: "20px" }}
                     onClick={() => {
+                      startOverRef.current = true; // Prevent queue effect from rebuilding
                       const shuffled = [...tracks].sort(() => Math.random() - 0.5);
                       setQueue(shuffled);
                       saveSeen(currentUser.username, []);

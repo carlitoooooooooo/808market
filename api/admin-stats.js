@@ -19,22 +19,29 @@ export default async function handler(req, res) {
     const totalRevenue = completed.reduce((sum, s) => sum + (s.amount_total || 0), 0) / 100;
     const platformCut = totalRevenue * 0.15;
 
-    const recentSales = completed.slice(0, 20).map(s => ({
+    // Get ALL paid sales (not just 20) for admin finance tab
+    const allSales = completed.map(s => ({
       id: s.id,
       amount: (s.amount_total || 0) / 100,
+      amount_paid: (s.amount_total || 0) / 100, // Include for DB compatibility
       buyer_email: s.customer_details?.email || 'anonymous',
       track_title: s.metadata?.trackTitle || 'Unknown',
       buyer_username: s.metadata?.buyerUsername || 'anonymous',
       producer: s.metadata?.producerUsername || 'unknown',
+      purchased_at: new Date(s.created * 1000).toISOString(),
       date: new Date(s.created * 1000).toISOString(),
       type: s.metadata?.type || 'beat',
+      payout_transferred: false, // Payouts handled by Stripe Connect
     }));
+
+    const recentSales = allSales.slice(0, 20);
 
     return res.status(200).json({
       totalRevenue,
       platformCut,
       totalSales: completed.length,
       recentSales,
+      allSales, // Include all sales for admin dashboard
     });
   } catch (err) {
     console.error('admin-stats error:', err);

@@ -473,8 +473,11 @@ export default function App() {
     }
   }, []);
 
+  const skipQueueRebuild = useRef(false);
+
   // Build smart queue
   useEffect(() => {
+    if (skipQueueRebuild.current) { skipQueueRebuild.current = false; return; }
     if (!currentUser || tracksLoading || votesLoading || tracks.length === 0) return;
     const votedIds = new Set(Object.keys(userVotes).map(String));
     const unvoted = tracks.filter(t => !votedIds.has(String(t.id)));
@@ -1025,11 +1028,10 @@ export default function App() {
                     className="btn-primary"
                     style={{ marginTop: "20px" }}
                     onClick={() => {
-                      // Clear votes and seen, then let the queue effect rebuild
                       saveSeen(currentUser.username, []);
-                      setUserVotes({});
-                      // Force a fresh shuffle immediately
+                      skipQueueRebuild.current = true;
                       const shuffled = [...tracks].sort(() => Math.random() - 0.5);
+                      setUserVotes({});
                       setQueue(shuffled);
                     }}
                   >

@@ -377,8 +377,11 @@ export default function App() {
   }, [currentUser, authLoading]);
 
   // Check if user should see onboarding (first time login)
+  const onboardingCheckedRef = useRef(false); // Prevent duplicate checks
   useEffect(() => {
-    if (!currentUser?.username || authLoading) return;
+    if (!currentUser?.username || authLoading || onboardingCheckedRef.current) return;
+    
+    onboardingCheckedRef.current = true; // Mark as checked to prevent re-running
     
     // Check localStorage first to prevent re-showing after dismiss
     const dismissedLocalKey = `onboarding_dismissed_${currentUser.username}`;
@@ -397,14 +400,13 @@ export default function App() {
       .then(data => {
         if (Array.isArray(data) && data.length > 0) {
           const hasCompleted = data[0]?.has_completed_onboarding;
-          // Only show if explicitly false (not if undefined/null, which means column doesn't exist yet)
+          // Only show if explicitly false (not if undefined/null)
           if (hasCompleted === false) {
             setShowOnboarding(true);
           }
         }
       })
       .catch(err => {
-        // Silently fail if column doesn't exist or fetch times out
         console.debug('Onboarding check skipped:', err);
       })
       .finally(() => clearTimeout(timeout));
@@ -887,8 +889,8 @@ export default function App() {
     <div className="app">
       <div className="app-bg" />
 
-      {/* Onboarding Modal — DISABLED TEMPORARILY FOR DEBUGGING */}
-      {false && showOnboarding && (
+      {/* Onboarding Modal */}
+      {showOnboarding && (
         <OnboardingModal
           onComplete={completeOnboarding}
           onSkip={() => {

@@ -785,84 +785,38 @@ export default function App() {
         📖 ONBOARDING
       </button>
 
-      {/* Onboarding Spotlight Effect - Darkens everything except highlighted area */}
+      {/* Onboarding Spotlight Effect - Simple dark overlay */}
       {showOnboarding && (
-        <>
-          {/* Step 3: Spotlight on "For You" */}
-          {onboardingStep === 3 && (
-            <div style={{
-              position: 'fixed',
-              inset: 0,
-              background: 'radial-gradient(circle 200px at 50% 100px, transparent 0%, rgba(0,0,0,0.8) 100%)',
-              pointerEvents: 'none',
-              zIndex: 9997,
-            }} />
-          )}
-          
-          {/* Step 4: Spotlight on leaderboard */}
-          {onboardingStep === 4 && (
-            <div style={{
-              position: 'fixed',
-              inset: 0,
-              background: 'radial-gradient(circle 180px at calc(50% + 80px) 35px, transparent 0%, rgba(0,0,0,0.8) 100%)',
-              pointerEvents: 'none',
-              zIndex: 9997,
-            }} />
-          )}
-          
-          {/* Step 5: Spotlight on "+ LIST BEAT" */}
-          {onboardingStep === 5 && (
-            <div style={{
-              position: 'fixed',
-              inset: 0,
-              background: 'radial-gradient(circle 180px at calc(100% - 95px) 35px, transparent 0%, rgba(0,0,0,0.8) 100%)',
-              pointerEvents: 'none',
-              zIndex: 9997,
-            }} />
-          )}
-          
-          {/* Step 6: Spotlight on "Create" tab */}
-          {onboardingStep === 6 && (
-            <div style={{
-              position: 'fixed',
-              inset: 0,
-              background: 'radial-gradient(circle 200px at calc(50% - 80px) calc(100% - 40px), transparent 0%, rgba(0,0,0,0.8) 100%)',
-              pointerEvents: 'none',
-              zIndex: 9997,
-            }} />
-          )}
-          
-          {/* Step 7: Spotlight on settings gear */}
-          {onboardingStep === 7 && (
-            <div style={{
-              position: 'fixed',
-              inset: 0,
-              background: 'radial-gradient(circle 150px at calc(100% - 40px) 35px, transparent 0%, rgba(0,0,0,0.8) 100%)',
-              pointerEvents: 'none',
-              zIndex: 9997,
-            }} />
-          )}
-        </>
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(0, 0, 0, 0.75)',
+          pointerEvents: 'none',
+          zIndex: 9997,
+        }} />
       )}
 
-      {/* Highlight Boxes */}
+      {/* Highlight Boxes - Cut through dark overlay */}
       {showOnboarding && (
         <>
           {/* Step 3: Highlight "For You" button */}
           {onboardingStep === 3 && (
             <div style={{
               position: 'fixed',
-              top: '75px',
+              top: '70px',
               left: '50%',
               transform: 'translateX(-50%)',
-              width: '320px',
-              height: '55px',
-              border: '4px solid #00f5ff',
-              borderRadius: '14px',
-              boxShadow: '0 0 50px rgba(0, 245, 255, 1)',
+              width: '340px',
+              height: '70px',
+              border: '5px solid #00f5ff',
+              borderRadius: '16px',
+              boxShadow: `
+                0 0 0 9999px rgba(0, 0, 0, 0.75),
+                0 0 60px rgba(0, 245, 255, 1),
+                inset 0 0 30px rgba(0, 245, 255, 0.3)
+              `,
               pointerEvents: 'none',
               zIndex: 9998,
-              animation: 'pulse-highlight 1.5s ease-in-out infinite',
             }} />
           )}
           
@@ -870,17 +824,20 @@ export default function App() {
           {onboardingStep === 4 && (
             <div style={{
               position: 'fixed',
-              top: '13px',
+              top: '10px',
               left: '50%',
               transform: 'translateX(calc(-50% + 60px))',
-              width: '110px',
-              height: '44px',
-              border: '4px solid #ff3366',
-              borderRadius: '14px',
-              boxShadow: '0 0 50px rgba(255, 51, 102, 1)',
+              width: '130px',
+              height: '50px',
+              border: '5px solid #ff3366',
+              borderRadius: '16px',
+              boxShadow: `
+                0 0 0 9999px rgba(0, 0, 0, 0.75),
+                0 0 60px rgba(255, 51, 102, 1),
+                inset 0 0 30px rgba(255, 51, 102, 0.3)
+              `,
               pointerEvents: 'none',
               zIndex: 9998,
-              animation: 'pulse-highlight 1.5s ease-in-out infinite',
             }} />
           )}
           
@@ -888,16 +845,19 @@ export default function App() {
           {onboardingStep === 5 && (
             <div style={{
               position: 'fixed',
-              top: '13px',
-              right: '130px',
-              width: '130px',
-              height: '44px',
-              border: '4px solid #00ff88',
-              borderRadius: '14px',
-              boxShadow: '0 0 50px rgba(0, 255, 136, 1)',
+              top: '10px',
+              right: '125px',
+              width: '150px',
+              height: '50px',
+              border: '5px solid #00ff88',
+              borderRadius: '16px',
+              boxShadow: `
+                0 0 0 9999px rgba(0, 0, 0, 0.75),
+                0 0 60px rgba(0, 255, 136, 1),
+                inset 0 0 30px rgba(0, 255, 136, 0.3)
+              `,
               pointerEvents: 'none',
               zIndex: 9998,
-              animation: 'pulse-highlight 1.5s ease-in-out infinite',
             }} />
           )}
           
@@ -905,17 +865,20 @@ export default function App() {
           {onboardingStep === 6 && (
             <div style={{
               position: 'fixed',
-              bottom: '16px',
+              bottom: '12px',
               left: '50%',
-              transform: 'translateX(calc(-50% - 60px))',
-              width: '90px',
-              height: '70px',
-              border: '4px solid #bf5fff',
-              borderRadius: '14px',
-              boxShadow: '0 0 50px rgba(191, 95, 255, 1)',
+              transform: 'translateX(calc(-50% - 70px))',
+              width: '110px',
+              height: '80px',
+              border: '5px solid #bf5fff',
+              borderRadius: '16px',
+              boxShadow: `
+                0 0 0 9999px rgba(0, 0, 0, 0.75),
+                0 0 60px rgba(191, 95, 255, 1),
+                inset 0 0 30px rgba(191, 95, 255, 0.3)
+              `,
               pointerEvents: 'none',
               zIndex: 9998,
-              animation: 'pulse-highlight 1.5s ease-in-out infinite',
             }} />
           )}
           
@@ -923,16 +886,19 @@ export default function App() {
           {onboardingStep === 7 && (
             <div style={{
               position: 'fixed',
-              top: '13px',
-              right: '13px',
-              width: '50px',
-              height: '50px',
-              border: '4px solid #ff9500',
-              borderRadius: '14px',
-              boxShadow: '0 0 50px rgba(255, 149, 0, 1)',
+              top: '10px',
+              right: '10px',
+              width: '60px',
+              height: '60px',
+              border: '5px solid #ff9500',
+              borderRadius: '16px',
+              boxShadow: `
+                0 0 0 9999px rgba(0, 0, 0, 0.75),
+                0 0 60px rgba(255, 149, 0, 1),
+                inset 0 0 30px rgba(255, 149, 0, 0.3)
+              `,
               pointerEvents: 'none',
               zIndex: 9998,
-              animation: 'pulse-highlight 1.5s ease-in-out infinite',
             }} />
           )}
         </>

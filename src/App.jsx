@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import "./App.css";
 import { useAuth } from "./AuthContext.jsx";
-import { ThemeProvider } from "./ThemeContext.jsx";
 import AuthScreen from "./AuthScreen.jsx";
 import AdminDashboard from "./AdminDashboard.jsx";
 import SwipeCard from "./SwipeCard.jsx";
@@ -796,9 +795,8 @@ export default function App() {
   const stackedCards = filteredQueue.slice(0, 4);
 
   return (
-    <ThemeProvider>
-      <div className="app">
-        <div className="app-bg" />
+    <div className="app">
+      <div className="app-bg" />
 
       {/* Onboarding Modal */}
       {showOnboarding && (
@@ -1395,8 +1393,7 @@ export default function App() {
           </div>
         </div>
       )}
-      </div>
-    </ThemeProvider>
+    </div>
   );
 }
 

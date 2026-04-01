@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "./AuthContext.jsx";
-import { useTheme } from "./ThemeContext.jsx";
 import { supabase } from "./supabase.js";
 // Sound utils removed — notification sounds disabled
 
@@ -450,7 +449,6 @@ export default function SettingsPage({ onClose, onOpenAnalytics, onOpenStorefron
     { id: "account", label: "👤 Account" },
     { id: "creator", label: "🛠️ Tools" },
     { id: "privacy", label: "🔒 Privacy" },
-    { id: "display", label: "🌙 Display" },
     { id: "fun", label: "🎉 Fun" },
     { id: "password", label: "🔑 Password" },
     { id: "about", label: "ℹ️ Help" },
@@ -600,41 +598,6 @@ export default function SettingsPage({ onClose, onOpenAnalytics, onOpenStorefron
               </button>
             </form>
           )}
-
-          {/* ── Display ── */}
-          {section === "display" && (() => {
-            const { isDark, toggleTheme } = useTheme();
-            return (
-              <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '8px', fontFamily: 'var(--font-head)' }}>
-                    🌙 DARK/LIGHT MODE
-                  </label>
-                  <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', marginBottom: '12px', fontFamily: 'var(--font-body)' }}>
-                    Toggle between dark and light themes
-                  </p>
-                  <button
-                    onClick={toggleTheme}
-                    style={{
-                      background: isDark ? 'rgba(0,245,255,0.1)' : 'rgba(255,200,50,0.1)',
-                      border: isDark ? '1px solid rgba(0,245,255,0.3)' : '1px solid rgba(255,200,50,0.3)',
-                      borderRadius: '10px',
-                      padding: '12px 16px',
-                      color: '#fff',
-                      fontWeight: 600,
-                      fontSize: '14px',
-                      cursor: 'pointer',
-                      fontFamily: 'var(--font-head)',
-                      transition: 'all 0.3s',
-                      width: '100%',
-                    }}
-                  >
-                    {isDark ? '🌙 Dark Mode' : '☀️ Light Mode'}
-                  </button>
-                </div>
-              </div>
-            );
-          })()}
 
           {section === "fun" && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>

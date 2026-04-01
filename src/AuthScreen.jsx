@@ -6,13 +6,14 @@ const TURNSTILE_SITE_KEY = '0x4AAAAAACvZvlyc-GFKm5Lm';
 
 export default function AuthScreen() {
   const { login, signup, currentUser } = useAuth();
-  const [mode, setMode] = useState("login");
+  const [mode, setMode] = useState("login"); // "login", "signup", "forgot"
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [bio, setBio] = useState("");
   const [email, setEmail] = useState("");
   const [avatarColor, setAvatarColor] = useState(AVATAR_COLORS[0]);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState(null);
   const turnstileRef = useRef(null);
@@ -80,6 +81,26 @@ export default function AuthScreen() {
 
     setLoading(true);
     let result;
+    
+    if (mode === "forgot") {
+      // Handle forgot password
+      if (!email.trim()) {
+        setError("Please enter your email address.");
+        setLoading(false);
+        return;
+      }
+      // In a real app, this would send an email with a reset link
+      // For now, we'll just show a success message
+      setSuccess("✅ Check your email for password reset instructions. (Feature coming soon)");
+      setEmail("");
+      setLoading(false);
+      setTimeout(() => {
+        setMode("login");
+        setSuccess("");
+      }, 3000);
+      return;
+    }
+    
     if (mode === "login") {
       result = await login(username.trim(), password);
     } else {
@@ -102,41 +123,81 @@ export default function AuthScreen() {
 
       <div className="auth-card">
         <div className="auth-tabs">
-          <button className={`auth-tab ${mode === "login" ? "auth-tab--active" : ""}`} onClick={() => { setMode("login"); setError(""); }}>
+          <button className={`auth-tab ${mode === "login" ? "auth-tab--active" : ""}`} onClick={() => { setMode("login"); setError(""); setSuccess(""); }}>
             LOGIN
           </button>
-          <button className={`auth-tab ${mode === "signup" ? "auth-tab--active" : ""}`} onClick={() => { setMode("signup"); setError(""); }}>
+          <button className={`auth-tab ${mode === "signup" ? "auth-tab--active" : ""}`} onClick={() => { setMode("signup"); setError(""); setSuccess(""); }}>
             SIGN UP
           </button>
         </div>
 
+        {/* Forgot Password Link - only in login mode */}
+        {mode === "login" && (
+          <div style={{ textAlign: 'center', marginBottom: '16px' }}>
+            <button
+              type="button"
+              onClick={() => { setMode("forgot"); setError(""); setSuccess(""); }}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#00f5ff',
+                fontSize: '12px',
+                cursor: 'pointer',
+                textDecoration: 'underline',
+                fontFamily: 'var(--font-body)'
+              }}
+            >
+              Forgot password?
+            </button>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="auth-form">
-          <div className="auth-field">
-            <label className="auth-label">USERNAME</label>
-            <input
-              className="auth-input"
-              type="text"
-              value={username}
-              onChange={e => setUsername(e.target.value)}
-              placeholder="ur_handle"
-              autoComplete="username"
-              disabled={loading}
-            />
-          </div>
+          {mode === "forgot" ? (
+            <>
+              <div style={{ marginBottom: '16px', color: 'rgba(255,255,255,0.6)', fontSize: '13px', textAlign: 'center' }}>
+                Enter your email and we'll send you a link to reset your password.
+              </div>
+              <div className="auth-field">
+                <label className="auth-label">EMAIL</label>
+                <input
+                  className="auth-input"
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="your@email.com"
+                  disabled={loading}
+                />
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="auth-field">
+                <label className="auth-label">USERNAME</label>
+                <input
+                  className="auth-input"
+                  type="text"
+                  value={username}
+                  onChange={e => setUsername(e.target.value)}
+                  placeholder="ur_handle"
+                  autoComplete="username"
+                  disabled={loading}
+                />
+              </div>
 
-          <div className="auth-field">
-            <label className="auth-label">PASSWORD</label>
-            <input
-              className="auth-input"
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              placeholder="••••••••"
-              disabled={loading}
-            />
-          </div>
+              <div className="auth-field">
+                <label className="auth-label">PASSWORD</label>
+                <input
+                  className="auth-input"
+                  type="password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  disabled={loading}
+                />
+              </div>
 
-          {mode === "signup" && (
+              {mode === "signup" && (
             <>
               <div className="auth-field">
                 <label className="auth-label">EMAIL <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '10px', fontWeight: 400 }}>(optional — for account recovery)</span></label>
@@ -181,10 +242,13 @@ export default function AuthScreen() {
                   ))}
                 </div>
               </div>
+              </>
+            )}
             </>
           )}
 
           {error && <div className="auth-error">{error}</div>}
+          {success && <div style={{ padding: '12px', background: 'rgba(0, 255, 136, 0.1)', border: '1px solid #00ff88', borderRadius: '8px', color: '#00ff88', fontSize: '13px', textAlign: 'center' }}>{success}</div>}
 
           {/* Turnstile widget - only shown on signup */}
           {mode === 'signup' && (
@@ -192,8 +256,28 @@ export default function AuthScreen() {
           )}
 
           <button className="auth-submit btn-primary" type="submit" disabled={loading || (mode === 'signup' && !turnstileToken)}>
-            {loading ? "..." : mode === "login" ? "Enter 808market →" : "Create Account →"}
+            {loading ? "..." : mode === "login" ? "Enter 808market →" : mode === "signup" ? "Create Account →" : "Send Reset Link →"}
           </button>
+          
+          {mode === "forgot" && (
+            <button
+              type="button"
+              onClick={() => { setMode("login"); setError(""); setSuccess(""); }}
+              style={{
+                width: '100%',
+                background: 'none',
+                border: '1px solid rgba(255,255,255,0.2)',
+                color: 'rgba(255,255,255,0.6)',
+                padding: '12px',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontSize: '13px',
+                marginTop: '12px'
+              }}
+            >
+              ← Back to Login
+            </button>
+          )}
         </form>
       </div>
 

@@ -656,6 +656,9 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
               {currentUser.isPro && (
                 <span style={{ background: 'linear-gradient(135deg, #ffd700, #ff9900)', color: '#000', fontSize: '9px', fontFamily: 'var(--font-head)', fontWeight: 700, padding: '2px 8px', borderRadius: '20px', letterSpacing: '1px', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>💎 PRO</span>
               )}
+              {currentUser.is_verified && (
+                <span title="Verified Producer" style={{ background: 'linear-gradient(135deg, #00f5ff, #bf5fff)', color: '#000', fontSize: '11px', fontFamily: 'var(--font-head)', fontWeight: 700, padding: '2px 8px', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', whiteSpace: 'nowrap' }}>✓</span>
+              )}
             </div>
 
             {/* Profile Badge */}

@@ -235,6 +235,24 @@ export default function UserProfilePage({ username, onClose, onOpenModal, userVo
                   <span className={`user-profile-username ${profile?.name_glow && profile.name_glow !== 'none' ? `name-glow-${profile.name_glow}` : ''}`}>
                     @{username}
                   </span>
+                  {/* Verified badge */}
+                  {profile?.is_verified && (
+                    <span title="Verified Producer" style={{
+                      fontSize: '14px',
+                      background: 'linear-gradient(135deg, #00f5ff, #bf5fff)',
+                      color: '#000',
+                      borderRadius: '50%',
+                      width: '20px',
+                      height: '20px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontWeight: 700,
+                      flexShrink: 0
+                    }}>
+                      ✓
+                    </span>
+                  )}
                   {/* Online indicator */}
                   {!profile?.hide_activity && profile?.last_seen && (() => {
                     const diff = (Date.now() - new Date(profile.last_seen).getTime()) / 1000 / 60;

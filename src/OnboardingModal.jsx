@@ -56,11 +56,18 @@ export default function OnboardingModal({ onComplete, onSkip }) {
 
   const currentStep = steps[step - 1];
 
-  const handleNext = () => {
-    // Trigger haptic
-    if (navigator.vibrate) {
-      navigator.vibrate(20);
+  const triggerHaptic = (duration = 20) => {
+    try {
+      if (navigator.vibrate) {
+        navigator.vibrate(duration);
+      }
+    } catch (e) {
+      // Haptics not supported
     }
+  };
+
+  const handleNext = () => {
+    triggerHaptic(30); // Medium vibration
     if (step < steps.length) {
       setStep(step + 1);
     } else {
@@ -69,10 +76,7 @@ export default function OnboardingModal({ onComplete, onSkip }) {
   };
 
   const handleSkip = () => {
-    // Trigger haptic
-    if (navigator.vibrate) {
-      navigator.vibrate(10);
-    }
+    triggerHaptic(15); // Light vibration
     onSkip();
   };
 

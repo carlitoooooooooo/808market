@@ -75,7 +75,7 @@ export default function LeaderboardPage({ tracks, onVote, userVotes, onViewUser,
       );
       const data = await res.json();
 
-      // Group by username
+      // Group by username and store ALL tracks for each producer
       const byUser = {};
       if (Array.isArray(data)) {
         data.forEach(t => {
@@ -100,11 +100,12 @@ export default function LeaderboardPage({ tracks, onVote, userVotes, onViewUser,
       const profileMap = {};
       if (Array.isArray(profiles)) profiles.forEach(p => { profileMap[p.username] = p; });
 
-      // Merge and sort
+      // Merge and keep tracks array for later filtering
       const merged = usernames.map(u => ({
         username: u,
         totalLikes: byUser[u].totalLikes,
         beatCount: byUser[u].beatCount,
+        tracks: byUser[u].tracks,
         ...(profileMap[u] || {}),
       }));
       merged.sort((a, b) => b.totalLikes - a.totalLikes);
@@ -143,11 +144,8 @@ export default function LeaderboardPage({ tracks, onVote, userVotes, onViewUser,
     
     if (Array.isArray(p.tracks)) {
       p.tracks.forEach(t => {
-        // Try multiple field names for date
-        let trackDate = t.listed_at || t.listedAt || t.created_at || t.createdAt;
-        if (!trackDate) return;
-        
-        const listedDate = new Date(trackDate);
+        // Normalize field name - DB uses listedAt, not listed_at
+        const listedDate = new Date(t.listedAt || t.created_at || new Date());
         const daysOld = (now - listedDate) / (1000 * 60 * 60 * 24);
         
         if (timeRange === 'week' && daysOld <= 7) {

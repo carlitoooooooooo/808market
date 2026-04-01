@@ -887,8 +887,8 @@ export default function App() {
     <div className="app">
       <div className="app-bg" />
 
-      {/* Onboarding Modal */}
-      {showOnboarding && (
+      {/* Onboarding Modal — DISABLED TEMPORARILY FOR DEBUGGING */}
+      {false && showOnboarding && (
         <OnboardingModal
           onComplete={completeOnboarding}
           onSkip={() => {

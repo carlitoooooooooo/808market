@@ -1064,6 +1064,18 @@ body {
   animation: nameGlowSolarShift 2.5s linear infinite;
   filter: drop-shadow(0 0 8px rgba(255,153,0,0.7));
 }
+
+.name-glow-eclipse {
+  color: #ff3366;
+  text-shadow: 0 0 10px #ff3366, 0 0 20px rgba(255,51,102,0.6), 0 0 30px rgba(255,51,102,0.4), inset 0 0 8px rgba(255,51,102,0.3);
+  animation: nameGlowEclipsePulse 2s ease-in-out infinite;
+}
+
+@keyframes nameGlowEclipsePulse {
+  0%, 100% { text-shadow: 0 0 10px #ff3366, 0 0 20px rgba(255,51,102,0.6), 0 0 30px rgba(255,51,102,0.4), inset 0 0 8px rgba(255,51,102,0.3); }
+  50% { text-shadow: 0 0 15px #ff3366, 0 0 30px rgba(255,51,102,0.8), 0 0 40px rgba(255,51,102,0.6), inset 0 0 12px rgba(255,51,102,0.5); }
+}
+
 @keyframes nameGlowSolarShift {
   0% { background-position: 0% center; }
   100% { background-position: 300% center; }

@@ -280,8 +280,6 @@ export default function AuthScreen() {
           )}
         </form>
       </div>
-
-      <div className="auth-footer">swipe. discover. sell. 🎵</div>
     </div>
   );
 }

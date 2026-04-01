@@ -58,10 +58,9 @@ export default function OnboardingModal({ onComplete, onSkip }) {
 
   const triggerHaptic = (duration = 20) => {
     try {
+      // iOS Safari doesn't support Vibration API - works on Android only
       if (navigator.vibrate) {
         navigator.vibrate(duration);
-      } else if (navigator.webkitVibrate) {
-        navigator.webkitVibrate(duration);
       }
     } catch (e) {
       // Haptics not supported

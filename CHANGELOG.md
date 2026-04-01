@@ -1,5 +1,25 @@
 # 808market — Changelog
 
+## [1.6.0] — 2026-04-01
+### Added
+- **Smart Discover Algorithm**: Personalized queue building based on genre/engagement/producer diversity (35% genre + 25% engagement + 20% producer + 10% freshness + 10% serendipity)
+- **Onboarding Modal**: 8-step interactive tutorial for new users (swipe, discover, leaderboard, list beats, storefront, Stripe, analytics)
+- **Haptic Feedback**: Vibrations on swipe gestures and onboarding buttons (Android functional, iOS unsupported)
+- **PRO User Features**:
+  - PRO badge on profile
+  - Bypass feature locks (name glow, profile background, cover image, animation tiers)
+  - 10 new PRO exclusive name glows: Neon Cyan, Neon Purple, Hologram, Plasma, Void, Cosmic (+ Diamond, Aurora, Platinum, Solar)
+  - 6 animated profile backgrounds: Neon Grid, Gradient Shift, Waves, Particles, Aurora, Plasma
+  - 6 animated avatar borders: Neon Pulse, Purple Pulse, Rainbow Glow, Gold Glow, Fire Glow, Cyan Glow
+- **Login Fix**: Auto-reload on successful sign-in (no more manual refresh needed)
+- **Admin Glow**: Eclipse (dark red/pink) replaces hologram for admin/team only
+
+### Fixed
+- Login now automatically redirects to app after credentials are verified
+- PRO users can unlock all appearance options immediately without hitting upload/play thresholds
+
+---
+
 ## [1.5.0] — 2026-03-24
 ### Added
 - Card flip: tap a swipe card to flip it and see beat details + COP IT button

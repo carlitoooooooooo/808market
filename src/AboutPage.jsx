@@ -2,6 +2,19 @@ import { useState } from "react";
 
 const CHANGELOG = [
   {
+    version: "1.10.0", date: "Apr 1, 2026", items: [
+      "🧠 Smart Discover Algorithm — personalized queue (genre + engagement + producer diversity)",
+      "🎓 Onboarding Modal — 8-step tutorial for new users (auto-shows on first login)",
+      "📳 Haptic Feedback — vibrations on swipes & onboarding buttons (Android only)",
+      "💎 PRO Exclusive Name Glows — Neon Cyan, Neon Purple, Plasma, Void, Cosmic (+ 5 existing)",
+      "✨ Animated Profile Backgrounds — Neon Grid, Gradient Shift, Waves, Particles, Aurora, Plasma (pulsing animations)",
+      "💫 Animated Avatar Borders — Neon Pulse, Purple Pulse, Rainbow, Gold, Fire, Cyan (glowing animations)",
+      "🔐 PRO Users bypass feature locks — use any glow, background, or border immediately",
+      "🔄 Login auto-redirect — no more manual refresh after sign-in",
+      "🌑 Admin Eclipse Glow — new exclusive look for admin/team (replaced hologram)",
+    ]
+  },
+  {
     version: "1.9.0", date: "Mar 30, 2026", items: [
       "🛡️ Admin Dashboard — analytics, user management, content moderation, finance, bug reports, announcements",
       "📢 Announcements system — banner, popup, and notification types with duration control",

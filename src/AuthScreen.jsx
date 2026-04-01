@@ -5,7 +5,7 @@ import Logo from "./Logo.jsx";
 const TURNSTILE_SITE_KEY = '0x4AAAAAACvZvlyc-GFKm5Lm';
 
 export default function AuthScreen() {
-  const { login, signup } = useAuth();
+  const { login, signup, currentUser } = useAuth();
   const [mode, setMode] = useState("login");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -41,6 +41,14 @@ export default function AuthScreen() {
       }
     };
   }, [mode]);
+
+  // Auto-redirect when login succeeds (currentUser is set)
+  useEffect(() => {
+    if (currentUser) {
+      // Force page reload to properly initialize app state
+      window.location.href = '/';
+    }
+  }, [currentUser]);
 
   async function handleSubmit(e) {
     e.preventDefault();

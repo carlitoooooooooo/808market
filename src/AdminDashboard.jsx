@@ -476,6 +476,8 @@ function FinanceTab() {
   const [stripeSales, setStripeSales] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const [totalRevenue, setTotalRevenue] = useState(0);
+  
   useEffect(() => {
     async function load() {
       setLoading(true);
@@ -486,7 +488,15 @@ function FinanceTab() {
         ]);
         const data = await dbRes.json();
         if (Array.isArray(data)) setPurchases(data);
-        if (stripeRes.recentSales) setStripeSales(stripeRes.recentSales);
+        
+        // Prefer Stripe API data (source of truth), fall back to DB
+        if (stripeRes.allSales && stripeRes.allSales.length > 0) {
+          setStripeSales(stripeRes.allSales);
+          setTotalRevenue(stripeRes.totalRevenue || 0);
+        } else if (Array.isArray(data)) {
+          const dbRev = data.reduce((s, p) => s + parseFloat(p.amount_paid || 0), 0);
+          setTotalRevenue(dbRev);
+        }
       } finally {
         setLoading(false);
       }
@@ -494,15 +504,9 @@ function FinanceTab() {
     load();
   }, []);
 
-  const dbRevenue = purchases.reduce((s, p) => s + parseFloat(p.amount_paid || 0), 0);
-  const stripeRevenue = stripeSales.reduce((s, p) => s + parseFloat(p.amount || 0), 0);
-  const totalRevenue = dbRevenue > 0 ? dbRevenue : stripeRevenue;
   const platformCut = totalRevenue * 0.15;
-  // Use Stripe sales if DB purchases are empty
-  const displayPurchases = purchases.length > 0 ? purchases : stripeSales.map(s => ({
-    id: s.id, track_title: s.track_title, buyer_username: s.buyer_username,
-    amount_paid: s.amount, purchased_at: s.date, payout_transferred: false,
-  }));
+  // Prefer Stripe sales (source of truth), fall back to DB
+  const displayPurchases = stripeSales.length > 0 ? stripeSales : purchases;
 
   if (loading) return <AdminLoading />;
 
@@ -521,7 +525,7 @@ function FinanceTab() {
         </div>
         <div className="admin-stat-card">
           <div className="admin-stat-icon">🧾</div>
-          <div className="admin-stat-value">{purchases.length}</div>
+          <div className="admin-stat-value">{displayPurchases.length}</div>
           <div className="admin-stat-label">Total Purchases</div>
         </div>
       </div>

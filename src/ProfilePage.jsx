@@ -585,7 +585,7 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
   };
 
   return (
-    <div className="profile-page" style={{ background: PROFILE_BG_STYLES[profileExtra.profile_bg] || 'transparent' }}>
+    <div className={`profile-page ${profileExtra.profile_bg?.startsWith('animated-') ? `profile-bg-${profileExtra.profile_bg}` : ''}`} style={{ background: !profileExtra.profile_bg?.startsWith('animated-') ? (PROFILE_BG_STYLES[profileExtra.profile_bg] || 'transparent') : 'transparent' }}>
       {/* LEFT COLUMN: identity, stats, pinned, badges */}
       <div className="profile-left-col">
 
@@ -621,7 +621,7 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
           {/* Avatar */}
           <div
-            className={`profile-avatar ${profileExtra.avatar_border !== 'none' ? `avatar-border-${profileExtra.avatar_border}` : ''}`}
+            className={`profile-avatar ${profileExtra.avatar_border !== 'none' ? `avatar-border-${profileExtra.avatar_border}` : ''} ${profileExtra.avatar_border?.startsWith('animated-') ? profileExtra.avatar_border : ''}`}
             style={{ background: avatarUrl ? 'transparent' : currentUser.avatarColor, cursor: 'pointer', overflow: 'hidden', position: 'relative', flexShrink: 0 }}
             onClick={() => avatarInputRef.current?.click()}
             title="Change profile picture"
@@ -1122,7 +1122,7 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
             {/* Cover image button - unlock at 50 cops */}
             {(() => {
               const totalCopsReceived = myUploads.reduce((sum, track) => sum + (track.cops || 0), 0);
-              const locked = totalCopsReceived < 50 && currentUser.role !== 'admin' && !TEAM_MEMBERS.includes(currentUser.username);
+              const locked = totalCopsReceived < 50 && !currentUser.isPro && currentUser.role !== 'admin' && !TEAM_MEMBERS.includes(currentUser.username);
               return (
                 <button
                   onClick={() => !locked && coverInputRef.current?.click()}
@@ -1205,9 +1205,9 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
               <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px', textTransform: 'uppercase' }}>
                 Name Glow
               </label>
-              {myUploads.length < 5 && currentUser.role !== 'admin' && !TEAM_MEMBERS.includes(currentUser.username) ? (
+              {myUploads.length < 5 && !currentUser.isPro && currentUser.role !== 'admin' && !TEAM_MEMBERS.includes(currentUser.username) ? (
                 <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '10px 14px', fontSize: '13px', color: 'rgba(255,255,255,0.3)', fontFamily: 'var(--font-body)' }}>
-                  🔒 Upload {5 - myUploads.length} more beat{5 - myUploads.length !== 1 ? 's' : ''} to unlock name glow
+                  🔒 Upload {5 - myUploads.length} more beat{5 - myUploads.length !== 1 ? 's' : ''} to unlock name glow (or upgrade to PRO)
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -1235,14 +1235,14 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
                   {/* Tier 2: 10 uploads */}
                   <div>
                     <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px' }}>
-                      10 UPLOADS {myUploads.length < 10 && currentUser.role !== 'admin' && <span style={{ color: '#ff3366' }}>🔒 {10 - myUploads.length} more to unlock</span>}
+                      10 UPLOADS {myUploads.length < 10 && !currentUser.isPro && currentUser.role !== 'admin' && <span style={{ color: '#ff3366' }}>🔒 {10 - myUploads.length} more to unlock</span>}
                     </div>
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                       {[
                         { value: 'pulse',   label: '💙 Pulse',   style: { background: '#00f5ff', color: '#000' } },
                         { value: 'flicker', label: '⚡ Flicker', style: { background: '#bf5fff', color: '#fff' } },
                       ].map(g => {
-                        const locked = myUploads.length < 10 && currentUser.role !== 'admin';
+                        const locked = myUploads.length < 10 && !currentUser.isPro && currentUser.role !== 'admin';
                         return (
                           <button key={g.value} type="button"
                             onClick={() => !locked && setProfileExtra(prev => ({ ...prev, name_glow: g.value }))}
@@ -1256,14 +1256,14 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
                   {/* Tier 3: 20 uploads */}
                   <div>
                     <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '6px' }}>
-                      20 UPLOADS {myUploads.length < 20 && currentUser.role !== 'admin' && <span style={{ color: '#ff3366' }}>🔒 {20 - myUploads.length} more to unlock</span>}
+                      20 UPLOADS {myUploads.length < 20 && !currentUser.isPro && currentUser.role !== 'admin' && <span style={{ color: '#ff3366' }}>🔒 {20 - myUploads.length} more to unlock</span>}
                     </div>
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                       {[
                         { value: 'fire', label: '🔥 Fire', style: { background: 'linear-gradient(135deg, #ff3366, #ff9900)', color: '#fff' } },
                         { value: 'ice',  label: '🧊 Ice',  style: { background: 'linear-gradient(135deg, #00f5ff, #ffffff)', color: '#000' } },
                       ].map(g => {
-                        const locked = myUploads.length < 20 && currentUser.role !== 'admin';
+                        const locked = myUploads.length < 20 && !currentUser.isPro && currentUser.role !== 'admin';
                         return (
                           <button key={g.value} type="button"
                             onClick={() => !locked && setProfileExtra(prev => ({ ...prev, name_glow: g.value }))}
@@ -1289,6 +1289,12 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
                           { value: 'aurora',   label: '🌌 Aurora',  style: { background: 'linear-gradient(135deg, #00ff88, #00f5ff, #bf5fff)', color: '#000' } },
                           { value: 'platinum', label: '⚪ Platinum', style: { background: 'linear-gradient(135deg, #e5e4e2, #fff)', color: '#000' } },
                           { value: 'solar',    label: '🌞 Solar',   style: { background: 'linear-gradient(135deg, #ff9900, #ffd700)', color: '#000' } },
+                          { value: 'neon-cyan', label: '⚡ Neon Cyan', style: { background: 'linear-gradient(135deg, #00f5ff, #00ffff)', color: '#000', textShadow: '0 0 10px #00f5ff' } },
+                          { value: 'neon-purple', label: '⚡ Neon Purple', style: { background: 'linear-gradient(135deg, #bf5fff, #ff00ff)', color: '#fff', textShadow: '0 0 10px #bf5fff' } },
+                          { value: 'hologram', label: '✨ Hologram', style: { background: 'linear-gradient(135deg, #ff3366, #00f5ff, #bf5fff, #00ff88, #ffd700)', color: '#fff' } },
+                          { value: 'plasma', label: '🔥 Plasma', style: { background: 'linear-gradient(135deg, #ff0080, #ff8c00, #ffff00)', color: '#000' } },
+                          { value: 'void', label: '🌌 Void', style: { background: 'linear-gradient(135deg, #0a0a0a, #1a0033, #000080)', color: '#00f5ff' } },
+                          { value: 'cosmic', label: '🚀 Cosmic', style: { background: 'linear-gradient(135deg, #ff006e, #8338ec, #3a86ff)', color: '#fff' } },
                         ].map(g => (
                           <button key={g.value} type="button"
                             onClick={() => setProfileExtra(prev => ({ ...prev, name_glow: g.value }))}
@@ -1355,7 +1361,7 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
                         {[
                           { value: 'crown', label: '👑 Crown', style: { background: 'linear-gradient(135deg, #ffd700, #ffed4e)', color: '#000' } },
                           { value: 'neon', label: '⚡ Neon', style: { background: 'linear-gradient(135deg, #00ff88, #00f5ff, #bf5fff)', color: '#000' } },
-                          { value: 'hologram', label: '✨ Hologram', style: { background: 'linear-gradient(135deg, #ff3366, #00f5ff, #bf5fff, #00ff88)', color: '#fff' } },
+                          { value: 'eclipse', label: '🌑 Eclipse', style: { background: 'linear-gradient(135deg, #1a1a1a, #ff3366, #1a1a1a)', color: '#ff3366' } },
                           { value: 'wave', label: '🌊 Wave', style: { background: 'linear-gradient(135deg, #00f5ff, #bf5fff, #00ff88)', color: '#000' } },
                           { value: 'shock', label: '⚡ Shock', style: { background: '#00f5ff', color: '#000' } },
                           { value: 'mystic', label: '🔮 Mystic', style: { background: 'linear-gradient(135deg, #6a0dad, #9b59b6)', color: '#fff' } },
@@ -1376,11 +1382,11 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
             {/* Profile Background picker */}
             <div>
               <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '10px', textTransform: 'uppercase' }}>
-                Profile Background {totalPlays < 500 && currentUser.role !== 'admin' && !TEAM_MEMBERS.includes(currentUser.username) && <span style={{ color: '#ff3366' }}>🔒 {500 - totalPlays} plays to unlock</span>}
+                Profile Background {totalPlays < 500 && !currentUser.isPro && currentUser.role !== 'admin' && !TEAM_MEMBERS.includes(currentUser.username) && <span style={{ color: '#ff3366' }}>🔒 {500 - totalPlays} plays to unlock</span>}
               </label>
-              {totalPlays < 500 && currentUser.role !== 'admin' && !TEAM_MEMBERS.includes(currentUser.username) ? (
+              {totalPlays < 500 && !currentUser.isPro && currentUser.role !== 'admin' && !TEAM_MEMBERS.includes(currentUser.username) ? (
                 <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '10px 14px', fontSize: '13px', color: 'rgba(255,255,255,0.3)', fontFamily: 'var(--font-body)' }}>
-                  🔒 Unlock at 500 total plays
+                  🔒 Unlock at 500 total plays (or upgrade to PRO)
                 </div>
               ) : (
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -1407,6 +1413,28 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
               )}
             </div>
 
+            {/* PRO Animated Backgrounds */}
+            {(currentUser.isPro || currentUser.role === 'admin' || TEAM_MEMBERS.includes(currentUser.username)) && (
+              <div>
+                <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,215,0,0.7)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '10px', textTransform: 'uppercase' }}>✨ PRO Animated Backgrounds</label>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  {[
+                    { value: 'animated-neon-grid', label: '⚡ Neon Grid', style: { background: 'repeating-linear-gradient(0deg, rgba(0,245,255,0.1) 0px, rgba(0,245,255,0.1) 1px, transparent 1px, transparent 2px), repeating-linear-gradient(90deg, rgba(0,245,255,0.1) 0px, rgba(0,245,255,0.1) 1px, transparent 1px, transparent 2px)', color: '#00f5ff', animation: 'pulse 3s ease-in-out infinite' } },
+                    { value: 'animated-gradient-shift', label: '🌈 Gradient Shift', style: { background: 'linear-gradient(135deg, rgba(255,51,102,0.15), rgba(255,153,0,0.15), rgba(0,245,255,0.15), rgba(191,95,255,0.15))', color: '#fff', animation: 'pulse 4s ease-in-out infinite' } },
+                    { value: 'animated-waves', label: '🌊 Waves', style: { background: 'linear-gradient(180deg, rgba(0,245,255,0.12) 0%, transparent 50%, rgba(191,95,255,0.12) 100%)', color: '#00f5ff', animation: 'pulse 3s ease-in-out infinite' } },
+                    { value: 'animated-particles', label: '✨ Particles', style: { background: 'radial-gradient(circle at 20% 50%, rgba(0,245,255,0.1) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(191,95,255,0.1) 0%, transparent 50%)', color: '#bf5fff', animation: 'pulse 4s ease-in-out infinite' } },
+                    { value: 'animated-aurora', label: '🌌 Aurora', style: { background: 'linear-gradient(135deg, rgba(0,255,136,0.12), rgba(0,245,255,0.12), rgba(191,95,255,0.12))', color: '#00ff88', animation: 'pulse 5s ease-in-out infinite' } },
+                    { value: 'animated-plasma', label: '🔥 Plasma', style: { background: 'linear-gradient(135deg, rgba(255,0,128,0.15), rgba(255,128,0,0.15), rgba(255,215,0,0.15))', color: '#ff8000', animation: 'pulse 3s ease-in-out infinite' } },
+                  ].map(b => (
+                    <button key={b.value} type="button" onClick={() => setProfileExtra(prev => ({ ...prev, profile_bg: b.value }))}
+                      style={{ ...b.style, border: `2px solid ${profileExtra.profile_bg === b.value ? '#fff' : 'transparent'}`, borderRadius: '20px', padding: '4px 12px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-head)' }}>
+                      {b.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Avatar border picker */}
             <div>
               <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '10px', textTransform: 'uppercase' }}>Avatar Border</label>
@@ -1426,6 +1454,28 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
                 ))}
               </div>
             </div>
+
+            {/* PRO Animated Avatar Borders */}
+            {(currentUser.isPro || currentUser.role === 'admin' || TEAM_MEMBERS.includes(currentUser.username)) && (
+              <div>
+                <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,215,0,0.7)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '10px', textTransform: 'uppercase' }}>✨ PRO Animated Avatar Borders</label>
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '8px' }}>
+                  {[
+                    { value: 'animated-neon-pulse', label: '💫 Neon Pulse', bg: '#00f5ff', animation: 'pulse 2s ease-in-out infinite' },
+                    { value: 'animated-purple-pulse', label: '💜 Purple Pulse', bg: '#bf5fff', animation: 'pulse 2s ease-in-out infinite' },
+                    { value: 'animated-rainbow-rotate', label: '🌈 Rainbow Glow', bg: 'linear-gradient(135deg, #ff3366, #ff9900, #00f5ff, #bf5fff)', animation: 'pulse 3s ease-in-out infinite' },
+                    { value: 'animated-gold-glow', label: '✨ Gold Glow', bg: '#ffd700', animation: 'pulse 2.5s ease-in-out infinite' },
+                    { value: 'animated-fire-glow', label: '🔥 Fire Glow', bg: 'linear-gradient(135deg, #ff0000, #ff8c00)', animation: 'pulse 2s ease-in-out infinite' },
+                    { value: 'animated-cyan-glow', label: '⚡ Cyan Glow', bg: '#00ffff', animation: 'pulse 2s ease-in-out infinite' },
+                  ].map(b => (
+                    <button key={b.value} type="button" onClick={() => setProfileExtra(prev => ({ ...prev, avatar_border: b.value }))}
+                      style={{ width: 36, height: 36, borderRadius: '50%', border: `3px solid ${profileExtra.avatar_border === b.value ? '#fff' : 'transparent'}`, background: b.bg, cursor: 'pointer', fontSize: '12px', color: '#000', fontWeight: 700, animation: profileExtra.avatar_border === b.value ? b.animation : 'none' }}>
+                      {profileExtra.avatar_border === b.value ? '✓' : ''}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Avatar color picker */}
             <div>

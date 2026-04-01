@@ -21,6 +21,7 @@ import LandingPage from "./LandingPage.jsx";
 import AuthPrompt from "./AuthPrompt.jsx";
 import UserSearch from "./UserSearch.jsx";
 import AchievementPopup from "./AchievementPopup.jsx";
+import OnboardingModal from "./OnboardingModal.jsx";
 import tracksData from "./tracks.js";
 import { supabase } from "./supabase.js";
 import { dbUpsert, dbSelect, dbUpdate, dbInsert } from "./dbHelper.js";
@@ -165,8 +166,11 @@ export default function App() {
       return [];
     }
   });
+  const [showOnboarding, setShowOnboarding] = useState(false); // Show onboarding modal
+  const onboardingCheckedRef = useRef(false); // Track if we've checked onboarding status
   const toastTimer = useRef(null);
   const notifTimer = useRef(null);
+  const startOverRef = useRef(false); // Flag to bypass queue rebuild during reset
 
   // Apply theme on mount
   useEffect(() => {
@@ -373,6 +377,25 @@ export default function App() {
     else setToast({ message: '🚫 Access denied', visible: true });
   }, [currentUser, authLoading]);
 
+
+
+  // Auto-show onboarding for new users (first login) — only once per session
+  useEffect(() => {
+    if (!currentUser?.username || authLoading || onboardingCheckedRef.current) return;
+    
+    onboardingCheckedRef.current = true; // Prevent this from running again
+    
+    // Check localStorage flag — if already completed, don't show again
+    const completedKey = `onboarding_completed_${currentUser.username}`;
+    const wasCompleted = localStorage.getItem(completedKey);
+    
+    // Only show if NOT completed before
+    if (!wasCompleted) {
+      setShowOnboarding(true);
+      triggerHaptic('medium');
+    }
+  }, [currentUser?.username, authLoading, triggerHaptic]);
+
   // Load active announcements
   useEffect(() => {
     const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
@@ -472,25 +495,67 @@ export default function App() {
     }
   }, []);
 
-  // Build queue
+  // Build queue with optimized smart algorithm
   useEffect(() => {
     if (!currentUser || tracksLoading || votesLoading || tracks.length === 0) return;
+    
+    // Skip rebuild if Start Over just cleared votes
+    if (startOverRef.current) {
+      startOverRef.current = false;
+      return;
+    }
+    
     const votedIds = new Set(Object.keys(userVotes).map(String));
     const unvoted = tracks.filter(t => !votedIds.has(String(t.id)));
     const voteCount = Object.keys(userVotes).length;
-
-    let ordered;
-    if (voteCount < 5) {
-      // New user — show most liked beats first, then shuffle the rest
-      const sorted = [...unvoted].sort((a, b) => (b.cops || 0) - (a.cops || 0));
-      const topN = sorted.slice(0, 10); // top 10 most liked, in order
-      const rest = sorted.slice(10).sort(() => Math.random() - 0.5);
-      ordered = [...topN, ...rest];
-    } else {
-      // Experienced user — full shuffle
-      ordered = [...unvoted].sort(() => Math.random() - 0.5);
+    
+    // Calculate genre & producer preferences ONCE (not for every track)
+    const genrePrefs = {};
+    const producerPrefs = {};
+    Object.keys(userVotes).forEach(trackId => {
+      const track = tracks.find(t => String(t.id) === trackId);
+      if (!track || userVotes[trackId] !== 'right') return;
+      genrePrefs[track.genre] = (genrePrefs[track.genre] || 0) + 1;
+      producerPrefs[track.uploadedBy] = (producerPrefs[track.uploadedBy] || 0) + 1;
+    });
+    
+    const totalLikes = Object.keys(userVotes).filter(id => userVotes[id] === 'right').length || 1;
+    
+    // Score each track once
+    const scored = unvoted.map(track => {
+      const genre = genrePrefs[track.genre] ? (genrePrefs[track.genre] / totalLikes) : 0.2;
+      const engagement = track.cops || 0 > 0 ? ((track.cops || 0) / ((track.cops || 0) + (track.passes || 0))) : 0.5;
+      const producer = producerPrefs[track.uploadedBy] ? (producerPrefs[track.uploadedBy] / totalLikes) : 0.1;
+      const daysSince = (new Date() - new Date(track.listedAt)) / (1000 * 60 * 60 * 24);
+      const freshness = Math.max(0, 1 - (daysSince / 7));
+      const serendipity = Math.random() * 0.1;
+      
+      const score = (0.35 * genre + 0.25 * engagement + 0.20 * producer + 0.10 * freshness + 0.10 * serendipity);
+      return { track, score };
+    });
+    
+    // Sort by score
+    const sorted = scored.sort((a, b) => b.score - a.score).map(s => s.track);
+    
+    // Interleave by producer (simple version)
+    const result = [];
+    const byProducer = {};
+    sorted.forEach(t => {
+      if (!byProducer[t.uploadedBy]) byProducer[t.uploadedBy] = [];
+      byProducer[t.uploadedBy].push(t);
+    });
+    
+    const producers = Object.keys(byProducer);
+    let idx = 0;
+    while (result.length < sorted.length) {
+      const producer = producers[idx % producers.length];
+      if (byProducer[producer].length > 0) {
+        result.push(byProducer[producer].shift());
+      }
+      idx++;
     }
-    setQueue(ordered);
+    
+    setQueue(result);
   }, [currentUser?.id, tracksLoading, votesLoading, tracks.length, JSON.stringify(userVotes)]);
 
   const showToast = useCallback((msg) => {
@@ -508,7 +573,9 @@ export default function App() {
   // Haptic feedback utility
   const triggerHaptic = useCallback((pattern = "light") => {
     try {
-      const hapticEnabled = JSON.parse(localStorage.getItem('hapticEnabled') || 'true');
+      // Default to true (enabled) if not set
+      const hapticEnabledStr = localStorage.getItem('hapticEnabled');
+      const hapticEnabled = hapticEnabledStr === null ? true : JSON.parse(hapticEnabledStr);
       if (!hapticEnabled) return;
       
       const patterns = {
@@ -648,6 +715,8 @@ export default function App() {
 
 
 
+
+
   if (authLoading) {
     return (
       <div className="app">
@@ -686,6 +755,28 @@ export default function App() {
   return (
     <div className="app">
       <div className="app-bg" />
+
+      {/* Onboarding Modal */}
+      {showOnboarding && (
+        <OnboardingModal
+          onComplete={() => {
+            setShowOnboarding(false);
+            if (currentUser?.username) {
+              localStorage.setItem(`onboarding_completed_${currentUser.username}`, '1');
+            }
+          }}
+          onSkip={() => {
+            setShowOnboarding(false);
+            if (currentUser?.username) {
+              localStorage.setItem(`onboarding_completed_${currentUser.username}`, '1');
+            }
+          }}
+        />
+      )}
+
+
+
+
 
       <header className="app-header">
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
@@ -971,6 +1062,7 @@ export default function App() {
                     className="btn-primary"
                     style={{ marginTop: "20px" }}
                     onClick={() => {
+                      startOverRef.current = true; // Prevent queue effect from rebuilding
                       const shuffled = [...tracks].sort(() => Math.random() - 0.5);
                       setQueue(shuffled);
                       saveSeen(currentUser.username, []);

@@ -80,6 +80,31 @@ function triggerKonamiEasterEgg() {
 }
 
 export const triggerLogoClickEasterEgg = () => {
+  // Find the logo element
+  const logo = document.querySelector('.logo-text');
+  if (logo) {
+    logo.textContent = 'producerhub';
+    logo.style.fontSize = '20px';
+    logo.style.fontWeight = '900';
+    logo.style.background = 'linear-gradient(90deg, #FF9000 0%, #FF9000 50%, #000 50%)';
+    logo.style.backgroundClip = 'text';
+    logo.style.webkitBackgroundClip = 'text';
+    logo.style.webkitTextFillColor = 'transparent';
+    logo.style.letterSpacing = '1px';
+    
+    // Reset after 10 seconds
+    setTimeout(() => {
+      logo.textContent = '808market';
+      logo.style.fontSize = '';
+      logo.style.fontWeight = '';
+      logo.style.background = '';
+      logo.style.backgroundClip = '';
+      logo.style.webkitBackgroundClip = '';
+      logo.style.webkitTextFillColor = '';
+      logo.style.letterSpacing = '';
+    }, 10000);
+  }
+  
   document.documentElement.style.animation = 'spin-rainbow 3s linear';
   setTimeout(() => {
     document.documentElement.style.animation = '';

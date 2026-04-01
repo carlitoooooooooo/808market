@@ -83,14 +83,16 @@ export const triggerLogoClickEasterEgg = () => {
   // Find the logo element
   const logo = document.querySelector('.logo-text');
   if (logo) {
-    logo.textContent = 'producerhub';
+    logo.textContent = 'beathub';
     logo.style.fontSize = '20px';
     logo.style.fontWeight = '900';
-    logo.style.background = 'linear-gradient(90deg, #FF9000 0%, #FF9000 50%, #000 50%)';
+    // Vibrant cyan to purple gradient - bright and visible
+    logo.style.background = 'linear-gradient(90deg, #00f5ff 0%, #ff3366 50%, #bf5fff 100%)';
     logo.style.backgroundClip = 'text';
     logo.style.webkitBackgroundClip = 'text';
     logo.style.webkitTextFillColor = 'transparent';
     logo.style.letterSpacing = '1px';
+    logo.style.filter = 'drop-shadow(0 0 8px rgba(0,245,255,0.6))';
     
     // Reset after 10 seconds
     setTimeout(() => {
@@ -102,6 +104,7 @@ export const triggerLogoClickEasterEgg = () => {
       logo.style.webkitBackgroundClip = '';
       logo.style.webkitTextFillColor = '';
       logo.style.letterSpacing = '';
+      logo.style.filter = '';
     }, 10000);
   }
   

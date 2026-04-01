@@ -278,6 +278,28 @@ export default function UserProfilePage({ username, onClose, onOpenModal, userVo
                   {' · '}
                   <span style={{ color: 'rgba(255,255,255,0.8)', fontWeight: 600 }}>{followingCount}</span> following
                 </div>
+                {/* Profile Badge */}
+                {profile?.profile_badge && (() => {
+                  const BADGE_COLORS = {
+                    'cyan-purple': { bg: 'linear-gradient(135deg,#00f5ff,#bf5fff)', color: '#000' },
+                    'gold':        { bg: 'linear-gradient(135deg,#ffd700,#ffed4e)', color: '#000' },
+                    'red':         { bg: 'linear-gradient(135deg,#ff3366,#ff0000)', color: '#fff' },
+                    'green':       { bg: 'linear-gradient(135deg,#00ff88,#00cc66)', color: '#000' },
+                    'blue':        { bg: 'linear-gradient(135deg,#4080ff,#0040cc)', color: '#fff' },
+                    'orange':      { bg: 'linear-gradient(135deg,#ff9900,#ff6600)', color: '#000' },
+                    'pink':        { bg: 'linear-gradient(135deg,#ff64c8,#ff0099)', color: '#fff' },
+                    'white':       { bg: 'linear-gradient(135deg,#fff,#ccc)', color: '#000' },
+                    'dark':        { bg: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)' },
+                  };
+                  const bc = BADGE_COLORS[profile.profile_badge_color] || BADGE_COLORS['cyan-purple'];
+                  return (
+                    <div style={{ marginTop: '4px', marginBottom: '2px' }}>
+                      <span style={{ background: bc.bg, color: bc.color, border: bc.border || 'none', fontSize: '10px', fontFamily: 'var(--font-head)', fontWeight: 700, padding: '2px 10px', borderRadius: '20px', letterSpacing: '0.5px' }}>
+                        {profile.profile_badge}
+                      </span>
+                    </div>
+                  );
+                })()}
                 {bio && <div className="user-profile-bio">{bio}</div>}
                 {profile?.tagline && <div style={{ fontSize: '12px', color: 'var(--cyan)', fontFamily: "'Inter', sans-serif", marginTop: '2px', fontStyle: 'italic' }}>{profile.tagline}</div>}
                 {profile?.location && <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', fontFamily: "'Inter', sans-serif", marginTop: '2px' }}>📍 {profile.location}</div>}

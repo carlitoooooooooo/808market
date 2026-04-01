@@ -4007,3 +4007,49 @@ html.party-mode .auth-submit {
   background: linear-gradient(135deg, rgba(255,0,128,0.15), rgba(255,128,0,0.15), rgba(255,215,0,0.15)) !important;
   animation: pulseGlow 3s ease-in-out infinite;
 }
+
+/* PRO Animated Avatar Border Styles */
+@keyframes borderPulse {
+  0%, 100% {
+    box-shadow: 0 0 8px currentColor, inset 0 0 8px currentColor;
+  }
+  50% {
+    box-shadow: 0 0 16px currentColor, inset 0 0 16px currentColor;
+  }
+}
+
+.avatar-border-animated-neon-pulse {
+  border-color: #00f5ff !important;
+  box-shadow: 0 0 8px #00f5ff, inset 0 0 8px #00f5ff;
+  animation: borderPulse 2s ease-in-out infinite;
+}
+
+.avatar-border-animated-purple-pulse {
+  border-color: #bf5fff !important;
+  box-shadow: 0 0 8px #bf5fff, inset 0 0 8px #bf5fff;
+  animation: borderPulse 2s ease-in-out infinite;
+}
+
+.avatar-border-animated-rainbow-rotate {
+  border-image: linear-gradient(135deg, #ff3366, #ff9900, #00f5ff, #bf5fff) 1 !important;
+  box-shadow: 0 0 12px rgba(255,51,102,0.5), 0 0 8px rgba(0,245,255,0.5);
+  animation: borderPulse 3s ease-in-out infinite;
+}
+
+.avatar-border-animated-gold-glow {
+  border-color: #ffd700 !important;
+  box-shadow: 0 0 10px #ffd700, inset 0 0 10px #ffd700;
+  animation: borderPulse 2.5s ease-in-out infinite;
+}
+
+.avatar-border-animated-fire-glow {
+  border-color: #ff6600 !important;
+  box-shadow: 0 0 12px #ff6600, inset 0 0 12px #ff4400;
+  animation: borderPulse 2s ease-in-out infinite;
+}
+
+.avatar-border-animated-cyan-glow {
+  border-color: #00ffff !important;
+  box-shadow: 0 0 10px #00ffff, inset 0 0 10px #00ffff;
+  animation: borderPulse 2s ease-in-out infinite;
+}

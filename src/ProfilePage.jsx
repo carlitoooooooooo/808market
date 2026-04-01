@@ -621,7 +621,7 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
           {/* Avatar */}
           <div
-            className={`profile-avatar ${profileExtra.avatar_border !== 'none' ? `avatar-border-${profileExtra.avatar_border}` : ''}`}
+            className={`profile-avatar ${profileExtra.avatar_border !== 'none' ? `avatar-border-${profileExtra.avatar_border}` : ''} ${profileExtra.avatar_border?.startsWith('animated-') ? profileExtra.avatar_border : ''}`}
             style={{ background: avatarUrl ? 'transparent' : currentUser.avatarColor, cursor: 'pointer', overflow: 'hidden', position: 'relative', flexShrink: 0 }}
             onClick={() => avatarInputRef.current?.click()}
             title="Change profile picture"
@@ -1454,6 +1454,28 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
                 ))}
               </div>
             </div>
+
+            {/* PRO Animated Avatar Borders */}
+            {(currentUser.isPro || currentUser.role === 'admin' || TEAM_MEMBERS.includes(currentUser.username)) && (
+              <div>
+                <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,215,0,0.7)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '10px', textTransform: 'uppercase' }}>✨ PRO Animated Avatar Borders</label>
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '8px' }}>
+                  {[
+                    { value: 'animated-neon-pulse', label: '💫 Neon Pulse', bg: '#00f5ff', animation: 'pulse 2s ease-in-out infinite' },
+                    { value: 'animated-purple-pulse', label: '💜 Purple Pulse', bg: '#bf5fff', animation: 'pulse 2s ease-in-out infinite' },
+                    { value: 'animated-rainbow-rotate', label: '🌈 Rainbow Glow', bg: 'linear-gradient(135deg, #ff3366, #ff9900, #00f5ff, #bf5fff)', animation: 'pulse 3s ease-in-out infinite' },
+                    { value: 'animated-gold-glow', label: '✨ Gold Glow', bg: '#ffd700', animation: 'pulse 2.5s ease-in-out infinite' },
+                    { value: 'animated-fire-glow', label: '🔥 Fire Glow', bg: 'linear-gradient(135deg, #ff0000, #ff8c00)', animation: 'pulse 2s ease-in-out infinite' },
+                    { value: 'animated-cyan-glow', label: '⚡ Cyan Glow', bg: '#00ffff', animation: 'pulse 2s ease-in-out infinite' },
+                  ].map(b => (
+                    <button key={b.value} type="button" onClick={() => setProfileExtra(prev => ({ ...prev, avatar_border: b.value }))}
+                      style={{ width: 36, height: 36, borderRadius: '50%', border: `3px solid ${profileExtra.avatar_border === b.value ? '#fff' : 'transparent'}`, background: b.bg, cursor: 'pointer', fontSize: '12px', color: '#000', fontWeight: 700, animation: profileExtra.avatar_border === b.value ? b.animation : 'none' }}>
+                      {profileExtra.avatar_border === b.value ? '✓' : ''}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Avatar color picker */}
             <div>

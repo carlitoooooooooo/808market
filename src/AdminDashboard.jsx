@@ -167,7 +167,7 @@ function UsersTab() {
     setLoading(true);
     try {
       const res = await sbFetch(
-        "/profiles?select=id,username,role,is_pro,is_beta_tester,is_banned,last_seen&order=last_seen.desc.nullslast&limit=500"
+        "/profiles?select=id,username,role,is_pro,is_beta_tester,is_verified,is_banned,last_seen&order=last_seen.desc.nullslast&limit=500"
       );
       const data = await res.json();
       if (Array.isArray(data)) setUsers(data);
@@ -219,6 +219,7 @@ function UsersTab() {
               <th>Role</th>
               <th>PRO</th>
               <th>Beta</th>
+              <th>Verified</th>
               <th>Banned</th>
               <th>Last Seen</th>
               <th>Actions</th>
@@ -237,6 +238,7 @@ function UsersTab() {
                   </td>
                   <td>{u.is_pro ? "✅" : "—"}</td>
                   <td>{u.is_beta_tester ? "✅" : "—"}</td>
+                  <td>{u.is_verified ? "✅" : "—"}</td>
                   <td>{u.is_banned ? "🚫" : "—"}</td>
                   <td style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)" }}>
                     {u.last_seen ? new Date(u.last_seen).toLocaleDateString() : "—"}
@@ -267,6 +269,25 @@ function UsersTab() {
                           onClick={() => patchUser(u.username, { is_beta_tester: true })}
                         >
                           Beta
+                        </button>
+                      )}
+                      {!u.is_verified ? (
+                        <button
+                          className="admin-btn admin-btn--verified"
+                          disabled={pending}
+                          onClick={() => patchUser(u.username, { is_verified: true })}
+                          style={{ background: 'linear-gradient(135deg, #00f5ff, #bf5fff)', color: '#000' }}
+                        >
+                          ✓ Verify
+                        </button>
+                      ) : (
+                        <button
+                          className="admin-btn admin-btn--unverify"
+                          disabled={pending}
+                          onClick={() => patchUser(u.username, { is_verified: false })}
+                          style={{ background: 'rgba(191,95,255,0.2)', color: '#bf5fff', border: '1px solid #bf5fff' }}
+                        >
+                          ✕ Unverify
                         </button>
                       )}
                       {!u.is_banned ? (

@@ -377,48 +377,17 @@ export default function App() {
   }, [currentUser, authLoading]);
 
   // Check if user should see onboarding (first time login)
-  const onboardingCheckedRef = useRef(false); // Prevent duplicate checks
+  // Simple version: just check localStorage. If not dismissed, show it.
   useEffect(() => {
-    console.log('Onboarding check useEffect ran - currentUser:', currentUser?.username, 'authLoading:', authLoading, 'checked:', onboardingCheckedRef.current);
-    if (!currentUser?.username || authLoading || onboardingCheckedRef.current) {
-      console.log('Early return from onboarding check');
-      return;
+    if (!currentUser?.username || authLoading) return;
+    
+    const dismissedKey = `onboarding_completed_${currentUser.username}`;
+    const isDismissed = localStorage.getItem(dismissedKey);
+    
+    // Show onboarding if NOT dismissed
+    if (!isDismissed) {
+      setShowOnboarding(true);
     }
-    
-    onboardingCheckedRef.current = true; // Mark as checked to prevent re-running
-    
-    // Check localStorage first to prevent re-showing after dismiss
-    const dismissedLocalKey = `onboarding_dismissed_${currentUser.username}`;
-    if (localStorage.getItem(dismissedLocalKey)) return;
-    
-    // Check if they've completed onboarding (with timeout to prevent hanging)
-    const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 3000); // 3 sec timeout
-    
-    fetch(`https://bkapxykeryzxbqpgjgab.supabase.co/rest/v1/profiles?username=eq.${encodeURIComponent(currentUser.username)}&select=has_completed_onboarding`, {
-      headers: { apikey: ANON, Authorization: `Bearer ${ANON}` },
-      signal: controller.signal
-    })
-      .then(r => r.json())
-      .then(data => {
-        console.log('Onboarding check - Fetched data:', data);
-        if (Array.isArray(data) && data.length > 0) {
-          const hasCompleted = data[0]?.has_completed_onboarding;
-          console.log('Has completed onboarding:', hasCompleted);
-          // Show if NOT completed (false, null, or undefined = new user)
-          if (!hasCompleted) {
-            console.log('Showing onboarding modal');
-            setShowOnboarding(true);
-          }
-        } else {
-          console.log('No profile data returned or not an array');
-        }
-      })
-      .catch(err => {
-        console.log('Onboarding fetch error:', err);
-      })
-      .finally(() => clearTimeout(timeout));
   }, [currentUser?.username, authLoading]);
 
   // Load active announcements
@@ -842,18 +811,19 @@ export default function App() {
     if (!currentUser?.username) return;
     setShowOnboarding(false);
     
-    // Store in localStorage to prevent re-showing
-    localStorage.setItem(`onboarding_dismissed_${currentUser.username}`, '1');
+    // Store in localStorage — that's it. Simple and foolproof.
+    localStorage.setItem(`onboarding_completed_${currentUser.username}`, '1');
     
+    // Also update DB in the background (optional, doesn't block)
     try {
       const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
-      await fetch(`https://bkapxykeryzxbqpgjgab.supabase.co/rest/v1/profiles?username=eq.${encodeURIComponent(currentUser.username)}`, {
+      fetch(`https://bkapxykeryzxbqpgjgab.supabase.co/rest/v1/profiles?username=eq.${encodeURIComponent(currentUser.username)}`, {
         method: 'PATCH',
         headers: { apikey: ANON, Authorization: `Bearer ${ANON}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ has_completed_onboarding: true }),
-      });
+      }).catch(() => {}); // Silently fail if DB is down
     } catch (err) {
-      console.debug('Onboarding completion DB save failed (localStorage saved):', err);
+      // Ignore — localStorage is the source of truth
     }
   }, [currentUser?.username]);
 

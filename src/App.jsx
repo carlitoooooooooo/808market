@@ -551,6 +551,25 @@ export default function App() {
     let producerIdx = 0;
     
     while (result.length < sorted.length) {
+      // If we've hit 2 from the same producer, FORCE next different producer
+      if (consecutiveCount >= 2 && lastProducer !== null) {
+        // Skip the last producer entirely until we pick a different one
+        let nextProducerIdx = 0;
+        let foundDifferent = false;
+        
+        for (let i = 0; i < producers.length; i++) {
+          const candidateProducer = producers[(producerIdx + i + 1) % producers.length];
+          if (candidateProducer !== lastProducer && byProducer[candidateProducer].length > 0) {
+            producerIdx = (producerIdx + i + 1) % producers.length;
+            foundDifferent = true;
+            break;
+          }
+        }
+        
+        if (!foundDifferent) break; // No other producers with beats
+        consecutiveCount = 0;
+      }
+      
       // Get next producer in round-robin fashion
       let producer = producers[producerIdx % producers.length];
       
@@ -559,26 +578,10 @@ export default function App() {
         producerIdx++;
         producer = producers[producerIdx % producers.length];
         
-        // Safety check: if we've cycled through all producers, break
-        if (producerIdx - (result.length / producers.length) > producers.length * 2) {
+        // Safety: if we've gone through all producers once, we're done
+        if (producerIdx >= producers.length && result.length < sorted.length) {
           break;
         }
-      }
-      
-      // If we've hit 2 from the same producer, force next producer
-      if (producer === lastProducer && consecutiveCount >= 2) {
-        producerIdx++;
-        producer = producers[producerIdx % producers.length];
-        
-        // Skip to first producer with beats
-        let skipAttempts = 0;
-        while (byProducer[producer].length === 0 && skipAttempts < producers.length) {
-          producerIdx++;
-          producer = producers[producerIdx % producers.length];
-          skipAttempts++;
-        }
-        
-        consecutiveCount = 0;
       }
       
       // Add beat from this producer if available
@@ -592,6 +595,9 @@ export default function App() {
           lastProducer = producer;
           consecutiveCount = 1;
         }
+      } else {
+        // Producer exhausted, move to next
+        producerIdx++;
       }
       
       producerIdx++;

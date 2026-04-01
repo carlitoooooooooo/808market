@@ -1,14 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 
-export default function OnboardingModal({ onComplete, onSkip, onStepChange }) {
+export default function OnboardingModal({ onComplete, onSkip }) {
   const [step, setStep] = useState(1);
-  
-  // Notify parent of step change
-  useEffect(() => {
-    if (onStepChange) {
-      onStepChange(step);
-    }
-  }, [step, onStepChange]);
 
   const steps = [
     {

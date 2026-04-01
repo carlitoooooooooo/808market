@@ -758,7 +758,6 @@ export default function App() {
       {/* Onboarding Modal */}
       {showOnboarding && (
         <OnboardingModal
-          onStepChange={setOnboardingStep}
           onComplete={() => {
             setShowOnboarding(false);
             setOnboardingStep(1);
@@ -778,124 +777,7 @@ export default function App() {
 
 
 
-      {/* Onboarding Spotlight Effect - Simple dark overlay */}
-      {showOnboarding && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          background: 'rgba(0, 0, 0, 0.75)',
-          pointerEvents: 'none',
-          zIndex: 9997,
-        }} />
-      )}
 
-      {/* Highlight Boxes - Cut through dark overlay */}
-      {showOnboarding && (
-        <>
-          {/* Step 3: Highlight "For You" button */}
-          {onboardingStep === 3 && (
-            <div style={{
-              position: 'fixed',
-              top: '70px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: '340px',
-              height: '70px',
-              border: '5px solid #00f5ff',
-              borderRadius: '16px',
-              boxShadow: `
-                0 0 0 9999px rgba(0, 0, 0, 0.75),
-                0 0 60px rgba(0, 245, 255, 1),
-                inset 0 0 30px rgba(0, 245, 255, 0.3)
-              `,
-              pointerEvents: 'none',
-              zIndex: 9998,
-            }} />
-          )}
-          
-          {/* Step 4: Highlight leaderboard tab */}
-          {onboardingStep === 4 && (
-            <div style={{
-              position: 'fixed',
-              top: '10px',
-              left: '50%',
-              transform: 'translateX(calc(-50% + 60px))',
-              width: '130px',
-              height: '50px',
-              border: '5px solid #ff3366',
-              borderRadius: '16px',
-              boxShadow: `
-                0 0 0 9999px rgba(0, 0, 0, 0.75),
-                0 0 60px rgba(255, 51, 102, 1),
-                inset 0 0 30px rgba(255, 51, 102, 0.3)
-              `,
-              pointerEvents: 'none',
-              zIndex: 9998,
-            }} />
-          )}
-          
-          {/* Step 5: Highlight "+ LIST BEAT" button */}
-          {onboardingStep === 5 && (
-            <div style={{
-              position: 'fixed',
-              top: '10px',
-              right: '125px',
-              width: '150px',
-              height: '50px',
-              border: '5px solid #00ff88',
-              borderRadius: '16px',
-              boxShadow: `
-                0 0 0 9999px rgba(0, 0, 0, 0.75),
-                0 0 60px rgba(0, 255, 136, 1),
-                inset 0 0 30px rgba(0, 255, 136, 0.3)
-              `,
-              pointerEvents: 'none',
-              zIndex: 9998,
-            }} />
-          )}
-          
-          {/* Step 6: Highlight "Create" tab in bottom nav */}
-          {onboardingStep === 6 && (
-            <div style={{
-              position: 'fixed',
-              bottom: '12px',
-              left: '50%',
-              transform: 'translateX(calc(-50% - 70px))',
-              width: '110px',
-              height: '80px',
-              border: '5px solid #bf5fff',
-              borderRadius: '16px',
-              boxShadow: `
-                0 0 0 9999px rgba(0, 0, 0, 0.75),
-                0 0 60px rgba(191, 95, 255, 1),
-                inset 0 0 30px rgba(191, 95, 255, 0.3)
-              `,
-              pointerEvents: 'none',
-              zIndex: 9998,
-            }} />
-          )}
-          
-          {/* Step 7: Highlight settings gear */}
-          {onboardingStep === 7 && (
-            <div style={{
-              position: 'fixed',
-              top: '10px',
-              right: '10px',
-              width: '60px',
-              height: '60px',
-              border: '5px solid #ff9500',
-              borderRadius: '16px',
-              boxShadow: `
-                0 0 0 9999px rgba(0, 0, 0, 0.75),
-                0 0 60px rgba(255, 149, 0, 1),
-                inset 0 0 30px rgba(255, 149, 0, 0.3)
-              `,
-              pointerEvents: 'none',
-              zIndex: 9998,
-            }} />
-          )}
-        </>
-      )}
 
       <header className="app-header">
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>

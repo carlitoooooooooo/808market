@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useAuth, AVATAR_COLORS } from "./AuthContext.jsx";
 import { PRODUCER_BADGES, getEarnedBadges } from "./producerBadges.js";
-import { getUnlockedAchievements } from "./AchievementBadges.js";
 // MOCK_USERS removed — using real DB data for taste match
 import SnippetPicker from "./SnippetPicker.jsx";
 
@@ -719,23 +718,7 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
           </div>
         </div>
 
-        {/* Achievement Badges */}
-        {(() => {
-          const achievements = getUnlockedAchievements(currentUser, myUploads, {}, []);
-          return achievements.length > 0 ? (
-            <div style={{ marginTop: '16px', padding: '12px', background: 'rgba(0,245,255,0.05)', border: '1px solid rgba(0,245,255,0.1)', borderRadius: '10px' }}>
-              <div style={{ fontSize: '11px', fontFamily: 'var(--font-head)', color: 'rgba(255,255,255,0.5)', letterSpacing: '1px', marginBottom: '8px', textTransform: 'uppercase' }}>🏆 Achievements ({achievements.length})</div>
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                {achievements.map(ach => (
-                  <div key={ach.id} title={ach.description} style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '4px 8px', background: 'rgba(0,245,255,0.1)', border: '1px solid rgba(0,245,255,0.2)', borderRadius: '6px', cursor: 'pointer' }}>
-                    <span style={{ fontSize: '16px' }}>{ach.emoji}</span>
-                    <span style={{ fontSize: '11px', fontFamily: 'var(--font-head)', color: 'rgba(255,255,255,0.7)' }}>{ach.name}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : null;
-        })()}
+
 
         {/* Bio + extra info */}
         {!editing && (

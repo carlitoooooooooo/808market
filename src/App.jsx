@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import "./App.css";
 import { useAuth } from "./AuthContext.jsx";
 import { initEasterEggs, triggerLogoClickEasterEgg, checkSearchEasterEgg, checkVoteStreak } from "./EasterEggs.js";
-import { getUnlockedAchievements, checkNewAchievements } from "./AchievementBadges.js";
 import AuthScreen from "./AuthScreen.jsx";
 import AdminDashboard from "./AdminDashboard.jsx";
 import SwipeCard from "./SwipeCard.jsx";
@@ -168,7 +167,6 @@ export default function App() {
       return [];
     }
   });
-  const prevUnlockedRef = useRef([]);
   const [showOnboarding, setShowOnboarding] = useState(false); // Show onboarding modal
   const onboardingCheckedRef = useRef(false); // Track if we've checked onboarding status
   const toastTimer = useRef(null);
@@ -403,27 +401,6 @@ export default function App() {
     // Mark as checked so we don't show it again even if currentUser changes
     onboardingCheckedRef.current = true;
   }, [currentUser?.username, authLoading]);
-
-  // Check achievements when tracks or votes change
-  useEffect(() => {
-    if (!currentUser) return;
-    
-    const currentUnlocked = getUnlockedAchievements(currentUser, tracks, userVotes);
-    const newAchievements = checkNewAchievements(prevUnlockedRef.current, currentUnlocked);
-    
-    // Update unlocked achievements
-    const allIds = currentUnlocked.map(a => a.id);
-    setUnlockedAchievements(allIds);
-    localStorage.setItem('unlockedAchievements', JSON.stringify(allIds));
-    
-    // Show toast for each new achievement
-    newAchievements.forEach(achievement => {
-      showToast(`🏆 Achievement Unlocked: ${achievement.emoji} ${achievement.name}!`);
-      triggerHaptic('strong');
-    });
-    
-    prevUnlockedRef.current = currentUnlocked;
-  }, [currentUser?.username, tracks.length, Object.keys(userVotes).length]);
 
   // Load active announcements
   useEffect(() => {

@@ -167,7 +167,7 @@ function UsersTab() {
     setLoading(true);
     try {
       const res = await sbFetch(
-        "/profiles?select=id,username,role,is_pro,is_beta_tester,is_verified,is_banned,last_seen&order=last_seen.desc.nullslast&limit=500"
+        "/profiles?select=id,username,role,is_pro,is_beta_tester,is_banned,last_seen&order=last_seen.desc.nullslast&limit=500"
       );
       const data = await res.json();
       if (Array.isArray(data)) setUsers(data);
@@ -238,7 +238,7 @@ function UsersTab() {
                   </td>
                   <td>{u.is_pro ? "✅" : "—"}</td>
                   <td>{u.is_beta_tester ? "✅" : "—"}</td>
-                  <td>{u.is_verified ? "✅" : "—"}</td>
+                  <td>{u.is_verified !== undefined ? (u.is_verified ? "✅" : "—") : "—"}</td>
                   <td>{u.is_banned ? "🚫" : "—"}</td>
                   <td style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)" }}>
                     {u.last_seen ? new Date(u.last_seen).toLocaleDateString() : "—"}

@@ -166,7 +166,7 @@ export default function App() {
       return [];
     }
   });
-  const [showOnboarding, setShowOnboarding] = useState(true); // Show onboarding modal — FORCE ON FOR TESTING
+  const [showOnboarding, setShowOnboarding] = useState(false); // Show onboarding modal
   const toastTimer = useRef(null);
   const notifTimer = useRef(null);
   const startOverRef = useRef(false); // Flag to bypass queue rebuild during reset
@@ -376,19 +376,7 @@ export default function App() {
     else setToast({ message: '🚫 Access denied', visible: true });
   }, [currentUser, authLoading]);
 
-  // Check if user should see onboarding (first time login)
-  // Simple version: just check localStorage. If not dismissed, show it.
-  useEffect(() => {
-    if (!currentUser?.username || authLoading) return;
-    
-    const dismissedKey = `onboarding_completed_${currentUser.username}`;
-    const isDismissed = localStorage.getItem(dismissedKey);
-    
-    // Show onboarding if NOT dismissed
-    if (!isDismissed) {
-      setShowOnboarding(true);
-    }
-  }, [currentUser?.username, authLoading]);
+
 
   // Load active announcements
   useEffect(() => {
@@ -806,26 +794,7 @@ export default function App() {
     showToast("🔥 BEAT LISTED!");
   }, [showToast]);
 
-  // Mark onboarding as complete
-  const completeOnboarding = useCallback(async () => {
-    if (!currentUser?.username) return;
-    setShowOnboarding(false);
-    
-    // Store in localStorage — that's it. Simple and foolproof.
-    localStorage.setItem(`onboarding_completed_${currentUser.username}`, '1');
-    
-    // Also update DB in the background (optional, doesn't block)
-    try {
-      const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
-      fetch(`https://bkapxykeryzxbqpgjgab.supabase.co/rest/v1/profiles?username=eq.${encodeURIComponent(currentUser.username)}`, {
-        method: 'PATCH',
-        headers: { apikey: ANON, Authorization: `Bearer ${ANON}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ has_completed_onboarding: true }),
-      }).catch(() => {}); // Silently fail if DB is down
-    } catch (err) {
-      // Ignore — localStorage is the source of truth
-    }
-  }, [currentUser?.username]);
+
 
 
 
@@ -868,41 +837,22 @@ export default function App() {
     <div className="app">
       <div className="app-bg" />
 
-      {/* Onboarding Modal - TEST DIV */}
+      {/* Onboarding Modal */}
       {showOnboarding && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          background: 'rgba(0, 0, 0, 0.9)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 9999,
-        }}>
-          <div style={{
-            background: '#000',
-            border: '3px solid #00f5ff',
-            padding: '40px',
-            borderRadius: '20px',
-            textAlign: 'center',
-            maxWidth: '400px',
-          }}>
-            <h1 style={{ color: '#00f5ff', fontSize: '32px', marginBottom: '20px' }}>🎵 ONBOARDING TEST</h1>
-            <p style={{ color: '#fff', fontSize: '18px', marginBottom: '20px' }}>If you see this, the modal works!</p>
-            <button onClick={() => setShowOnboarding(false)} style={{
-              background: '#00f5ff',
-              color: '#000',
-              border: 'none',
-              padding: '10px 20px',
-              borderRadius: '10px',
-              fontSize: '16px',
-              fontWeight: 'bold',
-              cursor: 'pointer',
-            }}>
-              Close
-            </button>
-          </div>
-        </div>
+        <OnboardingModal
+          onComplete={() => {
+            setShowOnboarding(false);
+            if (currentUser?.username) {
+              localStorage.setItem(`onboarding_completed_${currentUser.username}`, '1');
+            }
+          }}
+          onSkip={() => {
+            setShowOnboarding(false);
+            if (currentUser?.username) {
+              localStorage.setItem(`onboarding_completed_${currentUser.username}`, '1');
+            }
+          }}
+        />
       )}
 
       <header className="app-header">
@@ -980,6 +930,27 @@ export default function App() {
       <main className="app-main">
         {activeTab === "discover" && (
           <div className="discover-view">
+            {/* TEST: Onboarding button (remove later) */}
+            {currentUser && (
+              <button 
+                onClick={() => setShowOnboarding(true)}
+                style={{
+                  margin: '8px 12px 0',
+                  padding: '10px 14px',
+                  background: 'rgba(0,245,255,0.15)',
+                  border: '1px solid rgba(0,245,255,0.4)',
+                  borderRadius: '12px',
+                  color: '#00f5ff',
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  fontFamily: 'var(--font-head)',
+                }}
+              >
+                📖 Show Onboarding
+              </button>
+            )}
+
             {/* Stripe Connect Reminder Banner */}
             {showStripeReminder && currentUser && (
               <div style={{ margin: '8px 12px 0', background: 'linear-gradient(135deg, rgba(99,91,255,0.15), rgba(0,245,255,0.1))', border: '1px solid rgba(99,91,255,0.4)', borderRadius: '12px', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>

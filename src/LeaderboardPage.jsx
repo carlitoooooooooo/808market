@@ -68,9 +68,9 @@ export default function LeaderboardPage({ tracks, onVote, userVotes, onViewUser,
   async function loadProducers() {
     setProducersLoading(true);
     try {
-      // Fetch all tracks to group by producer
+      // Fetch all tracks to group by producer (include listed_at for time filtering)
       const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/tracks?select=uploaded_by_username,cops&uploaded_by_username=not.is.null`,
+        `${SUPABASE_URL}/rest/v1/tracks?select=uploaded_by_username,cops,listed_at&uploaded_by_username=not.is.null`,
         { headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` } }
       );
       const data = await res.json();
@@ -81,9 +81,10 @@ export default function LeaderboardPage({ tracks, onVote, userVotes, onViewUser,
         data.forEach(t => {
           const u = t.uploaded_by_username;
           if (!u) return;
-          if (!byUser[u]) byUser[u] = { totalLikes: 0, beatCount: 0 };
+          if (!byUser[u]) byUser[u] = { totalLikes: 0, beatCount: 0, tracks: [] };
           byUser[u].totalLikes += (t.cops || 0);
           byUser[u].beatCount += 1;
+          byUser[u].tracks.push(t);
         });
       }
 
@@ -131,6 +132,39 @@ export default function LeaderboardPage({ tracks, onVote, userVotes, onViewUser,
   });
   
   const sorted = [...filteredByTime].sort((a, b) => (b.cops || 0) - (a.cops || 0));
+
+  // Filter producers by time range
+  const filteredProducers = producers.map(p => {
+    if (timeRange === 'all') return p;
+    
+    // For time-based filtering, recalculate likes from tracks within date range
+    const now = new Date();
+    let timeFilteredLikes = 0;
+    
+    if (Array.isArray(p.tracks)) {
+      p.tracks.forEach(t => {
+        const listedDate = new Date(t.listed_at || new Date());
+        const daysOld = (now - listedDate) / (1000 * 60 * 60 * 24);
+        
+        if (timeRange === 'week' && daysOld <= 7) {
+          timeFilteredLikes += (t.cops || 0);
+        } else if (timeRange === 'month' && daysOld <= 30) {
+          timeFilteredLikes += (t.cops || 0);
+        }
+      });
+    }
+    
+    return { ...p, displayLikes: timeFilteredLikes };
+  });
+  
+  // Sort filtered producers
+  const sortedProducers = [...filteredProducers]
+    .filter(p => timeRange === 'all' || (p.displayLikes > 0))
+    .sort((a, b) => {
+      const likesA = timeRange === 'all' ? a.totalLikes : (a.displayLikes || 0);
+      const likesB = timeRange === 'all' ? b.totalLikes : (b.displayLikes || 0);
+      return likesB - likesA;
+    });
 
   return (
     <div className="leaderboard-page">
@@ -294,16 +328,45 @@ export default function LeaderboardPage({ tracks, onVote, userVotes, onViewUser,
       {/* ── TOP PRODUCERS ── */}
       <div className={`leaderboard-mobile-producers ${subTab !== "producers" ? "leaderboard-mobile-hidden" : ""}`}>
         <div className="leaderboard-col-header">👥 Top Producers — Most loved right now</div>
+        
+        {/* Time Range Filter */}
+        <div style={{ display: 'flex', gap: '8px', padding: '0 12px 12px', flexWrap: 'wrap' }}>
+          {[
+            { value: 'all', label: 'All Time' },
+            { value: 'month', label: 'This Month' },
+            { value: 'week', label: 'This Week' },
+          ].map(option => (
+            <button
+              key={option.value}
+              onClick={() => setTimeRange(option.value)}
+              style={{
+                background: timeRange === option.value ? 'linear-gradient(135deg, #00f5ff, #bf5fff)' : 'rgba(255,255,255,0.06)',
+                border: timeRange === option.value ? 'none' : '1px solid rgba(255,255,255,0.12)',
+                color: timeRange === option.value ? '#000' : 'rgba(255,255,255,0.6)',
+                borderRadius: '20px',
+                padding: '6px 14px',
+                fontSize: '12px',
+                fontWeight: '600',
+                fontFamily: 'var(--font-head)',
+                cursor: 'pointer',
+                transition: 'all 0.15s'
+              }}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+        
         <div className="leaderboard-list">
           {producersLoading ? (
             <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-dim)', fontFamily: "'Space Grotesk', sans-serif", fontSize: '14px' }}>
               Loading producers...
             </div>
-          ) : producers.length === 0 ? (
+          ) : sortedProducers.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-dim)', fontFamily: "'Space Grotesk', sans-serif", fontSize: '14px' }}>
-              No producers yet
+              No producers in this time range
             </div>
-          ) : producers.slice(0, producersLimit).map((p, idx) => {
+          ) : sortedProducers.slice(0, producersLimit).map((p, idx) => {
             const rank = idx + 1;
             const rankStyle = RANK_STYLE[rank] || {};
             const initial = (p.username || '?')[0].toUpperCase();
@@ -364,7 +427,7 @@ export default function LeaderboardPage({ tracks, onVote, userVotes, onViewUser,
 
                 {/* Likes */}
                 <div className="leaderboard-hards" style={{ textAlign: "right" }}>
-                  <div className="hards-count">❤️ {(p.totalLikes || 0).toLocaleString()}</div>
+                  <div className="hards-count">❤️ {(timeRange === 'all' ? (p.totalLikes || 0) : (p.displayLikes || 0)).toLocaleString()}</div>
                   {p.follower_count > 0 && (
                     <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginTop: '3px', fontFamily: "'Space Grotesk', sans-serif" }}>
                       👥 {p.follower_count}
@@ -375,7 +438,7 @@ export default function LeaderboardPage({ tracks, onVote, userVotes, onViewUser,
             );
           })}
         </div>
-        {producersLimit < producers.length && (
+        {producersLimit < sortedProducers.length && (
           <div style={{ display: 'flex', justifyContent: 'center', padding: '20px' }}>
             <button 
               onClick={() => setProducersLimit(prev => prev + 50)}
@@ -394,7 +457,7 @@ export default function LeaderboardPage({ tracks, onVote, userVotes, onViewUser,
               onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
               onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
             >
-              👥 Show More ({producersLimit} / {producers.length})
+              👥 Show More ({producersLimit} / {sortedProducers.length})
             </button>
           </div>
         )}

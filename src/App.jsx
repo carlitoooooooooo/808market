@@ -166,7 +166,7 @@ export default function App() {
       return [];
     }
   });
-  const [showOnboarding, setShowOnboarding] = useState(false); // Show onboarding modal
+  const [showOnboarding, setShowOnboarding] = useState(true); // Show onboarding modal — FORCE ON FOR TESTING
   const toastTimer = useRef(null);
   const notifTimer = useRef(null);
   const startOverRef = useRef(false); // Flag to bypass queue rebuild during reset

@@ -855,6 +855,28 @@ export default function App() {
         />
       )}
 
+      {/* TEST BUTTON - ALWAYS VISIBLE */}
+      <button 
+        onClick={() => setShowOnboarding(true)}
+        style={{
+          position: 'fixed',
+          bottom: '20px',
+          right: '20px',
+          padding: '12px 20px',
+          background: '#ff3366',
+          color: '#fff',
+          border: 'none',
+          borderRadius: '20px',
+          fontSize: '14px',
+          fontWeight: 'bold',
+          cursor: 'pointer',
+          zIndex: 100,
+          fontFamily: 'var(--font-head)',
+        }}
+      >
+        📖 ONBOARDING
+      </button>
+
       <header className="app-header">
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           <Logo />

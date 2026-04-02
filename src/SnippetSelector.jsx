@@ -100,10 +100,6 @@ export default function SnippetSelector({ file, url, initialStart, onConfirm, on
     audio.addEventListener("loadstart", onLoadStart);
     audio.addEventListener("loadeddata", onLoadedData);
 
-    // Explicitly trigger load
-    console.log("✓ Calling audio.load()");
-    audio.load();
-
     // Timeout
     const timeoutId = setTimeout(() => {
       if (!loaded) {

@@ -15,47 +15,75 @@ export default function SnippetSelector({ file, url, initialStart, onConfirm, on
   const rafRef = useRef(null);
   const barRef = useRef(null);
   const dragging = useRef(false);
+  const blobUrlRef = useRef(null);
 
+  // Initialize audio once
   useEffect(() => {
-    // Create audio element and append to DOM (some browsers need this)
     const audio = new Audio();
     audio.crossOrigin = "anonymous";
-    audio.style.display = "none";
-    document.body.appendChild(audio);
     audioRef.current = audio;
 
-    // Use File object directly with blob URL
-    let source = null;
-    if (file instanceof File || (file && file.size !== undefined && file.type !== undefined)) {
-      console.log("Using File object directly");
-      source = URL.createObjectURL(file);
-    } else if (url) {
-      console.log("Using URL");
-      source = url;
-    } else {
-      document.body.removeChild(audio);
-      setError("No audio file provided");
-      setLoading(false);
-      return;
-    }
+    let audioSource = null;
 
-    audio.src = source;
+    // Get audio source - prefer File object (blob URL), fall back to signed URL
+    const initAudio = async () => {
+      try {
+        if (file && (file instanceof File || (file.size && file.type))) {
+          // Use File object directly with blob URL
+          audioSource = URL.createObjectURL(file);
+          blobUrlRef.current = audioSource;
+          console.log("Using File object - blob URL created");
+        } else if (url) {
+          // For URL, get signed version if needed
+          if (!url.includes('/sign/') && url.includes('/object/public/')) {
+            try {
+              const res = await fetch('/api/sign-audio', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ audioUrl: url }),
+              });
+              const data = await res.json();
+              audioSource = data.signedUrl || url;
+              console.log("Got signed URL");
+            } catch (e) {
+              console.warn('Could not get signed URL, using public URL');
+              audioSource = url;
+            }
+          } else {
+            audioSource = url;
+          }
+        } else {
+          throw new Error("No file or URL provided");
+        }
 
+        audio.src = audioSource;
+        console.log("Audio src set");
+      } catch (err) {
+        console.error("Init error:", err);
+        setError(err.message);
+        setLoading(false);
+      }
+    };
+
+    initAudio();
+
+    // Event handlers
     const handleLoadedMetadata = () => {
-      console.log("✅ Audio loaded. Duration:", audio.duration);
+      console.log("Audio loaded. Duration:", audio.duration);
       setDuration(audio.duration);
       setSnippetStart(Math.min(initialStart || 0, Math.max(0, audio.duration - SNIPPET_DURATION)));
       setLoading(false);
     };
 
     const handleError = () => {
-      console.error("❌ Audio error:", audio.error?.code, audio.error?.message);
-      setError(`Failed to load audio: ${audio.error?.message || "unknown"}`);
+      console.error("Audio load error:", audio.error?.code, audio.error?.message);
+      setError(`Failed to load audio: ${audio.error?.message || "unknown error"}`);
       setLoading(false);
     };
 
     audio.addEventListener("loadedmetadata", handleLoadedMetadata);
     audio.addEventListener("error", handleError);
+    audio.addEventListener("ended", () => setPlaying(false));
 
     const timeoutId = setTimeout(() => {
       if (duration === 0) {
@@ -65,18 +93,18 @@ export default function SnippetSelector({ file, url, initialStart, onConfirm, on
       }
     }, 8000);
 
+    // Cleanup
     return () => {
       clearTimeout(timeoutId);
       audio.pause();
       audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
       audio.removeEventListener("error", handleError);
-      if (file instanceof File || (file && file.size !== undefined)) {
-        URL.revokeObjectURL(source);
+      if (blobUrlRef.current) {
+        URL.revokeObjectURL(blobUrlRef.current);
       }
-      if (document.body.contains(audio)) {
-        document.body.removeChild(audio);
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
       }
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
   }, [file, url, initialStart]);
 
@@ -101,8 +129,18 @@ export default function SnippetSelector({ file, url, initialStart, onConfirm, on
       setPlaying(false);
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     } else {
-      audio.currentTime = snippetStart;
-      audio.play().catch(err => console.error("Play error:", err));
+      // Seek to start time if ready, otherwise wait
+      if (audio.readyState >= 2 && isFinite(audio.duration)) {
+        audio.currentTime = snippetStart;
+        audio.play().catch(err => console.error("Play error:", err));
+      } else {
+        const onCanPlay = () => {
+          audio.removeEventListener("canplay", onCanPlay);
+          audio.currentTime = snippetStart;
+          audio.play().catch(err => console.error("Play error:", err));
+        };
+        audio.addEventListener("canplay", onCanPlay, { once: true });
+      }
       setPlaying(true);
       rafRef.current = requestAnimationFrame(tick);
     }

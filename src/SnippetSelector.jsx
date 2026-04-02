@@ -31,6 +31,7 @@ export default function SnippetSelector({ file, url, initialStart, onConfirm, on
 
     // Create audio element
     const audio = new Audio();
+    audio.crossOrigin = "anonymous";
     audioRef.current = audio;
     console.log("✓ Audio element created");
 

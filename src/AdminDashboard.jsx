@@ -17,7 +17,7 @@ import { useAuth } from "./AuthContext.jsx";
 
 const ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA";
 const BASE = "https://bkapxykeryzxbqpgjgab.supabase.co/rest/v1";
-const TEAM_MEMBERS = ["avalions"];
+const TEAM_MEMBERS = ["avalions", "alex"];
 
 const TABS = [
   { id: "analytics", label: "📊 Analytics" },

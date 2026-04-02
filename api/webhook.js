@@ -17,6 +17,9 @@ async function getRawBody(req) {
 }
 
 export default async function handler(req, res) {
+  // Prevent Vercel from redirecting
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  
   if (req.method !== 'POST') return res.status(405).end();
 
   const sig = req.headers['stripe-signature'];

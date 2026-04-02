@@ -59,31 +59,64 @@ function BeatCard({ beat, accent, onBuy, cardStyle }) {
     const audioUrl = beat.audio_url || beat.audioUrl;
     if (!audioUrl) {
       console.warn('No audio URL for beat:', beat);
+      alert('❌ No audio available for this beat');
       return;
     }
+
     if (playing) {
-      audioRef.current?.pause();
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
       setPlaying(false);
     } else {
-      if (!audioRef.current) {
-        try {
-          audioRef.current = new Audio(audioUrl);
-          audioRef.current.currentTime = beat.snippet_start || beat.snippetStart || 0;
-          audioRef.current.addEventListener('ended', () => setPlaying(false));
-          audioRef.current.addEventListener('error', (err) => {
-            console.error('Audio playback error:', err);
+      try {
+        // Always create fresh audio element (don't reuse)
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current.src = '';
+        }
+
+        audioRef.current = new Audio();
+        audioRef.current.crossOrigin = 'anonymous';
+        audioRef.current.src = audioUrl;
+        audioRef.current.preload = 'auto';
+
+        // Set snippet start
+        const startTime = beat.snippet_start || beat.snippetStart || 0;
+        
+        audioRef.current.oncanplaythrough = () => {
+          console.log('Audio ready to play:', audioUrl);
+          audioRef.current.currentTime = startTime;
+          audioRef.current.play().catch(err => {
+            console.error('Play failed:', err);
             setPlaying(false);
           });
-        } catch (err) {
-          console.error('Failed to create audio element:', err);
-          return;
-        }
+        };
+
+        audioRef.current.onended = () => {
+          console.log('Audio ended');
+          setPlaying(false);
+        };
+
+        audioRef.current.onerror = (err) => {
+          console.error('Audio error:', {
+            error: err,
+            errorCode: audioRef.current?.error?.code,
+            errorMsg: audioRef.current?.error?.message,
+            src: audioUrl,
+            readyState: audioRef.current?.readyState
+          });
+          setPlaying(false);
+        };
+
+        audioRef.current.onloadstart = () => console.log('Loading audio...');
+        audioRef.current.onpause = () => console.log('Audio paused');
+
+        setPlaying(true);
+      } catch (err) {
+        console.error('Failed to create audio element:', err);
+        alert('❌ Failed to load audio');
       }
-      audioRef.current.play().catch(err => {
-        console.error('Failed to play audio:', err);
-        setPlaying(false);
-      });
-      setPlaying(true);
     }
   };
 
@@ -131,30 +164,58 @@ function ListingCard({ listing, accent, onBuy, onDelete, isOwner }) {
     e.stopPropagation();
     if (!listing.audio_url) {
       console.warn('No audio URL for listing:', listing);
+      alert('❌ No audio available for this listing');
       return;
     }
+
     if (playing) {
-      audioRef.current?.pause();
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
       setPlaying(false);
     } else {
-      if (!audioRef.current) {
-        try {
-          audioRef.current = new Audio(listing.audio_url);
-          audioRef.current.addEventListener('ended', () => setPlaying(false));
-          audioRef.current.addEventListener('error', (err) => {
-            console.error('Audio playback error:', err);
+      try {
+        // Always create fresh audio element
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current.src = '';
+        }
+
+        audioRef.current = new Audio();
+        audioRef.current.crossOrigin = 'anonymous';
+        audioRef.current.src = listing.audio_url;
+        audioRef.current.preload = 'auto';
+
+        audioRef.current.oncanplaythrough = () => {
+          console.log('Audio ready to play:', listing.audio_url);
+          audioRef.current.play().catch(err => {
+            console.error('Play failed:', err);
             setPlaying(false);
           });
-        } catch (err) {
-          console.error('Failed to create audio element:', err);
-          return;
-        }
+        };
+
+        audioRef.current.onended = () => {
+          console.log('Audio ended');
+          setPlaying(false);
+        };
+
+        audioRef.current.onerror = (err) => {
+          console.error('Audio error:', {
+            error: err,
+            errorCode: audioRef.current?.error?.code,
+            errorMsg: audioRef.current?.error?.message,
+            src: listing.audio_url
+          });
+          setPlaying(false);
+        };
+
+        audioRef.current.onloadstart = () => console.log('Loading audio...');
+
+        setPlaying(true);
+      } catch (err) {
+        console.error('Failed to create audio element:', err);
+        alert('❌ Failed to load audio');
       }
-      audioRef.current.play().catch(err => {
-        console.error('Failed to play audio:', err);
-        setPlaying(false);
-      });
-      setPlaying(true);
     }
   };
 

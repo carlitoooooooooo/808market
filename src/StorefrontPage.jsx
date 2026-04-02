@@ -52,106 +52,91 @@ function BeatCard({ beat, accent, onBuy, cardStyle }) {
   const cardBorder = cardStyle === 'bordered' ? `2px solid ${accent}40` : cardStyle === 'minimal' ? 'none' : '1px solid rgba(255,255,255,0.08)';
   const [playing, setPlaying] = React.useState(false);
   const audioRef = React.useRef(null);
+  const currentUrlRef = React.useRef(null);
 
   // Check if audio URL is playable (not SoundCloud)
   const audioUrl = beat.audio_url || beat.audioUrl;
   const isPlayable = audioUrl && !audioUrl.includes('soundcloud.com');
 
+  // Create audio element once
+  React.useEffect(() => {
+    const audio = new Audio();
+    audio.crossOrigin = 'anonymous';
+    audioRef.current = audio;
+
+    const handleEnded = () => setPlaying(false);
+    const handleError = () => {
+      console.error('Audio error:', audio.error?.code);
+      setPlaying(false);
+    };
+
+    audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('error', handleError);
+
+    return () => {
+      audio.pause();
+      audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('error', handleError);
+    };
+  }, []);
+
   const togglePlay = (e) => {
     e.stopPropagation();
-    if (!isPlayable) {
-      console.warn('Audio not playable (SoundCloud):', beat);
-      return;
-    }
+    if (!isPlayable || !audioRef.current) return;
 
     if (playing) {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
+      audioRef.current.pause();
       setPlaying(false);
     } else {
-      try {
-        // Get signed URL first (same as AudioPlayer does)
-        const getSignedUrl = async () => {
-          if (!audioUrl || audioUrl.includes('/sign/') || !audioUrl.includes('/object/public/')) {
-            return audioUrl; // Already signed or not a public URL
-          }
-          try {
-            const res = await fetch('/api/sign-audio', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ audioUrl }),
-            });
-            const data = await res.json();
-            return data.signedUrl || audioUrl;
-          } catch (e) {
-            console.warn('Could not get signed URL, using public URL');
-            return audioUrl;
-          }
-        };
-
-        getSignedUrl().then(signedUrl => {
-          if (audioRef.current) {
-            audioRef.current.pause();
-            audioRef.current.src = '';
-          }
-
-          audioRef.current = new Audio();
-          audioRef.current.crossOrigin = 'anonymous';
-          audioRef.current.src = signedUrl;
-          audioRef.current.preload = 'auto';
-
-          // Set snippet start (match AudioPlayer behavior)
-          const startTime = beat.snippet_start || beat.snippetStart || 0;
-          
-          // Seek to start time if ready, otherwise wait for canplay
-          if (audioRef.current.readyState >= 2 && isFinite(audioRef.current.duration)) {
-            audioRef.current.currentTime = startTime;
-          } else {
-            const onCanPlay = () => {
-              audioRef.current.removeEventListener("canplay", onCanPlay);
-              audioRef.current.currentTime = startTime;
-            };
-            audioRef.current.addEventListener("canplay", onCanPlay);
-          }
-          
-          audioRef.current.play().catch(err => {
-            console.error('Play failed:', err);
-            setPlaying(false);
+      // Get signed URL
+      const getSignedUrl = async () => {
+        if (!audioUrl || audioUrl.includes('/sign/') || !audioUrl.includes('/object/public/')) {
+          return audioUrl;
+        }
+        try {
+          const res = await fetch('/api/sign-audio', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ audioUrl }),
           });
+          const data = await res.json();
+          return data.signedUrl || audioUrl;
+        } catch (e) {
+          console.warn('Could not get signed URL');
+          return audioUrl;
+        }
+      };
 
-          audioRef.current.onended = () => {
-            console.log('Audio ended');
-            setPlaying(false);
+      getSignedUrl().then(signedUrl => {
+        const audio = audioRef.current;
+        if (!audio) return;
+
+        // Only set src if it changed
+        if (currentUrlRef.current !== signedUrl) {
+          audio.pause();
+          audio.src = signedUrl;
+          currentUrlRef.current = signedUrl;
+        }
+
+        const startTime = beat.snippet_start || beat.snippetStart || 0;
+        
+        // Seek and play
+        if (audio.readyState >= 2 && isFinite(audio.duration)) {
+          audio.currentTime = startTime;
+          audio.play().catch(err => console.error('Play error:', err));
+        } else {
+          const onCanPlay = () => {
+            audio.removeEventListener("canplay", onCanPlay);
+            audio.currentTime = startTime;
+            audio.play().catch(err => console.error('Play error:', err));
           };
+          audio.addEventListener("canplay", onCanPlay, { once: true });
+        }
 
-          audioRef.current.onerror = (err) => {
-            console.error('Audio error:', {
-              error: err,
-              errorCode: audioRef.current?.error?.code,
-              errorMsg: audioRef.current?.error?.message,
-              src: signedUrl,
-              readyState: audioRef.current?.readyState
-            });
-            setPlaying(false);
-          };
-
-          audioRef.current.onloadstart = () => console.log('Loading audio...');
-          audioRef.current.onpause = () => console.log('Audio paused');
-
-          setPlaying(true);
-        }).catch(err => {
-          console.error('Failed to get signed URL:', err);
-          alert('❌ Failed to load audio');
-        });
-      } catch (err) {
-        console.error('Failed to create audio element:', err);
-        alert('❌ Failed to load audio');
-      }
+        setPlaying(true);
+      });
     }
   };
-
-  React.useEffect(() => () => audioRef.current?.pause(), []);
 
   return (
     <div style={{ background: cardBg, border: cardBorder, borderRadius: '12px', overflow: 'hidden', transition: 'border-color 0.2s' }}
@@ -188,100 +173,88 @@ function ListingCard({ listing, accent, onBuy, onDelete, isOwner }) {
   const typeLabel = listing.type === 'open_verse' ? '🎤 Open Verse' : '⭐ Feature';
   const [playing, setPlaying] = React.useState(false);
   const audioRef = React.useRef(null);
+  const currentUrlRef = React.useRef(null);
 
   // Check if audio URL is playable (not SoundCloud)
   const isPlayable = listing.audio_url && !listing.audio_url.includes('soundcloud.com');
 
+  // Create audio element once
+  React.useEffect(() => {
+    const audio = new Audio();
+    audio.crossOrigin = 'anonymous';
+    audioRef.current = audio;
+
+    const handleEnded = () => setPlaying(false);
+    const handleError = () => {
+      console.error('Audio error:', audio.error?.code);
+      setPlaying(false);
+    };
+
+    audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('error', handleError);
+
+    return () => {
+      audio.pause();
+      audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('error', handleError);
+    };
+  }, []);
+
   const togglePlay = (e) => {
     e.stopPropagation();
-    if (!isPlayable) {
-      console.warn('Audio not playable (SoundCloud):', listing);
-      return;
-    }
+    if (!isPlayable || !audioRef.current) return;
 
     if (playing) {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
+      audioRef.current.pause();
       setPlaying(false);
     } else {
-      try {
-        // Get signed URL first (same as AudioPlayer does)
-        const getSignedUrl = async () => {
-          if (!listing.audio_url || listing.audio_url.includes('/sign/') || !listing.audio_url.includes('/object/public/')) {
-            return listing.audio_url;
-          }
-          try {
-            const res = await fetch('/api/sign-audio', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ audioUrl: listing.audio_url }),
-            });
-            const data = await res.json();
-            return data.signedUrl || listing.audio_url;
-          } catch (e) {
-            console.warn('Could not get signed URL, using public URL');
-            return listing.audio_url;
-          }
-        };
-
-        getSignedUrl().then(signedUrl => {
-          if (audioRef.current) {
-            audioRef.current.pause();
-            audioRef.current.src = '';
-          }
-
-          audioRef.current = new Audio();
-          audioRef.current.crossOrigin = 'anonymous';
-          audioRef.current.src = signedUrl;
-          audioRef.current.preload = 'auto';
-
-          // Seek to start time if ready, otherwise wait for canplay
-          if (audioRef.current.readyState >= 2 && isFinite(audioRef.current.duration)) {
-            audioRef.current.currentTime = 0;
-          } else {
-            const onCanPlay = () => {
-              audioRef.current.removeEventListener("canplay", onCanPlay);
-              audioRef.current.currentTime = 0;
-            };
-            audioRef.current.addEventListener("canplay", onCanPlay);
-          }
-          
-          audioRef.current.play().catch(err => {
-            console.error('Play failed:', err);
-            setPlaying(false);
+      // Get signed URL
+      const getSignedUrl = async () => {
+        if (!listing.audio_url || listing.audio_url.includes('/sign/') || !listing.audio_url.includes('/object/public/')) {
+          return listing.audio_url;
+        }
+        try {
+          const res = await fetch('/api/sign-audio', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ audioUrl: listing.audio_url }),
           });
+          const data = await res.json();
+          return data.signedUrl || listing.audio_url;
+        } catch (e) {
+          console.warn('Could not get signed URL');
+          return listing.audio_url;
+        }
+      };
 
-          audioRef.current.onended = () => {
-            console.log('Audio ended');
-            setPlaying(false);
+      getSignedUrl().then(signedUrl => {
+        const audio = audioRef.current;
+        if (!audio) return;
+
+        // Only set src if it changed
+        if (currentUrlRef.current !== signedUrl) {
+          audio.pause();
+          audio.src = signedUrl;
+          currentUrlRef.current = signedUrl;
+        }
+
+        // Seek and play
+        if (audio.readyState >= 2 && isFinite(audio.duration)) {
+          audio.currentTime = 0;
+          audio.play().catch(err => console.error('Play error:', err));
+        } else {
+          const onCanPlay = () => {
+            audio.removeEventListener("canplay", onCanPlay);
+            audio.currentTime = 0;
+            audio.play().catch(err => console.error('Play error:', err));
           };
+          audio.addEventListener("canplay", onCanPlay, { once: true });
+        }
 
-          audioRef.current.onerror = (err) => {
-            console.error('Audio error:', {
-              error: err,
-              errorCode: audioRef.current?.error?.code,
-              errorMsg: audioRef.current?.error?.message,
-              src: signedUrl
-            });
-            setPlaying(false);
-          };
-
-          audioRef.current.onloadstart = () => console.log('Loading audio...');
-
-          setPlaying(true);
-        }).catch(err => {
-          console.error('Failed to get signed URL:', err);
-          alert('❌ Failed to load audio');
-        });
-      } catch (err) {
-        console.error('Failed to create audio element:', err);
-        alert('❌ Failed to load audio');
-      }
+        setPlaying(true);
+      });
     }
   };
-
-  React.useEffect(() => () => audioRef.current?.pause(), []);
 
   return (
     <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', overflow: 'hidden', transition: 'border-color 0.2s' }}

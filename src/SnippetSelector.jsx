@@ -88,7 +88,8 @@ export default function SnippetSelector({ file, url, initialStart, onConfirm, on
     audio.addEventListener("ended", () => setPlaying(false));
 
     const timeoutId = setTimeout(() => {
-      if (!metadataLoadedRef.current) {
+      // Only set error if metadata still hasn't loaded
+      if (!metadataLoadedRef.current && !error) {
         console.error("Timeout loading audio");
         setError("Audio load timeout");
         setLoading(false);
@@ -108,7 +109,7 @@ export default function SnippetSelector({ file, url, initialStart, onConfirm, on
         cancelAnimationFrame(rafRef.current);
       }
     };
-  }, [file, url, initialStart]);
+  }, [file, url, initialStart, error]);
 
   const tick = useCallback(() => {
     if (!audioRef.current) return;
@@ -176,15 +177,15 @@ export default function SnippetSelector({ file, url, initialStart, onConfirm, on
     return `${m}:${sec.toString().padStart(2, "0")}`;
   };
 
-  if (loading) {
-    return (
-      <div style={{ padding: "32px", textAlign: "center", color: "rgba(255,255,255,0.5)", fontFamily: "'Inter', sans-serif" }}>
-        <div>⏳ Loading audio...</div>
-      </div>
-    );
-  }
-
-  if (error) {
+  // Only show loading/error if duration is still 0 (metadata hasn't loaded yet)
+  if (loading || (error && duration === 0)) {
+    if (loading) {
+      return (
+        <div style={{ padding: "32px", textAlign: "center", color: "rgba(255,255,255,0.5)", fontFamily: "'Inter', sans-serif" }}>
+          <div>⏳ Loading audio...</div>
+        </div>
+      );
+    }
     return (
       <div style={{ padding: "32px", textAlign: "center", color: "#ff3366", fontFamily: "'Inter', sans-serif" }}>
         <div>❌ {error}</div>

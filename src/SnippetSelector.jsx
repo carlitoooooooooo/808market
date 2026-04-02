@@ -17,7 +17,9 @@ export default function SnippetSelector({ file, url, initialStart, onConfirm, on
   const dragging = useRef(false);
 
   console.log("=== SnippetSelector mounted ===");
-  console.log("Props:", { file: file?.name, url, initialStart });
+  console.log("file prop type:", typeof file, "value:", file);
+  console.log("url prop type:", typeof url, "value:", url);
+  console.log("initialStart:", initialStart);
 
   useEffect(() => {
     console.log("=== useEffect running ===");

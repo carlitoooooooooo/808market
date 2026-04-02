@@ -9,123 +9,72 @@ export default function SnippetSelector({ file, url, initialStart, onConfirm, on
   const [playhead, setPlayhead] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [waveform, setWaveform] = useState([]);
+  const [waveform, setWaveform] = useState(Array.from({ length: 60 }, () => Math.random() * 0.6 + 0.2));
 
   const audioRef = useRef(null);
   const rafRef = useRef(null);
   const barRef = useRef(null);
   const dragging = useRef(false);
-  const objectUrlRef = useRef(null);
 
-  // Simpler initialization - just focus on making audio work
+  // Simple audio loading - no frills
   useEffect(() => {
-    (async () => {
-      try {
-        setLoading(true);
-        setError(null);
+    const audio = new Audio();
+    audioRef.current = audio;
 
-        // Create audio element first
-        const audio = new Audio();
-        audioRef.current = audio;
+    let objectUrl = null;
 
-        // Create the URL
-        let audioUrl;
-        if (file) {
-          // Create blob URL from file
-          objectUrlRef.current = URL.createObjectURL(file);
-          audioUrl = objectUrlRef.current;
-          console.log("Created blob URL from file:", audioUrl);
-        } else if (url) {
-          audioUrl = url;
-          console.log("Using provided URL:", audioUrl);
-        } else {
-          throw new Error("No file or URL provided");
-        }
+    // Create audio source
+    if (file) {
+      objectUrl = URL.createObjectURL(file);
+      audio.src = objectUrl;
+    } else if (url) {
+      audio.src = url;
+    } else {
+      setError("No file or URL provided");
+      setLoading(false);
+      return;
+    }
 
-        // Set audio src and wait for metadata
-        audio.src = audioUrl;
-        audio.crossOrigin = "anonymous";
+    console.log("Audio src set to:", audio.src);
 
-        // Wait for loadedmetadata with timeout
-        const metadataPromise = new Promise((resolve, reject) => {
-          const onLoaded = () => {
-            audio.removeEventListener("loadedmetadata", onLoaded);
-            audio.removeEventListener("error", onError);
-            clearTimeout(timeoutId);
-            console.log("Audio metadata loaded. Duration:", audio.duration);
-            resolve();
-          };
-          const onError = (err) => {
-            audio.removeEventListener("loadedmetadata", onLoaded);
-            audio.removeEventListener("error", onError);
-            clearTimeout(timeoutId);
-            console.error("Audio load error event fired:", {
-              code: audio.error?.code,
-              message: audio.error?.message,
-              src: audioUrl,
-            });
-            reject(new Error(`Audio load failed: ${audio.error?.message || "unknown error"}`));
-          };
-          const timeoutId = setTimeout(() => {
-            audio.removeEventListener("loadedmetadata", onLoaded);
-            audio.removeEventListener("error", onError);
-            console.error("Audio load timeout - metadata never loaded");
-            reject(new Error("Audio load timeout - metadata never loaded"));
-          }, 10000); // 10 second timeout
+    // Wait for metadata
+    const handleLoadedMetadata = () => {
+      console.log("Metadata loaded. Duration:", audio.duration);
+      setDuration(audio.duration);
+      setSnippetStart(Math.min(initialStart || 0, Math.max(0, audio.duration - SNIPPET_DURATION)));
+      setLoading(false);
+    };
 
-          audio.addEventListener("loadedmetadata", onLoaded, { once: true });
-          audio.addEventListener("error", onError, { once: true });
-        });
+    const handleError = (e) => {
+      console.error("Audio error:", {
+        code: audio.error?.code,
+        message: audio.error?.message,
+        type: audio.error?.type,
+      });
+      setError(`Failed to load audio: ${audio.error?.message || "unknown error"}`);
+      setLoading(false);
+    };
 
-        await metadataPromise;
+    audio.addEventListener("loadedmetadata", handleLoadedMetadata);
+    audio.addEventListener("error", handleError);
+    audio.addEventListener("ended", () => setPlaying(false));
 
-        // Successfully loaded
-        setDuration(audio.duration);
-        setSnippetStart(Math.min(initialStart || 0, Math.max(0, audio.duration - SNIPPET_DURATION)));
-
-        // Generate waveform (non-blocking)
-        try {
-          if (file) {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const buffer = await file.arrayBuffer();
-            const decoded = await ctx.decodeAudioData(buffer);
-            const data = decoded.getChannelData(0);
-            const bars = 60;
-            const step = Math.floor(data.length / bars);
-            const samples = Array.from({ length: bars }, (_, i) => {
-              let max = 0;
-              for (let j = 0; j < step; j++) {
-                max = Math.max(max, Math.abs(data[i * step + j] || 0));
-              }
-              return max;
-            });
-            setWaveform(samples);
-            console.log("Waveform generated from audio data");
-          } else {
-            // For URL-based, just use placeholder
-            setWaveform(Array.from({ length: 60 }, () => Math.random() * 0.6 + 0.2));
-          }
-        } catch (waveErr) {
-          console.warn("Waveform generation failed, using placeholder:", waveErr);
-          setWaveform(Array.from({ length: 60 }, () => Math.random() * 0.6 + 0.2));
-        }
-
-        setLoading(false);
-      } catch (err) {
-        console.error("Snippet selector initialization failed:", err);
-        setError(err.message);
+    // Set timeout in case metadata never loads
+    const timeoutId = setTimeout(() => {
+      if (duration === 0) {
+        console.error("Timeout waiting for audio metadata");
+        setError("Timeout loading audio - file may be corrupted or unsupported");
         setLoading(false);
       }
-    })();
+    }, 5000);
 
     return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = "";
-      }
-      if (objectUrlRef.current) {
-        URL.revokeObjectURL(objectUrlRef.current);
-        objectUrlRef.current = null;
+      clearTimeout(timeoutId);
+      audio.pause();
+      audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      audio.removeEventListener("error", handleError);
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
       }
       if (rafRef.current) {
         cancelAnimationFrame(rafRef.current);
@@ -148,7 +97,7 @@ export default function SnippetSelector({ file, url, initialStart, onConfirm, on
   const togglePlay = () => {
     const audio = audioRef.current;
     if (!audio || duration === 0) {
-      console.error("Cannot play - audio not ready or duration is 0");
+      console.error("Cannot play - audio not ready");
       return;
     }
 
@@ -156,28 +105,25 @@ export default function SnippetSelector({ file, url, initialStart, onConfirm, on
       audio.pause();
       setPlaying(false);
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      console.log("Paused");
     } else {
       try {
         audio.currentTime = snippetStart;
-        console.log("Starting playback from:", snippetStart);
         const playPromise = audio.play();
-        if (playPromise && playPromise.catch) {
+        if (playPromise?.catch) {
           playPromise.catch((err) => {
-            console.error("Play promise rejected:", err);
+            console.error("Play error:", err);
             setPlaying(false);
           });
         }
         setPlaying(true);
         rafRef.current = requestAnimationFrame(tick);
       } catch (err) {
-        console.error("Play error:", err);
+        console.error("Play exception:", err);
         setPlaying(false);
       }
     }
   };
 
-  // Update playback position when snippet changes
   useEffect(() => {
     if (playing && audioRef.current) {
       audioRef.current.currentTime = snippetStart;
@@ -210,7 +156,7 @@ export default function SnippetSelector({ file, url, initialStart, onConfirm, on
     return (
       <div style={{ padding: "32px", textAlign: "center", color: "rgba(255,255,255,0.5)", fontFamily: "'Inter', sans-serif" }}>
         <div>⏳ Loading audio...</div>
-        <div style={{ fontSize: "12px", marginTop: "8px", color: "rgba(255,255,255,0.3)" }}>This may take a moment</div>
+        <div style={{ fontSize: "12px", marginTop: "8px", color: "rgba(255,255,255,0.3)" }}>Please wait...</div>
       </div>
     );
   }
@@ -218,11 +164,7 @@ export default function SnippetSelector({ file, url, initialStart, onConfirm, on
   if (error) {
     return (
       <div style={{ padding: "32px", textAlign: "center", color: "#ff3366", fontFamily: "'Inter', sans-serif" }}>
-        <div>❌ Error loading audio</div>
-        <div style={{ fontSize: "12px", marginTop: "8px", color: "rgba(255,255,255,0.3)" }}>{error}</div>
-        <div style={{ fontSize: "11px", marginTop: "12px", color: "rgba(255,255,255,0.25)", fontFamily: "monospace" }}>
-          Check browser console (F12) for details
-        </div>
+        <div>❌ {error}</div>
         <button
           onClick={onCancel}
           style={{ marginTop: "16px", padding: "10px 20px", background: "#ff3366", border: "none", borderRadius: "8px", color: "#000", fontWeight: 700, cursor: "pointer" }}
@@ -242,7 +184,7 @@ export default function SnippetSelector({ file, url, initialStart, onConfirm, on
         Drag or click to pick which part plays as the preview
       </div>
 
-      {/* Waveform + scrubber */}
+      {/* Waveform */}
       <div
         ref={barRef}
         style={{
@@ -304,7 +246,7 @@ export default function SnippetSelector({ file, url, initialStart, onConfirm, on
           })}
         </div>
 
-        {/* Snippet window overlay */}
+        {/* Snippet overlay */}
         <div
           style={{
             position: "absolute",

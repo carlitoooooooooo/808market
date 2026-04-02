@@ -236,26 +236,7 @@ export default function LandingPage({ onGetStarted, onBrowseAsGuest }) {
                 </button>
               </div>
 
-              {/* Stats */}
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(3, 1fr)',
-                gap: '20px',
-                marginTop: '48px',
-                paddingTop: '32px',
-                borderTop: '1px solid rgba(0, 245, 255, 0.1)'
-              }}>
-                {[
-                  { label: 'Beats', value: '🎵' },
-                  { label: 'Artists', value: '🎤' },
-                  { label: 'Sold', value: '💰' }
-                ].map((stat, i) => (
-                  <div key={i}>
-                    <div style={{ fontSize: '28px', marginBottom: '8px' }}>{stat.value}</div>
-                    <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '1px' }}>{stat.label}</div>
-                  </div>
-                ))}
-              </div>
+
             </div>
 
             {/* Right: Featured Beats Grid */}

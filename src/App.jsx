@@ -33,7 +33,7 @@ const TABS = [
   { id: "leaderboard", label: "🔥 Top Beats" },
   { id: "profile", label: "👤 Profile" },
   { id: "notifications", label: "🔔 Notifs" },
-  { id: "create", label: "🏪 Create" },
+  { id: "create", label: "🏪 My Store" },
 ];
 
 const GENRES = ["ALL", "Hip-Hop", "Drill", "Trap", "R&B", "Electronic", "Other"];

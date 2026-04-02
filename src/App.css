@@ -3965,6 +3965,15 @@ html.party-mode .auth-submit {
   }
 }
 
+@keyframes borderRotate {
+  0% {
+    filter: hue-rotate(0deg);
+  }
+  100% {
+    filter: hue-rotate(360deg);
+  }
+}
+
 .profile-bg-animated-neon-grid {
   background: repeating-linear-gradient(0deg, rgba(0,245,255,0.1) 0px, rgba(0,245,255,0.1) 1px, transparent 1px, transparent 2px), repeating-linear-gradient(90deg, rgba(0,245,255,0.1) 0px, rgba(0,245,255,0.1) 1px, transparent 1px, transparent 2px) !important;
   animation: pulseGlow 3s ease-in-out infinite;
@@ -4018,9 +4027,13 @@ html.party-mode .auth-submit {
 }
 
 .avatar-border-animated-rainbow-rotate {
-  border-image: linear-gradient(135deg, #ff3366, #ff9900, #00f5ff, #bf5fff) 1 !important;
-  box-shadow: 0 0 12px rgba(255,51,102,0.5), 0 0 8px rgba(0,245,255,0.5);
-  animation: borderPulse 3s ease-in-out infinite;
+  position: relative;
+  border: 3px solid transparent !important;
+  background: 
+    linear-gradient(#000, #000) padding-box,
+    conic-gradient(from 0deg, #ff3366, #ff9900, #00f5ff, #bf5fff, #ff3366) border-box !important;
+  box-shadow: 0 0 15px rgba(255,51,102,0.4), 0 0 10px rgba(0,245,255,0.4);
+  animation: borderRotate 4s linear infinite;
 }
 
 .avatar-border-animated-gold-glow {

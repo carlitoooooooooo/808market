@@ -71,49 +71,72 @@ function BeatCard({ beat, accent, onBuy, cardStyle }) {
       setPlaying(false);
     } else {
       try {
-        // Always create fresh audio element (don't reuse)
-        if (audioRef.current) {
-          audioRef.current.pause();
-          audioRef.current.src = '';
-        }
+        // Get signed URL first (same as AudioPlayer does)
+        const getSignedUrl = async () => {
+          if (!audioUrl || audioUrl.includes('/sign/') || !audioUrl.includes('/object/public/')) {
+            return audioUrl; // Already signed or not a public URL
+          }
+          try {
+            const res = await fetch('/api/sign-audio', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ audioUrl }),
+            });
+            const data = await res.json();
+            return data.signedUrl || audioUrl;
+          } catch (e) {
+            console.warn('Could not get signed URL, using public URL');
+            return audioUrl;
+          }
+        };
 
-        audioRef.current = new Audio();
-        audioRef.current.crossOrigin = 'anonymous';
-        audioRef.current.src = audioUrl;
-        audioRef.current.preload = 'auto';
+        getSignedUrl().then(signedUrl => {
+          if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current.src = '';
+          }
 
-        // Set snippet start
-        const startTime = beat.snippet_start || beat.snippetStart || 0;
-        
-        audioRef.current.oncanplaythrough = () => {
-          console.log('Audio ready to play:', audioUrl);
-          audioRef.current.currentTime = startTime;
-          audioRef.current.play().catch(err => {
-            console.error('Play failed:', err);
+          audioRef.current = new Audio();
+          audioRef.current.crossOrigin = 'anonymous';
+          audioRef.current.src = signedUrl;
+          audioRef.current.preload = 'auto';
+
+          // Set snippet start
+          const startTime = beat.snippet_start || beat.snippetStart || 0;
+          
+          audioRef.current.oncanplaythrough = () => {
+            console.log('Audio ready to play:', signedUrl);
+            audioRef.current.currentTime = startTime;
+            audioRef.current.play().catch(err => {
+              console.error('Play failed:', err);
+              setPlaying(false);
+            });
+          };
+
+          audioRef.current.onended = () => {
+            console.log('Audio ended');
             setPlaying(false);
-          });
-        };
+          };
 
-        audioRef.current.onended = () => {
-          console.log('Audio ended');
-          setPlaying(false);
-        };
+          audioRef.current.onerror = (err) => {
+            console.error('Audio error:', {
+              error: err,
+              errorCode: audioRef.current?.error?.code,
+              errorMsg: audioRef.current?.error?.message,
+              src: signedUrl,
+              readyState: audioRef.current?.readyState
+            });
+            setPlaying(false);
+          };
 
-        audioRef.current.onerror = (err) => {
-          console.error('Audio error:', {
-            error: err,
-            errorCode: audioRef.current?.error?.code,
-            errorMsg: audioRef.current?.error?.message,
-            src: audioUrl,
-            readyState: audioRef.current?.readyState
-          });
-          setPlaying(false);
-        };
+          audioRef.current.onloadstart = () => console.log('Loading audio...');
+          audioRef.current.onpause = () => console.log('Audio paused');
 
-        audioRef.current.onloadstart = () => console.log('Loading audio...');
-        audioRef.current.onpause = () => console.log('Audio paused');
-
-        setPlaying(true);
+          setPlaying(true);
+        }).catch(err => {
+          console.error('Failed to get signed URL:', err);
+          alert('❌ Failed to load audio');
+        });
       } catch (err) {
         console.error('Failed to create audio element:', err);
         alert('❌ Failed to load audio');
@@ -176,43 +199,66 @@ function ListingCard({ listing, accent, onBuy, onDelete, isOwner }) {
       setPlaying(false);
     } else {
       try {
-        // Always create fresh audio element
-        if (audioRef.current) {
-          audioRef.current.pause();
-          audioRef.current.src = '';
-        }
+        // Get signed URL first (same as AudioPlayer does)
+        const getSignedUrl = async () => {
+          if (!listing.audio_url || listing.audio_url.includes('/sign/') || !listing.audio_url.includes('/object/public/')) {
+            return listing.audio_url;
+          }
+          try {
+            const res = await fetch('/api/sign-audio', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ audioUrl: listing.audio_url }),
+            });
+            const data = await res.json();
+            return data.signedUrl || listing.audio_url;
+          } catch (e) {
+            console.warn('Could not get signed URL, using public URL');
+            return listing.audio_url;
+          }
+        };
 
-        audioRef.current = new Audio();
-        audioRef.current.crossOrigin = 'anonymous';
-        audioRef.current.src = listing.audio_url;
-        audioRef.current.preload = 'auto';
+        getSignedUrl().then(signedUrl => {
+          if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current.src = '';
+          }
 
-        audioRef.current.oncanplaythrough = () => {
-          console.log('Audio ready to play:', listing.audio_url);
-          audioRef.current.play().catch(err => {
-            console.error('Play failed:', err);
+          audioRef.current = new Audio();
+          audioRef.current.crossOrigin = 'anonymous';
+          audioRef.current.src = signedUrl;
+          audioRef.current.preload = 'auto';
+
+          audioRef.current.oncanplaythrough = () => {
+            console.log('Audio ready to play:', signedUrl);
+            audioRef.current.play().catch(err => {
+              console.error('Play failed:', err);
+              setPlaying(false);
+            });
+          };
+
+          audioRef.current.onended = () => {
+            console.log('Audio ended');
             setPlaying(false);
-          });
-        };
+          };
 
-        audioRef.current.onended = () => {
-          console.log('Audio ended');
-          setPlaying(false);
-        };
+          audioRef.current.onerror = (err) => {
+            console.error('Audio error:', {
+              error: err,
+              errorCode: audioRef.current?.error?.code,
+              errorMsg: audioRef.current?.error?.message,
+              src: signedUrl
+            });
+            setPlaying(false);
+          };
 
-        audioRef.current.onerror = (err) => {
-          console.error('Audio error:', {
-            error: err,
-            errorCode: audioRef.current?.error?.code,
-            errorMsg: audioRef.current?.error?.message,
-            src: listing.audio_url
-          });
-          setPlaying(false);
-        };
+          audioRef.current.onloadstart = () => console.log('Loading audio...');
 
-        audioRef.current.onloadstart = () => console.log('Loading audio...');
-
-        setPlaying(true);
+          setPlaying(true);
+        }).catch(err => {
+          console.error('Failed to get signed URL:', err);
+          alert('❌ Failed to load audio');
+        });
       } catch (err) {
         console.error('Failed to create audio element:', err);
         alert('❌ Failed to load audio');

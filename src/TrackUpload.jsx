@@ -182,6 +182,7 @@ function MP3Tab({ onSubmit, onCancel }) {
   const [error, setError] = useState("");
   const [snippetStart, setSnippetStart] = useState(0);
   const [showSnippetPicker, setShowSnippetPicker] = useState(false);
+  const audioRef = useRef(null);
   const coverRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
 

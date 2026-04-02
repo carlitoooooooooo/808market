@@ -51,17 +51,16 @@ function BeatCard({ beat, accent, onBuy, cardStyle }) {
   const cardBg = cardStyle === 'glass' ? 'rgba(255,255,255,0.08)' : cardStyle === 'minimal' ? 'transparent' : cardStyle === 'bordered' ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.04)';
   const cardBorder = cardStyle === 'bordered' ? `2px solid ${accent}40` : cardStyle === 'minimal' ? 'none' : '1px solid rgba(255,255,255,0.08)';
   const [playing, setPlaying] = React.useState(false);
-  // cardBg and cardBorder used in render below
   const audioRef = React.useRef(null);
+
+  // Check if audio URL is playable (not SoundCloud)
+  const audioUrl = beat.audio_url || beat.audioUrl;
+  const isPlayable = audioUrl && !audioUrl.includes('soundcloud.com');
 
   const togglePlay = (e) => {
     e.stopPropagation();
-    const audioUrl = beat.audio_url || beat.audioUrl;
-    console.log('Beat data:', beat);
-    console.log('Audio URL:', audioUrl);
-    if (!audioUrl) {
-      console.warn('No audio URL for beat:', beat);
-      alert('❌ No audio available for this beat');
+    if (!isPlayable) {
+      console.warn('Audio not playable (SoundCloud):', beat);
       return;
     }
 
@@ -124,8 +123,6 @@ function BeatCard({ beat, accent, onBuy, cardStyle }) {
 
   React.useEffect(() => () => audioRef.current?.pause(), []);
 
-  const audioUrl = beat.audio_url || beat.audioUrl;
-
   return (
     <div style={{ background: cardBg, border: cardBorder, borderRadius: '12px', overflow: 'hidden', transition: 'border-color 0.2s' }}
       onMouseEnter={e => e.currentTarget.style.borderColor = `${accent}70`}
@@ -133,8 +130,8 @@ function BeatCard({ beat, accent, onBuy, cardStyle }) {
     >
       <div style={{ height: '120px', backgroundImage: `url(${beat.coverUrl || beat.cover_url})`, backgroundSize: 'cover', backgroundPosition: 'center', position: 'relative' }}>
         <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.3)' }} />
-        {/* Play button */}
-        {audioUrl && (
+        {/* Play button - only for playable audio (not SoundCloud) */}
+        {isPlayable && (
           <button onClick={togglePlay} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', background: playing ? accent : 'rgba(0,0,0,0.6)', border: `2px solid ${accent}`, borderRadius: '50%', width: '40px', height: '40px', color: playing ? '#000' : accent, fontSize: '16px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s' }}>
             {playing ? '⏸' : '▶'}
           </button>
@@ -162,11 +159,13 @@ function ListingCard({ listing, accent, onBuy, onDelete, isOwner }) {
   const [playing, setPlaying] = React.useState(false);
   const audioRef = React.useRef(null);
 
+  // Check if audio URL is playable (not SoundCloud)
+  const isPlayable = listing.audio_url && !listing.audio_url.includes('soundcloud.com');
+
   const togglePlay = (e) => {
     e.stopPropagation();
-    if (!listing.audio_url) {
-      console.warn('No audio URL for listing:', listing);
-      alert('❌ No audio available for this listing');
+    if (!isPlayable) {
+      console.warn('Audio not playable (SoundCloud):', listing);
       return;
     }
 
@@ -230,7 +229,7 @@ function ListingCard({ listing, accent, onBuy, onDelete, isOwner }) {
     >
       {listing.cover_url ? (
         <div style={{ height: '100px', backgroundImage: `url(${listing.cover_url})`, backgroundSize: 'cover', backgroundPosition: 'center', position: 'relative' }}>
-          {listing.audio_url && (
+          {isPlayable && (
             <button onClick={togglePlay} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', background: playing ? accent : 'rgba(0,0,0,0.6)', border: `2px solid ${accent}`, borderRadius: '50%', width: '36px', height: '36px', color: playing ? '#000' : accent, fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {playing ? '⏸' : '▶'}
             </button>

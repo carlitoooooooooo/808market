@@ -101,17 +101,24 @@ function BeatCard({ beat, accent, onBuy, cardStyle }) {
           audioRef.current.src = signedUrl;
           audioRef.current.preload = 'auto';
 
-          // Set snippet start
+          // Set snippet start (match AudioPlayer behavior)
           const startTime = beat.snippet_start || beat.snippetStart || 0;
           
-          audioRef.current.oncanplaythrough = () => {
-            console.log('Audio ready to play:', signedUrl);
+          // Seek to start time if ready, otherwise wait for canplay
+          if (audioRef.current.readyState >= 2 && isFinite(audioRef.current.duration)) {
             audioRef.current.currentTime = startTime;
-            audioRef.current.play().catch(err => {
-              console.error('Play failed:', err);
-              setPlaying(false);
-            });
-          };
+          } else {
+            const onCanPlay = () => {
+              audioRef.current.removeEventListener("canplay", onCanPlay);
+              audioRef.current.currentTime = startTime;
+            };
+            audioRef.current.addEventListener("canplay", onCanPlay);
+          }
+          
+          audioRef.current.play().catch(err => {
+            console.error('Play failed:', err);
+            setPlaying(false);
+          });
 
           audioRef.current.onended = () => {
             console.log('Audio ended');
@@ -229,13 +236,21 @@ function ListingCard({ listing, accent, onBuy, onDelete, isOwner }) {
           audioRef.current.src = signedUrl;
           audioRef.current.preload = 'auto';
 
-          audioRef.current.oncanplaythrough = () => {
-            console.log('Audio ready to play:', signedUrl);
-            audioRef.current.play().catch(err => {
-              console.error('Play failed:', err);
-              setPlaying(false);
-            });
-          };
+          // Seek to start time if ready, otherwise wait for canplay
+          if (audioRef.current.readyState >= 2 && isFinite(audioRef.current.duration)) {
+            audioRef.current.currentTime = 0;
+          } else {
+            const onCanPlay = () => {
+              audioRef.current.removeEventListener("canplay", onCanPlay);
+              audioRef.current.currentTime = 0;
+            };
+            audioRef.current.addEventListener("canplay", onCanPlay);
+          }
+          
+          audioRef.current.play().catch(err => {
+            console.error('Play failed:', err);
+            setPlaying(false);
+          });
 
           audioRef.current.onended = () => {
             console.log('Audio ended');

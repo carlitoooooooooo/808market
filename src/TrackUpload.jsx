@@ -342,6 +342,7 @@ function MP3Tab({ onSubmit, onCancel }) {
       {showSnippetPicker && audioFile && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.95)', zIndex: 400, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
           <div style={{ background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px 20px 0 0', width: '100%', maxWidth: '480px', maxHeight: '80vh', overflowY: 'auto' }}>
+            {console.log("Modal rendering with audioFile:", audioFile?.name, audioFile?.size)}
             <SnippetSelector
               file={audioFile}
               onConfirm={(start) => { setSnippetStart(start); setShowSnippetPicker(false); }}

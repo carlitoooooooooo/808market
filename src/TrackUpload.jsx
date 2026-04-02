@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { useAuth } from "./AuthContext";
 import { supabase } from "./supabase.js";
+import SnippetSelector from "./SnippetSelector.jsx";
 
 const GENRES = ["Hip-Hop", "Drill", "Trap", "R&B", "Electronic", "Other"];
 const UPLOAD_LIMIT = 10;
@@ -179,6 +180,8 @@ function MP3Tab({ onSubmit, onCancel }) {
   const [progress, setProgress] = useState("");
   const [uploadPct, setUploadPct] = useState(0);
   const [error, setError] = useState("");
+  const [snippetStart, setSnippetStart] = useState(0);
+  const [showSnippetPicker, setShowSnippetPicker] = useState(false);
   const coverRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -261,7 +264,7 @@ function MP3Tab({ onSubmit, onCancel }) {
         bpm: parseInt(bpm) || 0,
         cover_url: coverUrl,
         audio_url: audioUrl,
-        snippet_start: 0,
+        snippet_start: snippetStart,
         tags: [...new Set([genre.toLowerCase(), ...tags])],
         uploaded_by_username: currentUser.username,
         cops: 0,
@@ -333,6 +336,19 @@ function MP3Tab({ onSubmit, onCancel }) {
         >
           🎚️ Pick Snippet — {snippetStart > 0 ? `starts at ${Math.floor(snippetStart/60)}:${String(snippetStart%60).padStart(2,'0')}` : 'starts at beginning'}
         </button>
+      )}
+
+      {/* Snippet picker modal */}
+      {showSnippetPicker && audioFile && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.95)', zIndex: 400, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+          <div style={{ background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px 20px 0 0', width: '100%', maxWidth: '480px', maxHeight: '80vh', overflowY: 'auto' }}>
+            <SnippetSelector
+              file={audioFile}
+              onConfirm={(start) => { setSnippetStart(start); setShowSnippetPicker(false); }}
+              onCancel={() => setShowSnippetPicker(false)}
+            />
+          </div>
+        </div>
       )}
 
       <div className="upload-cover-row">

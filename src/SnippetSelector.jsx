@@ -9,101 +9,92 @@ export default function SnippetSelector({ file, url, initialStart, onConfirm, on
   const [playhead, setPlayhead] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [waveform, setWaveform] = useState(Array.from({ length: 60 }, () => Math.random() * 0.6 + 0.2));
+  const [waveform] = useState(Array.from({ length: 60 }, () => Math.random() * 0.6 + 0.2));
 
   const audioRef = useRef(null);
   const rafRef = useRef(null);
   const barRef = useRef(null);
   const dragging = useRef(false);
+  const objectUrlRef = useRef(null);
+  const loadedRef = useRef(false);
 
-  // Load audio - try multiple approaches
+  // Initialize audio element once
   useEffect(() => {
-    (async () => {
-      try {
-        const audio = new Audio();
-        audioRef.current = audio;
-        audio.preload = "metadata";
+    // Create audio element
+    const audio = new Audio();
+    audioRef.current = audio;
 
-        let audioSource = null;
+    // Prepare audio source
+    let source = null;
+    if (file) {
+      source = URL.createObjectURL(file);
+      objectUrlRef.current = source;
+      console.log("🎵 Created blob URL for file:", file.name, "Size:", file.size);
+    } else if (url) {
+      source = url;
+      console.log("🎵 Using URL:", url);
+    } else {
+      setError("No audio file provided");
+      setLoading(false);
+      return;
+    }
 
-        if (file) {
-          console.log("Loading file:", { name: file.name, size: file.size, type: file.type });
-          
-          // Try to use FileReader to read as data URL
-          try {
-            const reader = new FileReader();
-            audioSource = await new Promise((resolve, reject) => {
-              reader.onload = () => {
-                console.log("FileReader successful, data URL created");
-                resolve(reader.result);
-              };
-              reader.onerror = () => {
-                console.error("FileReader error:", reader.error);
-                reject(new Error("Failed to read file"));
-              };
-              reader.readAsDataURL(file);
-            });
-          } catch (readerErr) {
-            console.warn("FileReader approach failed, falling back to blob URL:", readerErr);
-            // Fallback to blob URL
-            audioSource = URL.createObjectURL(file);
-          }
+    // Set source
+    audio.src = source;
+    console.log("🎵 Audio element src set");
 
-          audio.src = audioSource;
-          console.log("Audio src set. Type:", audioSource.substring(0, 50));
-        } else if (url) {
-          audioSource = url;
-          audio.src = url;
-          console.log("Using provided URL");
-        } else {
-          throw new Error("No file or URL provided");
-        }
+    // Handler: Audio metadata loaded
+    const handleLoadedMetadata = () => {
+      if (loadedRef.current) return; // Prevent duplicate calls
+      loadedRef.current = true;
+      console.log("✅ Metadata loaded. Duration:", audio.duration);
+      setDuration(audio.duration);
+      setSnippetStart(Math.min(initialStart || 0, Math.max(0, audio.duration - SNIPPET_DURATION)));
+      setLoading(false);
+    };
 
-        // Wait for loadedmetadata with timeout
-        const metadataLoaded = new Promise((resolve, reject) => {
-          const onLoaded = () => {
-            audio.removeEventListener("loadedmetadata", onLoaded);
-            audio.removeEventListener("error", onError);
-            clearTimeout(timeoutId);
-            console.log("✓ Metadata loaded. Duration:", audio.duration);
-            resolve();
-          };
+    // Handler: Audio error
+    const handleError = () => {
+      if (loadedRef.current) return; // Already processed
+      loadedRef.current = true;
+      console.error("❌ Audio error:", audio.error?.code, audio.error?.message);
+      setError(`Failed to load audio: ${audio.error?.message || "unknown error"}`);
+      setLoading(false);
+    };
 
-          const onError = () => {
-            audio.removeEventListener("loadedmetadata", onLoaded);
-            audio.removeEventListener("error", onError);
-            clearTimeout(timeoutId);
-            const errorMsg = `${audio.error?.code} (${audio.error?.message || "unknown"})`;
-            console.error("✗ Audio element error:", errorMsg);
-            reject(new Error(`Audio load failed: ${errorMsg}`));
-          };
+    // Handler: Audio ended
+    const handleEnded = () => {
+      console.log("⏹ Audio ended");
+      setPlaying(false);
+    };
 
-          const timeoutId = setTimeout(() => {
-            audio.removeEventListener("loadedmetadata", onLoaded);
-            audio.removeEventListener("error", onError);
-            console.error("✗ Timeout waiting for metadata");
-            reject(new Error("Audio load timeout"));
-          }, 5000);
+    // Attach listeners
+    audio.addEventListener("loadedmetadata", handleLoadedMetadata);
+    audio.addEventListener("error", handleError);
+    audio.addEventListener("ended", handleEnded);
 
-          audio.addEventListener("loadedmetadata", onLoaded);
-          audio.addEventListener("error", onError);
-        });
-
-        await metadataLoaded;
-
-        setDuration(audio.duration);
-        setSnippetStart(Math.min(initialStart || 0, Math.max(0, audio.duration - SNIPPET_DURATION)));
-        setLoading(false);
-      } catch (err) {
-        console.error("Snippet selector error:", err.message);
-        setError(err.message);
+    // Timeout failsafe
+    const timeoutId = setTimeout(() => {
+      if (!loadedRef.current) {
+        console.error("⏱ Timeout: Audio metadata never loaded");
+        loadedRef.current = true;
+        setError("Audio load timeout - file may be unsupported");
         setLoading(false);
       }
-    })();
+    }, 8000);
 
+    console.log("🎵 Listeners attached, waiting for metadata...");
+
+    // Cleanup
     return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
+      clearTimeout(timeoutId);
+      audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      audio.removeEventListener("error", handleError);
+      audio.removeEventListener("ended", handleEnded);
+      audio.pause();
+      if (objectUrlRef.current) {
+        URL.revokeObjectURL(objectUrlRef.current);
+        objectUrlRef.current = null;
       }
       if (rafRef.current) {
         cancelAnimationFrame(rafRef.current);
@@ -125,15 +116,20 @@ export default function SnippetSelector({ file, url, initialStart, onConfirm, on
 
   const togglePlay = () => {
     const audio = audioRef.current;
-    if (!audio || duration === 0) return;
+    if (!audio || duration === 0) {
+      console.warn("⚠ Cannot play: audio not ready or duration is 0");
+      return;
+    }
 
     if (playing) {
       audio.pause();
       setPlaying(false);
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      console.log("⏸ Paused");
     } else {
       try {
         audio.currentTime = snippetStart;
+        console.log("▶ Playing from:", snippetStart);
         const playPromise = audio.play();
         if (playPromise?.catch) {
           playPromise.catch((err) => {
@@ -182,6 +178,7 @@ export default function SnippetSelector({ file, url, initialStart, onConfirm, on
     return (
       <div style={{ padding: "32px", textAlign: "center", color: "rgba(255,255,255,0.5)", fontFamily: "'Inter', sans-serif" }}>
         <div>⏳ Loading audio...</div>
+        <div style={{ fontSize: "12px", marginTop: "8px", color: "rgba(255,255,255,0.3)" }}>Check browser console for details</div>
       </div>
     );
   }

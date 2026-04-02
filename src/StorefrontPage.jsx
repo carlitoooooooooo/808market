@@ -57,6 +57,8 @@ function BeatCard({ beat, accent, onBuy, cardStyle }) {
   const togglePlay = (e) => {
     e.stopPropagation();
     const audioUrl = beat.audio_url || beat.audioUrl;
+    console.log('Beat data:', beat);
+    console.log('Audio URL:', audioUrl);
     if (!audioUrl) {
       console.warn('No audio URL for beat:', beat);
       alert('❌ No audio available for this beat');

@@ -57,17 +57,32 @@ function BeatCard({ beat, accent, onBuy, cardStyle }) {
   const togglePlay = (e) => {
     e.stopPropagation();
     const audioUrl = beat.audio_url || beat.audioUrl;
-    if (!audioUrl) return;
+    if (!audioUrl) {
+      console.warn('No audio URL for beat:', beat);
+      return;
+    }
     if (playing) {
       audioRef.current?.pause();
       setPlaying(false);
     } else {
       if (!audioRef.current) {
-        audioRef.current = new Audio(audioUrl);
-        audioRef.current.currentTime = beat.snippet_start || beat.snippetStart || 0;
-        audioRef.current.onended = () => setPlaying(false);
+        try {
+          audioRef.current = new Audio(audioUrl);
+          audioRef.current.currentTime = beat.snippet_start || beat.snippetStart || 0;
+          audioRef.current.addEventListener('ended', () => setPlaying(false));
+          audioRef.current.addEventListener('error', (err) => {
+            console.error('Audio playback error:', err);
+            setPlaying(false);
+          });
+        } catch (err) {
+          console.error('Failed to create audio element:', err);
+          return;
+        }
       }
-      audioRef.current.play();
+      audioRef.current.play().catch(err => {
+        console.error('Failed to play audio:', err);
+        setPlaying(false);
+      });
       setPlaying(true);
     }
   };
@@ -114,16 +129,31 @@ function ListingCard({ listing, accent, onBuy, onDelete, isOwner }) {
 
   const togglePlay = (e) => {
     e.stopPropagation();
-    if (!listing.audio_url) return;
+    if (!listing.audio_url) {
+      console.warn('No audio URL for listing:', listing);
+      return;
+    }
     if (playing) {
       audioRef.current?.pause();
       setPlaying(false);
     } else {
       if (!audioRef.current) {
-        audioRef.current = new Audio(listing.audio_url);
-        audioRef.current.onended = () => setPlaying(false);
+        try {
+          audioRef.current = new Audio(listing.audio_url);
+          audioRef.current.addEventListener('ended', () => setPlaying(false));
+          audioRef.current.addEventListener('error', (err) => {
+            console.error('Audio playback error:', err);
+            setPlaying(false);
+          });
+        } catch (err) {
+          console.error('Failed to create audio element:', err);
+          return;
+        }
       }
-      audioRef.current.play();
+      audioRef.current.play().catch(err => {
+        console.error('Failed to play audio:', err);
+        setPlaying(false);
+      });
       setPlaying(true);
     }
   };

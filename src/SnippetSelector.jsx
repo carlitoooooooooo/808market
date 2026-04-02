@@ -32,25 +32,29 @@ export default function SnippetSelector({ file, url, initialStart, onConfirm, on
       cancelAnimationFrame(rafRef.current);
     });
 
-    // Generate waveform
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const bufferPromise = file ? file.arrayBuffer() : fetch(objectUrl).then(r => r.arrayBuffer());
-    bufferPromise
-      .then(buf => ctx.decodeAudioData(buf))
-      .then(decoded => {
-        const data = decoded.getChannelData(0);
-        const bars = 60;
-        const step = Math.floor(data.length / bars);
-        const samples = Array.from({ length: bars }, (_, i) => {
-          let max = 0;
-          for (let j = 0; j < step; j++) max = Math.max(max, Math.abs(data[i * step + j] || 0));
-          return max;
+    // Generate waveform - skip if URL (CORS issues), just use random bars for uploaded files
+    if (file) {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      file.arrayBuffer()
+        .then(buf => ctx.decodeAudioData(buf))
+        .then(decoded => {
+          const data = decoded.getChannelData(0);
+          const bars = 60;
+          const step = Math.floor(data.length / bars);
+          const samples = Array.from({ length: bars }, (_, i) => {
+            let max = 0;
+            for (let j = 0; j < step; j++) max = Math.max(max, Math.abs(data[i * step + j] || 0));
+            return max;
+          });
+          setWaveform(samples);
+        })
+        .catch(() => {
+          setWaveform(Array.from({ length: 60 }, () => Math.random() * 0.6 + 0.2));
         });
-        setWaveform(samples);
-      })
-      .catch(() => {
-        setWaveform(Array.from({ length: 60 }, () => Math.random() * 0.6 + 0.2));
-      });
+    } else {
+      // For URLs, just use random waveform (avoid CORS fetch issues)
+      setWaveform(Array.from({ length: 60 }, () => Math.random() * 0.6 + 0.2));
+    }
 
     return () => {
       audio.pause();

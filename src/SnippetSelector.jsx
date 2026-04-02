@@ -17,11 +17,14 @@ export default function SnippetSelector({ file, url, initialStart, onConfirm, on
   const dragging = useRef(false);
 
   useEffect(() => {
+    // Create audio element and append to DOM (some browsers need this)
     const audio = new Audio();
     audio.crossOrigin = "anonymous";
+    audio.style.display = "none";
+    document.body.appendChild(audio);
     audioRef.current = audio;
 
-    // Prefer File object (fresh from input), fall back to URL
+    // Use File object directly with blob URL
     let source = null;
     if (file instanceof File || (file && file.size !== undefined && file.type !== undefined)) {
       console.log("Using File object directly");
@@ -30,6 +33,7 @@ export default function SnippetSelector({ file, url, initialStart, onConfirm, on
       console.log("Using URL");
       source = url;
     } else {
+      document.body.removeChild(audio);
       setError("No audio file provided");
       setLoading(false);
       return;
@@ -68,6 +72,9 @@ export default function SnippetSelector({ file, url, initialStart, onConfirm, on
       audio.removeEventListener("error", handleError);
       if (file instanceof File || (file && file.size !== undefined)) {
         URL.revokeObjectURL(source);
+      }
+      if (document.body.contains(audio)) {
+        document.body.removeChild(audio);
       }
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };

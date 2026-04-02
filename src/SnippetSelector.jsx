@@ -16,121 +16,60 @@ export default function SnippetSelector({ file, url, initialStart, onConfirm, on
   const barRef = useRef(null);
   const dragging = useRef(false);
 
-  console.log("=== SnippetSelector mounted ===");
-  console.log("file prop type:", typeof file, "value:", file);
-  console.log("url prop type:", typeof url, "value:", url);
-  console.log("initialStart:", initialStart);
-
   useEffect(() => {
-    console.log("=== useEffect running ===");
+    const audio = new Audio();
+    audio.crossOrigin = "anonymous";
+    audioRef.current = audio;
 
-    if (!file && !url) {
-      console.error("No file or URL!");
+    // Prefer File object (fresh from input), fall back to URL
+    let source = null;
+    if (file instanceof File || (file && file.size !== undefined && file.type !== undefined)) {
+      console.log("Using File object directly");
+      source = URL.createObjectURL(file);
+    } else if (url) {
+      console.log("Using URL");
+      source = url;
+    } else {
       setError("No audio file provided");
       setLoading(false);
       return;
     }
 
-    // Create audio element
-    const audio = new Audio();
-    audio.crossOrigin = "anonymous";
-    audioRef.current = audio;
-    console.log("✓ Audio element created");
+    audio.src = source;
 
-    // Create source
-    let objectUrl = null;
-    if (file) {
-      console.log("Loading file:", file.name, "Type:", file.type, "Size:", file.size);
-      objectUrl = URL.createObjectURL(file);
-      console.log("✓ Blob URL created:", objectUrl.substring(0, 50) + "...");
-    } else {
-      console.log("Using URL:", url);
-      objectUrl = url;
-    }
-
-    // Set source
-    audio.src = objectUrl;
-    console.log("✓ Audio src set");
-
-    // Set up event handlers BEFORE loading
-    let loaded = false;
-
-    const onMetadata = () => {
-      if (loaded) return;
-      loaded = true;
-      console.log("✅ LOADEDMETADATA event fired!");
-      console.log("Duration:", audio.duration);
+    const handleLoadedMetadata = () => {
+      console.log("✅ Audio loaded. Duration:", audio.duration);
       setDuration(audio.duration);
       setSnippetStart(Math.min(initialStart || 0, Math.max(0, audio.duration - SNIPPET_DURATION)));
       setLoading(false);
     };
 
-    const onError = () => {
-      if (loaded) return;
-      loaded = true;
-      const code = audio.error?.code;
-      const msg = audio.error?.message;
-      console.error("❌ ERROR event fired!");
-      console.error("Error code:", code, "Message:", msg);
-      console.error("ReadyState:", audio.readyState);
-      console.error("NetworkState:", audio.networkState);
-      setError(`Failed to load audio: ${msg || `Error code ${code}`}`);
+    const handleError = () => {
+      console.error("❌ Audio error:", audio.error?.code, audio.error?.message);
+      setError(`Failed to load audio: ${audio.error?.message || "unknown"}`);
       setLoading(false);
     };
 
-    const onCanPlay = () => {
-      console.log("🎵 CANPLAY event fired");
-    };
+    audio.addEventListener("loadedmetadata", handleLoadedMetadata);
+    audio.addEventListener("error", handleError);
 
-    const onCanPlayThrough = () => {
-      console.log("🎵 CANPLAYTHROUGH event fired");
-    };
-
-    const onLoadStart = () => {
-      console.log("🎵 LOADSTART event fired");
-    };
-
-    const onLoadedData = () => {
-      console.log("🎵 LOADEDDATA event fired, Duration:", audio.duration);
-    };
-
-    console.log("✓ Attaching event listeners...");
-    audio.addEventListener("loadedmetadata", onMetadata);
-    audio.addEventListener("error", onError);
-    audio.addEventListener("canplay", onCanPlay);
-    audio.addEventListener("canplaythrough", onCanPlayThrough);
-    audio.addEventListener("loadstart", onLoadStart);
-    audio.addEventListener("loadeddata", onLoadedData);
-
-    // Timeout
     const timeoutId = setTimeout(() => {
-      if (!loaded) {
-        loaded = true;
-        console.error("⏱ Timeout: No load event after 10 seconds");
-        console.error("ReadyState:", audio.readyState, "NetworkState:", audio.networkState);
+      if (duration === 0) {
+        console.error("Timeout loading audio");
         setError("Audio load timeout");
         setLoading(false);
       }
-    }, 10000);
+    }, 8000);
 
-    // Cleanup
     return () => {
-      console.log("=== Cleanup ===");
       clearTimeout(timeoutId);
       audio.pause();
-      audio.src = "";
-      audio.removeEventListener("loadedmetadata", onMetadata);
-      audio.removeEventListener("error", onError);
-      audio.removeEventListener("canplay", onCanPlay);
-      audio.removeEventListener("canplaythrough", onCanPlayThrough);
-      audio.removeEventListener("loadstart", onLoadStart);
-      audio.removeEventListener("loadeddata", onLoadedData);
-      if (objectUrl && file) {
-        URL.revokeObjectURL(objectUrl);
+      audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      audio.removeEventListener("error", handleError);
+      if (file instanceof File || (file && file.size !== undefined)) {
+        URL.revokeObjectURL(source);
       }
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current);
-      }
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
   }, [file, url, initialStart]);
 
@@ -148,31 +87,17 @@ export default function SnippetSelector({ file, url, initialStart, onConfirm, on
 
   const togglePlay = () => {
     const audio = audioRef.current;
-    if (!audio || duration === 0) {
-      console.warn("Cannot play: audio not ready");
-      return;
-    }
+    if (!audio || duration === 0) return;
 
     if (playing) {
       audio.pause();
       setPlaying(false);
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     } else {
-      try {
-        audio.currentTime = snippetStart;
-        const playPromise = audio.play();
-        if (playPromise?.catch) {
-          playPromise.catch((err) => {
-            console.error("Play error:", err);
-            setPlaying(false);
-          });
-        }
-        setPlaying(true);
-        rafRef.current = requestAnimationFrame(tick);
-      } catch (err) {
-        console.error("Play exception:", err);
-        setPlaying(false);
-      }
+      audio.currentTime = snippetStart;
+      audio.play().catch(err => console.error("Play error:", err));
+      setPlaying(true);
+      rafRef.current = requestAnimationFrame(tick);
     }
   };
 
@@ -208,7 +133,6 @@ export default function SnippetSelector({ file, url, initialStart, onConfirm, on
     return (
       <div style={{ padding: "32px", textAlign: "center", color: "rgba(255,255,255,0.5)", fontFamily: "'Inter', sans-serif" }}>
         <div>⏳ Loading audio...</div>
-        <div style={{ fontSize: "12px", marginTop: "8px", color: "rgba(255,255,255,0.3)" }}>Check browser console (F12)</div>
       </div>
     );
   }

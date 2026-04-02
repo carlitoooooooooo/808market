@@ -326,7 +326,7 @@ function MP3Tab({ onSubmit, onCancel }) {
       {/* Snippet picker button */}
       {audioFile && (
         <button
-          onClick={() => setShowSnippetPicker(true)}
+          onClick={() => { console.log("Snippet button clicked. audioFile:", audioFile?.name); setShowSnippetPicker(true); }}
           style={{
             width: '100%', padding: '10px', marginBottom: '12px',
             background: 'rgba(0,245,255,0.06)', border: '1px solid rgba(0,245,255,0.3)',

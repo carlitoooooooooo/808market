@@ -16,6 +16,7 @@ export default function SnippetSelector({ file, url, initialStart, onConfirm, on
   const barRef = useRef(null);
   const dragging = useRef(false);
   const blobUrlRef = useRef(null);
+  const metadataLoadedRef = useRef(false);
 
   // Initialize audio once
   useEffect(() => {
@@ -70,6 +71,7 @@ export default function SnippetSelector({ file, url, initialStart, onConfirm, on
     // Event handlers
     const handleLoadedMetadata = () => {
       console.log("Audio loaded. Duration:", audio.duration);
+      metadataLoadedRef.current = true;
       setDuration(audio.duration);
       setSnippetStart(Math.min(initialStart || 0, Math.max(0, audio.duration - SNIPPET_DURATION)));
       setLoading(false);
@@ -86,7 +88,7 @@ export default function SnippetSelector({ file, url, initialStart, onConfirm, on
     audio.addEventListener("ended", () => setPlaying(false));
 
     const timeoutId = setTimeout(() => {
-      if (duration === 0) {
+      if (!metadataLoadedRef.current) {
         console.error("Timeout loading audio");
         setError("Audio load timeout");
         setLoading(false);

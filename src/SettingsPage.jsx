@@ -218,8 +218,8 @@ export default function SettingsPage({ onClose, onOpenAnalytics, onOpenStorefron
 
   const THEME_PACKS = [
     { id: 'default', name: 'Default', emoji: '🎵', colors: ['--cyan', '--purple', '--green'] },
-    { id: 'cyberpunk', name: 'Cyberpunk', emoji: '🤖', colors: ['#ff0080', '#00ff9f', '#ff00ff'] },
-    { id: 'synthwave', name: 'Synthwave', emoji: '🌅', colors: ['#ff006e', '#00f5ff', '#ffbe0b'] },
+    { id: 'hologram', name: '✨ HOLOGRAM', emoji: '🌈', colors: ['#ff1493', '#00ffff', '#ff00ff'] },
+    { id: 'dracula', name: '🦇 DRACULA', emoji: '🩸', colors: ['#8b1538', '#ff0040', '#4a0e4e'] },
     { id: 'vaporwave', name: '💗 VAPORWAVE', emoji: '🌴', colors: ['#ff006e', '#f0f', '#ffc0cb'] },
     { id: 'glitch', name: '🔴 GLITCH', emoji: '⚡', colors: ['#ff0000', '#00ffff', '#ff00ff'] },
     { id: 'arcade', name: '🎮 ARCADE', emoji: '👾', colors: ['#ffff00', '#ff0000', '#0000ff'] },

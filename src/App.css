@@ -4357,6 +4357,192 @@ html.party-mode .auth-submit {
   font-weight: 900;
 }
 
+/* ===== HOLOGRAM THEME ===== */
+[data-theme="hologram"] {
+  --bg: #000;
+  --text: #ff1493;
+  --cyan: #00ffff;
+  --purple: #ff00ff;
+}
+
+[data-theme="hologram"] body {
+  background: linear-gradient(135deg, #000, #1a001a, #000033, #001a1a, #000) !important;
+  background-size: 400% 400%;
+  animation: hologramShift 10s ease infinite !important;
+  color: #ff1493 !important;
+}
+
+[data-theme="hologram"] * {
+  color: #ff1493 !important;
+  text-shadow: 0 0 10px #ff1493, 0 0 20px #00ffff, 0 0 30px #ff00ff !important;
+  animation: hologramShimmer 3s ease-in-out infinite !important;
+}
+
+[data-theme="hologram"] .auth-card {
+  background: rgba(0, 0, 0, 0.6) !important;
+  border: 2px solid #ff1493 !important;
+  box-shadow: 
+    0 0 20px #ff1493,
+    0 0 40px #00ffff,
+    inset 0 0 20px rgba(0, 255, 255, 0.1),
+    inset 0 0 10px rgba(255, 20, 147, 0.1) !important;
+  backdrop-filter: blur(10px) !important;
+  animation: hologramFloat 4s ease-in-out infinite !important;
+}
+
+[data-theme="hologram"] button {
+  background: linear-gradient(135deg, rgba(255, 20, 147, 0.2), rgba(0, 255, 255, 0.2)) !important;
+  color: #00ffff !important;
+  border: 2px solid #00ffff !important;
+  box-shadow: 
+    0 0 15px #00ffff,
+    0 0 30px rgba(255, 20, 147, 0.3),
+    inset 0 0 10px rgba(0, 255, 255, 0.1) !important;
+  backdrop-filter: blur(5px) !important;
+  font-weight: bold !important;
+}
+
+[data-theme="hologram"] button:hover {
+  border-color: #ff1493 !important;
+  box-shadow: 
+    0 0 25px #ff1493,
+    0 0 40px #00ffff,
+    inset 0 0 15px rgba(0, 255, 255, 0.2) !important;
+}
+
+[data-theme="hologram"] input,
+[data-theme="hologram"] textarea,
+[data-theme="hologram"] select {
+  background: rgba(0, 0, 0, 0.5) !important;
+  color: #00ffff !important;
+  border: 2px solid #00ffff !important;
+  box-shadow: 
+    0 0 10px #00ffff,
+    inset 0 0 10px rgba(255, 20, 147, 0.1) !important;
+  backdrop-filter: blur(5px) !important;
+  caret-color: #ff1493 !important;
+}
+
+[data-theme="hologram"] .auth-logo-text {
+  color: #00ffff !important;
+  text-shadow: 
+    0 0 20px #00ffff,
+    0 0 30px #ff1493,
+    0 0 40px #ff00ff !important;
+  animation: hologramPulse 2s ease-in-out infinite !important;
+  letter-spacing: 2px !important;
+}
+
+@keyframes hologramShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes hologramShimmer {
+  0%, 100% { 
+    text-shadow: 0 0 10px #ff1493, 0 0 20px #00ffff, 0 0 30px #ff00ff;
+    filter: hue-rotate(0deg);
+  }
+  50% { 
+    text-shadow: 0 0 15px #00ffff, 0 0 25px #ff1493, 0 0 35px #ff00ff;
+    filter: hue-rotate(10deg);
+  }
+}
+
+@keyframes hologramFloat {
+  0%, 100% { transform: translateY(0px) rotateX(0deg); }
+  50% { transform: translateY(-10px) rotateX(5deg); }
+}
+
+@keyframes hologramPulse {
+  0%, 100% { 
+    text-shadow: 0 0 20px #00ffff, 0 0 30px #ff1493, 0 0 40px #ff00ff;
+    color: #00ffff;
+  }
+  50% { 
+    text-shadow: 0 0 30px #ff1493, 0 0 40px #00ffff, 0 0 50px #ff00ff;
+    color: #ff1493;
+  }
+}
+
+/* ===== DRACULA THEME ===== */
+[data-theme="dracula"] {
+  --bg: #0f0a15;
+  --text: #ff0040;
+  --cyan: #8b1538;
+  --purple: #4a0e4e;
+}
+
+[data-theme="dracula"] body {
+  background: linear-gradient(135deg, #0f0a15 0%, #1a0820 25%, #230d2f 50%, #1a0820 75%, #0f0a15 100%) !important;
+  background-attachment: fixed !important;
+  color: #ff0040 !important;
+  font-family: Georgia, serif !important;
+}
+
+[data-theme="dracula"] * {
+  color: #ff0040 !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8), 0 0 15px rgba(139, 21, 56, 0.5) !important;
+}
+
+[data-theme="dracula"] .auth-card {
+  background: linear-gradient(135deg, #1a0820, #230d2f) !important;
+  border: 2px solid #8b1538 !important;
+  box-shadow: 
+    0 8px 32px rgba(139, 21, 56, 0.4),
+    inset 0 1px 0 rgba(255, 0, 64, 0.2) !important;
+}
+
+[data-theme="dracula"] button {
+  background: linear-gradient(135deg, #8b1538, #5c0f2b) !important;
+  color: #fff !important;
+  border: 2px solid #ff0040 !important;
+  border-radius: 4px !important;
+  font-weight: bold !important;
+  box-shadow: 0 4px 15px rgba(139, 21, 56, 0.4) !important;
+}
+
+[data-theme="dracula"] button:hover {
+  background: linear-gradient(135deg, #a01844, #6c1533) !important;
+  box-shadow: 0 8px 20px rgba(255, 0, 64, 0.5) !important;
+  transform: translateY(-2px) !important;
+}
+
+[data-theme="dracula"] input,
+[data-theme="dracula"] textarea,
+[data-theme="dracula"] select {
+  background: rgba(10, 5, 15, 0.6) !important;
+  color: #ff0040 !important;
+  border: 2px solid #8b1538 !important;
+  border-radius: 4px !important;
+  font-family: Georgia, serif !important;
+  caret-color: #ff0040 !important;
+}
+
+[data-theme="dracula"] .auth-logo-text {
+  color: #ff0040 !important;
+  font-family: Georgia, serif !important;
+  font-style: italic !important;
+  text-shadow: 
+    0 0 10px #8b1538,
+    0 0 20px rgba(139, 21, 56, 0.6),
+    2px 2px 4px rgba(0, 0, 0, 0.8) !important;
+  animation: draculaPulse 2s ease-in-out infinite !important;
+  letter-spacing: 1px !important;
+}
+
+@keyframes draculaPulse {
+  0%, 100% { 
+    color: #ff0040;
+    text-shadow: 0 0 10px #8b1538, 0 0 20px rgba(139, 21, 56, 0.6), 2px 2px 4px rgba(0, 0, 0, 0.8);
+  }
+  50% { 
+    color: #ff3366;
+    text-shadow: 0 0 15px #8b1538, 0 0 25px rgba(139, 21, 56, 0.8), 2px 2px 4px rgba(0, 0, 0, 0.9);
+  }
+}
+
 /* ===== VAPORWAVE THEME ===== */
 [data-theme="vaporwave"] {
   --bg: #ffc0cb;

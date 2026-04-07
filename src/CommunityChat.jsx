@@ -3,7 +3,7 @@ import { useAuth } from "./AuthContext.jsx";
 
 const SUPABASE_URL = 'https://bkapxykeryzxbqpgjgab.supabase.co';
 const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
-const TEAM_MEMBERS = ['avalions'];
+const TEAM_MEMBERS = ['avalions', 'alex'];
 const POLL_MS = 5000;
 const ONLINE_NOW_MS = 5 * 60 * 1000;    // green: < 5 min
 const ACTIVE_TODAY_MS = 24 * 60 * 60 * 1000; // sidebar: < 24h

@@ -381,7 +381,7 @@ export default function App() {
     if (!adminIntentRef.current || authLoading) return;
     adminIntentRef.current = false;
     history.replaceState(null, '', '/');
-    const TEAM_MEMBERS = ['avalions'];
+    const TEAM_MEMBERS = ['avalions', 'alex'];
     const isAdmin = currentUser?.role?.toLowerCase() === 'admin' || TEAM_MEMBERS.includes(currentUser?.username);
     if (isAdmin) setShowAdmin(true);
     else setToast({ message: '🚫 Access denied', visible: true });

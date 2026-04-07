@@ -4,7 +4,7 @@ import { PRODUCER_BADGES, getEarnedBadges } from "./producerBadges.js";
 // MOCK_USERS removed — using real DB data for taste match
 import SnippetPicker from "./SnippetPicker.jsx";
 
-const TEAM_MEMBERS = ['avalions'];
+const TEAM_MEMBERS = ['avalions', 'alex'];
 import { supabase } from "./supabase.js";
 import EditBeatModal from "./EditBeatModal.jsx";
 import ImageCropper from "./ImageCropper.jsx";

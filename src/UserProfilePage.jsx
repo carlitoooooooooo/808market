@@ -4,7 +4,7 @@ import DrumkitSection from "./DrumkitSection.jsx";
 import { dbSelect, dbInsert, dbUpdate } from "./dbHelper.js";
 import { useAuth } from "./AuthContext.jsx";
 
-const TEAM_MEMBERS = ['avalions'];
+const TEAM_MEMBERS = ['avalions', 'alex'];
 
 const SUPABASE_URL = 'https://bkapxykeryzxbqpgjgab.supabase.co';
 const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';

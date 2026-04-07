@@ -46,7 +46,7 @@ function SectionHeader({ label, accent }) {
   );
 }
 
-function BeatCard({ beat, accent, onBuy, cardStyle, onPlayTrack, onStopTrack }) {
+function BeatCard({ beat, accent, onBuy, cardStyle }) {
   const isFree = !beat.price || beat.price === 0;
   const cardBg = cardStyle === 'glass' ? 'rgba(255,255,255,0.08)' : cardStyle === 'minimal' ? 'transparent' : cardStyle === 'bordered' ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.04)';
   const cardBorder = cardStyle === 'bordered' ? `2px solid ${accent}40` : cardStyle === 'minimal' ? 'none' : '1px solid rgba(255,255,255,0.08)';
@@ -87,9 +87,7 @@ function BeatCard({ beat, accent, onBuy, cardStyle, onPlayTrack, onStopTrack }) 
     if (playing) {
       audioRef.current.pause();
       setPlaying(false);
-      if (onStopTrack) onStopTrack();
     } else {
-      if (onPlayTrack) onPlayTrack(beat);
       // Get signed URL
       const getSignedUrl = async () => {
         if (!audioUrl || audioUrl.includes('/sign/') || !audioUrl.includes('/object/public/')) {
@@ -485,8 +483,6 @@ function StorefrontEditor({ storefront, username, beats, onSave, onClose }) {
   const [bannerPreview, setBannerPreview] = useState(storefront?.banner_url || null);
   const [cropFile, setCropFile] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [currentlyPlayingTrack, setCurrentlyPlayingTrack] = useState(null);
-  const [stickyPlayerIsPlaying, setStickyPlayerIsPlaying] = useState(false);
   const bannerRef = useRef(null);
 
   const handleBannerChange = (e) => {
@@ -1150,16 +1146,6 @@ export default function StorefrontPage({ username, onBack }) {
   const features = listings.filter(l => l.type === 'feature');
   const listedDrumkits = listings.filter(l => l.type === 'drumkit');
 
-  // Map font style to actual font family
-  const fontStyleMap = {
-    'default': 'var(--font-head)',
-    'mono': 'Courier New, monospace',
-    'serif': 'Georgia, serif',
-    'geometric': 'Poppins, sans-serif',
-    'bold-sans': 'Arial Black, sans-serif',
-  };
-  const appliedFontFamily = fontStyleMap[storefront?.font_style] || fontStyleMap['default'];
-
   return (
     <div style={{ minHeight: '100vh', background: bg, color: '#fff' }}>
 
@@ -1207,13 +1193,13 @@ export default function StorefrontPage({ username, onBack }) {
       </div>
 
       {/* Content */}
-      <div style={{ padding: '24px 20px', maxWidth: '800px', margin: '0 auto', fontFamily: appliedFontFamily }}>
+      <div style={{ padding: '24px 20px', maxWidth: '800px', margin: '0 auto', fontFamily }}>
 
         {/* Owner actions */}
         {isOwner && (
           <div style={{ marginBottom: '24px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
             <button onClick={() => setShowListingUpload(true)}
-              style={{ padding: '10px 18px', background: `linear-gradient(135deg, ${accent}, #bf5fff)`, border: 'none', borderRadius: '20px', color: '#000', fontWeight: 700, fontSize: '13px', cursor: 'pointer', fontFamily: appliedFontFamily }}>
+              style={{ padding: '10px 18px', background: `linear-gradient(135deg, ${accent}, #bf5fff)`, border: 'none', borderRadius: '20px', color: '#000', fontWeight: 700, fontSize: '13px', cursor: 'pointer', fontFamily }}>
               ➕ Add Listing
             </button>
           </div>
@@ -1242,7 +1228,7 @@ export default function StorefrontPage({ username, onBack }) {
           <div style={{ marginBottom: '32px' }}>
             <SectionHeader label="⭐ Featured Beat" accent={accent} />
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '12px', maxWidth: '340px' }}>
-              <BeatCard beat={featuredBeat} accent={accent} onBuy={handleBuy} cardStyle={storefront?.card_style} onPlayTrack={setCurrentlyPlayingTrack} onStopTrack={() => setCurrentlyPlayingTrack(null)} />
+              <BeatCard beat={featuredBeat} accent={accent} onBuy={handleBuy} cardStyle={storefront?.card_style} />
             </div>
           </div>
         )}
@@ -1260,7 +1246,7 @@ export default function StorefrontPage({ username, onBack }) {
             <div key="beats" style={{ marginBottom: '32px' }}>
               <SectionHeader label={`🎵 Beats (${beats.length})`} accent={accent} />
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '12px' }}>
-                {beats.map(b => <BeatCard key={b.id} beat={b} accent={accent} onBuy={handleBuy} cardStyle={storefront?.card_style} onPlayTrack={setCurrentlyPlayingTrack} onStopTrack={() => setCurrentlyPlayingTrack(null)} />)}
+                {beats.map(b => <BeatCard key={b.id} beat={b} accent={accent} onBuy={handleBuy} cardStyle={storefront?.card_style} />)}
               </div>
             </div>
           );
@@ -1332,8 +1318,6 @@ export default function StorefrontPage({ username, onBack }) {
           onAdded={(listing) => setListings(prev => [listing, ...prev])}
         />
       )}
-
-
     </div>
   );
 }

@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect, useCallback } from "react";
 import AudioPlayer from "./AudioPlayer.js";
 import WaveformVisualizer from "./WaveformVisualizer.jsx";
 import { useAuth } from "./AuthContext.jsx";
+import "./SwipeCard.css";
 
 const SWIPE_THRESHOLD = 80;
 
@@ -15,7 +16,6 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
   const [stamp, setStamp] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [isFlipped, setIsFlipped] = useState(false);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
 
   const playerRef = useRef(null);
@@ -39,13 +39,11 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
     };
   }, [isTop, track.id]);
 
-  // Attach touchmove with passive:false so e.preventDefault() works on mobile
   useEffect(() => {
     const el = cardRef.current;
     if (!el || !isTop) return;
     const handler = (e) => {
       const dx = Math.abs((e.touches[0]?.clientX || 0) - (e.touches[1]?.clientX || e.touches[0]?.clientX || 0));
-      // Only prevent default if we're in a horizontal drag
       if (el._swipingHorizontal) e.preventDefault();
     };
     el.addEventListener('touchmove', handler, { passive: false });
@@ -61,7 +59,6 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
     p.play();
     setIsPlaying(true);
     setProgress(0);
-    // Increment play count atomically
     const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
     fetch('https://bkapxykeryzxbqpgjgab.supabase.co/rest/v1/rpc/increment_play_count', {
       method: 'POST',
@@ -94,117 +91,31 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
   }
 
   const triggerSwipe = useCallback((dir) => {
-    const label = dir === "right" ? "❤️ LIKED" : "PASS 💨";
+    const label = dir === "right" ? "❤️ LIKED" : "💨 PASS";
     setStamp(label);
     setFlyDir(dir);
     setIsFlying(true);
-    stopPlay();
-    
-    // Haptic feedback (Android only - iOS Safari doesn't support Vibration API)
-    try {
-      const hapticEnabled = JSON.parse(localStorage.getItem('hapticEnabled') ?? 'true');
-      if (hapticEnabled && navigator.vibrate) {
-        const pattern = dir === "right" ? [40] : [20];
-        navigator.vibrate(pattern);
-      }
-    } catch (e) {}
-    
-    const rect = cardRef.current?.getBoundingClientRect();
     setTimeout(() => {
-      onSwipe(dir, track, rect);
-    }, 350);
-  }, [track, onSwipe]);
+      onSwipe(track.id, dir === "right" ? "cops" : "passes");
+    }, 100);
+  }, [track.id, onSwipe]);
 
-  // Apply transform directly to DOM — no React state re-render on every move
-  const applyDragTransform = useCallback((dx, dy) => {
-    if (!outerRef.current) return;
-    const rotate = dx * 0.08;
-    outerRef.current.style.transform = `translate(${dx}px, ${dy * 0.3}px) rotate(${rotate}deg)`;
-    outerRef.current.style.transition = 'none';
-  }, []);
-
-  const resetTransform = useCallback(() => {
-    if (!outerRef.current) return;
-    outerRef.current.style.transform = '';
-    outerRef.current.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-  }, []);
-
-  const onPointerDown = useCallback((e) => {
-    if (isFlying) return;
-    if (isFlipped) return;
-    pointerDownRef.current = true;
-    dragStartedRef.current = false;
-    isHorizontalRef.current = false;
-    startXRef.current = e.clientX;
-    startYRef.current = e.clientY;
-    lastXRef.current = e.clientX;
-    currentDragX.current = 0;
-    e.currentTarget.setPointerCapture(e.pointerId);
-  }, [isFlying, isFlipped]);
-
-  const onPointerMove = useCallback((e) => {
-    if (!pointerDownRef.current || isFlying) return;
-    const dx = e.clientX - startXRef.current;
-    const dy = e.clientY - startYRef.current;
-    lastXRef.current = e.clientX;
-    currentDragX.current = dx;
-
-    if (!dragStartedRef.current && (Math.abs(dx) > 5 || Math.abs(dy) > 5)) {
-      dragStartedRef.current = true;
-      isHorizontalRef.current = Math.abs(dx) >= Math.abs(dy);
-    }
-
-    if (dragStartedRef.current && isHorizontalRef.current) {
-      e.preventDefault();
-      if (cardRef.current) cardRef.current._swipingHorizontal = true;
-      applyDragTransform(dx, dy);
-      // Only update stamp label in state (cheap)
-      const newStamp = dx > 30 ? "❤️ LIKED" : dx < -30 ? "PASS 💨" : null;
-      setStamp(prev => prev !== newStamp ? newStamp : prev);
-      if (!isDragging) setIsDragging(true);
-    }
-  }, [isFlying, isDragging, applyDragTransform]);
-
-  const onPointerUp = useCallback((e) => {
-    if (!pointerDownRef.current) return;
-    pointerDownRef.current = false;
-
-    if (!dragStartedRef.current || !isHorizontalRef.current) {
-      setDragX(0); setDragY(0); setIsDragging(false); setStamp(null);
-      if (!dragStartedRef.current) setIsFlipped(true);
-      dragStartedRef.current = false;
+  const handleCopIt = async (e) => {
+    e.stopPropagation();
+    if (!currentUser) {
+      alert("Please log in to purchase");
       return;
     }
-
-    const dx = currentDragX.current;
-    dragStartedRef.current = false;
-    if (cardRef.current) cardRef.current._swipingHorizontal = false;
-    setIsDragging(false);
-
-    if (dx > SWIPE_THRESHOLD) {
-      triggerSwipe("right");
-    } else if (dx < -SWIPE_THRESHOLD) {
-      triggerSwipe("left");
-    } else {
-      resetTransform();
-      setStamp(null);
-      currentDragX.current = 0;
-    }
-  }, [triggerSwipe, resetTransform]);
-
-  async function handleCopIt(e) {
-    e.stopPropagation();
-    if (isFree) {
-      if (track.audioUrl) {
-        const a = document.createElement('a');
-        a.href = track.audioUrl;
-        a.download = `${track.title} - ${track.artist}.mp3`;
-        a.target = '_blank';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-      }
-      triggerSwipe("right");
+    const isFree = !track.price || track.price === 0;
+    const downloadUrl = track.audioUrl;
+    if (isFree && downloadUrl) {
+      const a = document.createElement('a');
+      a.href = downloadUrl;
+      a.download = `${track.title}.mp3`;
+      a.target = '_blank';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
       return;
     }
     setCheckoutLoading(true);
@@ -217,50 +128,111 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
           trackTitle: track.title,
           artist: track.artist,
           price: track.price,
-          licenseType: track.licenseType,
-          buyerUsername: currentUser?.username || 'anonymous',
-          producerUsername: track.uploadedBy || track.artist,
+          licenseType: track.licenseType || 'Non-Exclusive Lease',
+          buyerUsername: currentUser.username,
+          producerUsername: track.uploadedBy,
         }),
       });
       const data = await res.json();
-      if (data.url) {
-        triggerSwipe("right");
-        window.location.href = data.url;
-      } else {
-        if (track.paymentLink) window.open(track.paymentLink, '_blank');
-        triggerSwipe("right");
-      }
-    } catch {
-      if (track.paymentLink) window.open(track.paymentLink, '_blank');
-      triggerSwipe("right");
-    } finally {
-      setCheckoutLoading(false);
+      if (data.url) window.location.href = data.url;
+    } catch (err) {
+      alert('Checkout failed: ' + err.message);
     }
+    setCheckoutLoading(false);
+  };
+
+  // Swipe/drag handlers
+  function onPointerDown(e) {
+    if (!isTop || track.isSoundCloud) return;
+    pointerDownRef.current = true;
+    dragStartedRef.current = false;
+    isHorizontalRef.current = false;
+    startXRef.current = e.clientX || e.touches?.[0]?.clientX || 0;
+    startYRef.current = e.clientY || e.touches?.[0]?.clientY || 0;
+    lastXRef.current = startXRef.current;
+    currentDragX.current = 0;
   }
 
-  const rotation = dragX * 0.08;
-  const stampOpacity = Math.min(1, Math.abs(currentDragX.current || dragX) / SWIPE_THRESHOLD);
+  function onPointerMove(e) {
+    if (!pointerDownRef.current || !isTop) return;
+    const x = e.clientX || e.touches?.[0]?.clientX || 0;
+    const y = e.clientY || e.touches?.[0]?.clientY || 0;
+    const deltaX = x - startXRef.current;
+    const deltaY = y - startYRef.current;
 
-  let flyStyle = {};
-  if (isFlying) {
-    flyStyle = {
-      transform: `translateX(${flyDir === "right" ? "120vw" : "-120vw"}) rotate(${flyDir === "right" ? 30 : -30}deg)`,
-      transition: "transform 0.35s cubic-bezier(0.4, 0, 0.6, 1)",
-    };
-  } else if (!isDragging) {
-    flyStyle = {
-      transform: `translateX(0) rotate(0deg) scale(${stackIndex === 0 ? 1 : 0.96 - stackIndex * 0.02})`,
-      transition: "transform 0.25s ease",
-    };
+    if (!dragStartedRef.current) {
+      if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
+        dragStartedRef.current = true;
+        isHorizontalRef.current = Math.abs(deltaX) > Math.abs(deltaY);
+      } else {
+        return;
+      }
+    }
+
+    if (!isHorizontalRef.current) return;
+
+    currentDragX.current = deltaX;
+    setDragX(deltaX);
+    setDragY(deltaY * 0.1);
+    setIsDragging(true);
+
+    if (outerRef.current) {
+      const angle = (deltaX / window.innerWidth) * 15;
+      outerRef.current.style.transform = `translateX(${deltaX}px) translateY(${deltaY * 0.1}px) rotate(${angle}deg)`;
+    }
+    if (cardRef.current) cardRef.current._swipingHorizontal = true;
   }
-  // When isDragging, transform is applied directly via outerRef (no state re-render)
 
-  // Price display
+  function onPointerUp(e) {
+    if (!pointerDownRef.current || !dragStartedRef.current) {
+      pointerDownRef.current = false;
+      if (Math.abs(currentDragX.current) < 5) {
+        // Tap - do nothing on modern card, just close on old design
+      }
+      return;
+    }
+    pointerDownRef.current = false;
+    dragStartedRef.current = false;
+
+    const threshold = SWIPE_THRESHOLD;
+    if (Math.abs(currentDragX.current) > threshold) {
+      triggerSwipe(currentDragX.current > 0 ? "right" : "left");
+    } else {
+      if (outerRef.current) {
+        outerRef.current.style.transform = '';
+        outerRef.current.style.transition = 'transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)';
+        setTimeout(() => {
+          if (outerRef.current) outerRef.current.style.transition = '';
+        }, 350);
+      }
+      setDragX(0);
+      setDragY(0);
+      setIsDragging(false);
+    }
+    if (cardRef.current) cardRef.current._swipingHorizontal = false;
+  }
+
   const priceLabel = (!track.price || track.price === 0) ? "FREE" : `$${track.price}`;
   const isFree = !track.price || track.price === 0;
 
+  let flyStyle = {};
+  if (isFlying) {
+    const dir = flyDir === "right" ? 1 : -1;
+    flyStyle = {
+      transform: `translateX(${dir * window.innerWidth}px) rotate(${dir * 45}deg) scale(0.8)`,
+      transition: "transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
+      opacity: 0,
+    };
+  } else if (isDragging) {
+    flyStyle = { transition: "none" };
+  } else if (!isDragging) {
+    flyStyle = {
+      transform: `translateY(${stackIndex * 12}px) scale(${1 - stackIndex * 0.03})`,
+      transition: "transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)",
+    };
+  }
+
   return (
-    // Outer: handles fly/drag transform + perspective
     <div
       ref={outerRef}
       style={{
@@ -274,154 +246,97 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
         ...flyStyle,
       }}
     >
-    {/* Inner: captures pointer events when not flipped, transparent when flipped */}
-    <div
-      ref={cardRef}
-      className={`swipe-card ${isTop ? "swipe-card--top" : ""}`}
-      style={{
-        width: "100%", height: "100%",
-        cursor: isTop ? (isFlipped ? "default" : "grab") : "default",
-        position: "relative",
-        pointerEvents: isFlipped ? "none" : "auto",
-        touchAction: isTop ? "pan-y" : "auto",
-      }}
-      onPointerDown={isTop ? onPointerDown : undefined}
-      onPointerMove={isTop ? onPointerMove : undefined}
-      onPointerUp={isTop ? onPointerUp : undefined}
-      onPointerCancel={isTop ? onPointerUp : undefined}
-    >
-      {/* Flip container */}
-      <div className="swipe-card__flipper" style={{
-        width: "100%", height: "100%",
-        position: "relative",
-        transformStyle: "preserve-3d",
-        transition: "transform 0.45s cubic-bezier(0.4,0,0.2,1)",
-        transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)",
-      }}>
-
-        {/* ── FRONT FACE ── */}
-        <div className="swipe-card__face swipe-card__face--front">
-          <div className="swipe-card__cover" style={{ backgroundImage: `url(${track.coverUrl})` }} />
-          <div className="swipe-card__overlay" />
-          <div className={`price-badge ${isFree ? "price-badge--free" : ""}`}>{priceLabel}</div>
-
-          {track.isSoundCloud ? (
-            <div className="swipe-card__sc-embed" onClick={e => e.stopPropagation()}>
-              <iframe scrolling="no" frameBorder="no" allow="autoplay" src={track.embedUrl}
-                title="SoundCloud" style={{ width: "100%", height: "80px", border: "none" }} />
-            </div>
-          ) : (
-            <div className="swipe-card__center">
-              <WaveformVisualizer isPlaying={isPlaying} progress={progress} />
-              <button className="swipe-card__play-btn"
-                onPointerDown={(e) => e.stopPropagation()}
-                onPointerUp={(e) => e.stopPropagation()}
-                onClick={(e) => { e.stopPropagation(); e.preventDefault(); togglePlay(); }}
-                aria-label={isPlaying ? "Pause" : "Play"}>
-                {isPlaying ? "⏸" : "▶"}
-              </button>
-            </div>
-          )}
-
-          <div className="swipe-card__info">
-            <div className="swipe-card__artist">{track.artist}</div>
-            <div className="swipe-card__title">{track.title}</div>
-            <div className="swipe-card__meta">
-              <span className="genre-tag">{track.genre}</span>
-              {track.bpm > 0 && <span className="bpm-tag">{track.bpm} BPM</span>}
-              {track.beatKey && <span className="bpm-tag" style={{ color: "var(--purple)" }}>{track.beatKey}</span>}
-            </div>
-          </div>
-
-          {stamp && (
-            <div className={`swipe-stamp swipe-stamp--${dragX > 0 || flyDir === "right" ? "like" : "pass"}`}
-              style={{ opacity: isFlying ? 1 : stampOpacity }}>{stamp}</div>
-          )}
-          <div className="swipe-card__progress-bar">
-            <div className="swipe-card__progress-fill" style={{ width: `${progress * 100}%` }} />
-          </div>
-
-          {/* Tap hint */}
-          <div className="swipe-card__tap-hint">tap to flip</div>
+      <div
+        ref={cardRef}
+        className={`swipe-card ${isDragging ? "dragging" : ""} ${isFlying ? "flying" : ""}`}
+        style={{
+          width: "100%",
+          height: "100%",
+          cursor: isTop ? "grab" : "default",
+          position: "relative",
+          pointerEvents: isTop ? "auto" : "none",
+          touchAction: isTop ? "pan-y" : "auto",
+        }}
+        onPointerDown={isTop ? onPointerDown : undefined}
+        onPointerMove={isTop ? onPointerMove : undefined}
+        onPointerUp={isTop ? onPointerUp : undefined}
+        onPointerCancel={isTop ? onPointerUp : undefined}
+      >
+        {/* Cover Image */}
+        <div className="swipe-card-image">
+          <img src={track.coverUrl} alt={track.title} />
         </div>
 
-        {/* ── BACK FACE ── */}
-        <div className="swipe-card__face swipe-card__face--back">
-          {/* Blurred cover bg */}
-          <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${track.coverUrl})`, backgroundSize: 'cover', backgroundPosition: 'center', filter: 'blur(20px) brightness(0.3)', borderRadius: 'inherit' }} />
-          <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', height: '100%', padding: '20px', justifyContent: 'space-between' }}>
-            {/* Header */}
-            <div>
-              <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-head)', letterSpacing: '1px', marginBottom: '4px' }}>BEAT DETAILS</div>
-              <div style={{ fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '20px', color: '#fff', marginBottom: '2px' }}>{track.title}</div>
-              <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', fontFamily: 'var(--font-body)' }}>by {track.artist}</div>
+        {/* Info Section */}
+        <div className="swipe-card-info">
+          <div>
+            <div className="swipe-card-title">{track.title}</div>
+            <div className="swipe-card-artist">{track.artist}</div>
+            
+            {/* Badges */}
+            <div className="swipe-card-badges">
+              <span className="badge genre">{track.genre}</span>
+              {track.bpm > 0 && <span className="badge">{track.bpm} BPM</span>}
+              {!isFree && <span className="badge price">{priceLabel}</span>}
             </div>
+          </div>
 
-            {/* Details */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                <span className="genre-tag">{track.genre}</span>
-                {track.bpm > 0 && <span className="bpm-tag">{track.bpm} BPM</span>}
-                {track.beatKey && <span className="bpm-tag" style={{ color: 'var(--purple)' }}>{track.beatKey}</span>}
-              </div>
-              {track.licenseType && (
-                <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', fontFamily: 'var(--font-body)' }}>
-                  📄 {track.licenseType}
-                </div>
-              )}
-              {track.producerNotes && (
-                <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', fontFamily: 'var(--font-body)', lineHeight: 1.4, maxHeight: '48px', overflow: 'hidden' }}>
-                  "{track.producerNotes}"
-                </div>
-              )}
-            </div>
-
-            {/* Actions */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <button
-                onPointerDown={e => e.stopPropagation()}
-                onPointerUp={e => e.stopPropagation()}
-                onClick={handleCopIt}
-                disabled={checkoutLoading}
-                style={{
-                  width: '100%', padding: '14px',
-                  background: isFree ? 'linear-gradient(135deg, var(--cyan), var(--green))' : 'linear-gradient(135deg, var(--cyan), var(--purple))',
-                  border: 'none', borderRadius: '14px',
-                  color: '#000', fontFamily: 'var(--font-head)', fontWeight: 700,
-                  fontSize: '15px', cursor: 'pointer',
-                  opacity: checkoutLoading ? 0.7 : 1,
-                }}>
-                {checkoutLoading ? "Opening..." : isFree ? "🎁 FREE DOWNLOAD" : `🛒 COP IT — ${priceLabel}`}
-              </button>
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <button
-                  onPointerDown={e => e.stopPropagation()}
-                  onPointerUp={e => e.stopPropagation()}
-                  onClick={e => { e.stopPropagation(); triggerSwipe("left"); }}
-                  style={{ flex: 1, padding: '12px', background: 'rgba(255,51,102,0.15)', border: '1px solid rgba(255,51,102,0.4)', borderRadius: '12px', color: 'var(--red)', fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '13px', cursor: 'pointer' }}>
-                  💨 Pass
-                </button>
-                <button
-                  onPointerDown={e => e.stopPropagation()}
-                  onPointerUp={e => e.stopPropagation()}
-                  onClick={e => { e.stopPropagation(); triggerSwipe("right"); }}
-                  style={{ flex: 1, padding: '12px', background: 'rgba(0,245,255,0.15)', border: '1px solid rgba(0,245,255,0.4)', borderRadius: '12px', color: 'var(--cyan)', fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '13px', cursor: 'pointer' }}>
-                  ❤️ Like
-                </button>
-              </div>
-              <button
-                onPointerDown={e => e.stopPropagation()}
-                onPointerUp={e => e.stopPropagation()}
-                onClick={e => { e.stopPropagation(); setIsFlipped(false); }}
-                style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', fontFamily: 'var(--font-body)', fontSize: '13px', cursor: 'pointer', padding: '4px' }}>
-                ← flip back
-              </button>
-            </div>
+          {/* Action Buttons */}
+          <div className="swipe-card-buttons">
+            <button 
+              className="swipe-btn swipe-btn-play"
+              onPointerDown={(e) => e.stopPropagation()}
+              onPointerUp={(e) => e.stopPropagation()}
+              onClick={(e) => { e.stopPropagation(); e.preventDefault(); togglePlay(); }}
+              aria-label={isPlaying ? "Pause" : "Play"}
+            >
+              {isPlaying ? "⏸ PLAYING" : "▶ PREVIEW"}
+            </button>
+            <button 
+              className="swipe-btn swipe-btn-info"
+              onPointerDown={(e) => e.stopPropagation()}
+              onPointerUp={(e) => e.stopPropagation()}
+              onClick={(e) => { e.stopPropagation(); handleCopIt(e); }}
+              disabled={checkoutLoading}
+            >
+              {checkoutLoading ? "..." : isFree ? "📥 GET" : "🛒 BUY"}
+            </button>
           </div>
         </div>
 
+        {/* Floating Info Panel */}
+        <div className="floating-info-panel">
+          <div className="stat-row">
+            <span className="stat-label">Plays</span>
+            <span className="stat-value">{track.cops || 0}</span>
+          </div>
+          <div className="stat-row">
+            <span className="stat-label">Cops</span>
+            <span className="stat-value">{track.passes || 0}</span>
+          </div>
+          <div className="stat-row">
+            <span className="stat-label">Key</span>
+            <span className="stat-value">{track.beatKey || "—"}</span>
+          </div>
+        </div>
+
+        {/* Stamp Animation */}
+        {stamp && (
+          <div className={`swipe-stamp ${flyDir === "right" ? "stamp-like" : "stamp-pass"}`}
+            style={{
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+            }}>
+            {stamp}
+          </div>
+        )}
+
+        {/* Progress Bar */}
+        {isPlaying && (
+          <div className="progress-bar" style={{ width: `${progress * 100}%` }} />
+        )}
       </div>
-    </div>
     </div>
   );
 }

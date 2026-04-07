@@ -23,17 +23,6 @@ const dbPost = (path, body) => fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
 }).then(r => r.json());
 
 const ACCENT_COLORS = ['#00f5ff', '#bf5fff', '#ff3366', '#00ff88', '#ffd700', '#ff9900', '#ff64c8', '#4080ff'];
-const CARD_STYLES = [
-  { value: 'default', label: 'Default' },
-  { value: 'glass', label: 'Glass' },
-  { value: 'minimal', label: 'Minimal' },
-  { value: 'bordered', label: 'Bordered' },
-];
-const FONT_STYLES = [
-  { value: 'default', label: 'Default', family: 'var(--font-head)' },
-  { value: 'mono', label: 'Monospace', family: 'monospace' },
-  { value: 'serif', label: 'Serif', family: 'serif' },
-];
 const BG_OPTIONS = [
   { value: '#0a0a0a', label: 'Black', preview: '#0a0a0a', text: '#666' },
   { value: '#080818', label: 'Midnight', preview: 'linear-gradient(135deg, #080818, #12103a)', text: '#6060cc' },

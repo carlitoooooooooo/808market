@@ -4180,4 +4180,89 @@ html.party-mode .auth-submit {
   animation: nameGlowPulse 2.5s ease-in-out infinite;
 }
 
+/* Admin-only CRAZY name glows */
+.name-glow-admin-inferno {
+  background: linear-gradient(135deg, #ff0000, #ff6600, #ffff00);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 20px #ff3300, 0 0 10px #ff0000;
+  color: #ff3300 !important;
+  font-weight: 900;
+}
+
+.name-glow-admin-quantum {
+  background: linear-gradient(135deg, #00ff00, #0088ff, #ff00ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 20px #00ff00, 0 0 15px #ff00ff;
+  color: #00ff00 !important;
+  font-weight: 900;
+}
+
+.name-glow-admin-void-star {
+  background: linear-gradient(135deg, #ff0099, #4d0099, #1a0033);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 30px #ff00ff, 0 0 20px #ff0099;
+  color: #ff00ff !important;
+  font-weight: 900;
+}
+
+.name-glow-admin-chaos {
+  background: linear-gradient(135deg, #ff3366, #ff9900, #00ff88, #bf5fff, #ff3366);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 25px rgba(255, 51, 102, 0.8), 0 0 15px rgba(191, 95, 255, 0.6);
+  color: #ff3366 !important;
+  font-weight: 900;
+  animation: gradient-shift 2s ease infinite;
+}
+
+.name-glow-admin-supernova {
+  background: radial-gradient(circle, #ffff00, #ff8800, #ff0000);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 30px #ffff00, 0 0 20px #ff6600, 0 0 10px #ff0000;
+  color: #ffff00 !important;
+  font-weight: 900;
+}
+
+.name-glow-admin-hyperdrive {
+  background: linear-gradient(90deg, #00ffff, #0088ff, #ff00ff, #00ffff);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 25px #00ffff, 0 0 15px #ff00ff;
+  color: #00ffff !important;
+  font-weight: 900;
+  animation: gradient-shift 1.5s ease infinite;
+}
+
+.name-glow-admin-eclipse {
+  background: linear-gradient(135deg, #ff006e, #ff3399, #ff0066);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 35px #ff006e, 0 0 20px #ff0099;
+  color: #ff006e !important;
+  font-weight: 900;
+}
+
+.name-glow-admin-starfield {
+  background: linear-gradient(135deg, #0088ff, #0044ff, #003366);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 30px #00ffff, 0 0 15px #0088ff;
+  color: #00ffff !important;
+  font-weight: 900;
+}
+
 

@@ -5,7 +5,7 @@ import { useAuth } from "./AuthContext.jsx";
 
 const SWIPE_THRESHOLD = 80;
 
-export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
+export default function SwipeCard({ track, onSwipe, isTop, stackIndex, onGlobalPlay, onGlobalPause }) {
   const { currentUser } = useAuth();
   const [dragX, setDragX] = useState(0);
   const [dragY, setDragY] = useState(0);
@@ -56,11 +56,21 @@ export default function SwipeCard({ track, onSwipe, isTop, stackIndex }) {
     stopPlay();
     const p = new AudioPlayer(track.audioUrl || null, track.snippetStart, track.id);
     p.onTimeUpdate((prog) => setProgress(prog));
-    p.onEnded(() => { setIsPlaying(false); setProgress(0); });
+    p.onEnded(() => { 
+      setIsPlaying(false); 
+      setProgress(0);
+      if (onGlobalPause) onGlobalPause();
+    });
     playerRef.current = p;
     p.play();
     setIsPlaying(true);
     setProgress(0);
+    
+    // Notify global state about current playing track
+    if (onGlobalPlay) {
+      onGlobalPlay(track);
+    }
+    
     // Increment play count atomically
     const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXB4eWtlcnl6eGJxcGdqZ2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3NzgsImV4cCI6MjA4OTg1Nzc3OH0.-URU57ytulm82gnYfpSrOQ_i0e7qlwk0LKfGokDXmWA';
     fetch('https://bkapxykeryzxbqpgjgab.supabase.co/rest/v1/rpc/increment_play_count', {

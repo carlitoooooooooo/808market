@@ -53,7 +53,7 @@ function timeAgo(iso) {
   return `${Math.floor(diff / 86400)}d ago`;
 }
 
-export default function TrackModal({ track, onClose, onVote, userVotes, onViewUser, onOpenModal }) {
+export default function TrackModal({ track, onClose, onVote, userVotes, onViewUser, onOpenModal, onGlobalPlay, onGlobalPause }) {
   const { currentUser } = useAuth();
   const [isPlaying, setIsPlaying] = useState(false);
   const [shareToast, setShareToast] = useState("");
@@ -243,10 +243,19 @@ export default function TrackModal({ track, onClose, onVote, userVotes, onViewUs
     if (!playerRef.current) {
       const p = new AudioPlayer(track.audioUrl, track.snippetStart);
       p.onTimeUpdate((prog) => setProgress(prog));
-      p.onEnded(() => { setIsPlaying(false); setProgress(0); });
+      p.onEnded(() => { 
+        setIsPlaying(false); 
+        setProgress(0);
+        if (onGlobalPause) onGlobalPause();
+      });
       playerRef.current = p;
       p.play();
       setIsPlaying(true);
+      
+      // Notify global state
+      if (onGlobalPlay) {
+        onGlobalPlay(track);
+      }
       return;
     }
     if (isPlaying) {

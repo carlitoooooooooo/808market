@@ -1146,6 +1146,16 @@ export default function StorefrontPage({ username, onBack }) {
   const features = listings.filter(l => l.type === 'feature');
   const listedDrumkits = listings.filter(l => l.type === 'drumkit');
 
+  // Map font style to actual font family
+  const fontStyleMap = {
+    'default': 'var(--font-head)',
+    'mono': 'Courier New, monospace',
+    'serif': 'Georgia, serif',
+    'geometric': 'Poppins, sans-serif',
+    'bold-sans': 'Arial Black, sans-serif',
+  };
+  const appliedFontFamily = fontStyleMap[storefront?.font_style] || fontStyleMap['default'];
+
   return (
     <div style={{ minHeight: '100vh', background: bg, color: '#fff' }}>
 
@@ -1193,13 +1203,13 @@ export default function StorefrontPage({ username, onBack }) {
       </div>
 
       {/* Content */}
-      <div style={{ padding: '24px 20px', maxWidth: '800px', margin: '0 auto', fontFamily }}>
+      <div style={{ padding: '24px 20px', maxWidth: '800px', margin: '0 auto', fontFamily: appliedFontFamily }}>
 
         {/* Owner actions */}
         {isOwner && (
           <div style={{ marginBottom: '24px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
             <button onClick={() => setShowListingUpload(true)}
-              style={{ padding: '10px 18px', background: `linear-gradient(135deg, ${accent}, #bf5fff)`, border: 'none', borderRadius: '20px', color: '#000', fontWeight: 700, fontSize: '13px', cursor: 'pointer', fontFamily }}>
+              style={{ padding: '10px 18px', background: `linear-gradient(135deg, ${accent}, #bf5fff)`, border: 'none', borderRadius: '20px', color: '#000', fontWeight: 700, fontSize: '13px', cursor: 'pointer', fontFamily: appliedFontFamily }}>
               ➕ Add Listing
             </button>
           </div>

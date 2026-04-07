@@ -1,0 +1,328 @@
+/* ===== STICKY AUDIO PLAYER ===== */
+
+.sticky-audio-player {
+  position: fixed;
+  bottom: 64px; /* Above the bottom nav */
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 448px;
+  z-index: 300;
+  
+  /* Glassmorphic background */
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  
+  /* Gradient border accent */
+  border: 1px solid;
+  border-image: linear-gradient(
+    135deg,
+    rgba(0, 245, 255, 0.3),
+    rgba(191, 95, 255, 0.2),
+    rgba(0, 245, 255, 0.1)
+  ) 1;
+  
+  border-radius: 12px;
+  overflow: hidden;
+  
+  /* Subtle shadow and glow */
+  box-shadow: 
+    0 8px 32px rgba(0, 245, 255, 0.1),
+    inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  
+  animation: slideUpIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes slideUpIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(120px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Hover effect for desktop */
+@media (hover: hover) {
+  .sticky-audio-player:hover {
+    background: rgba(0, 0, 0, 0.7);
+    border-image: linear-gradient(
+      135deg,
+      rgba(0, 245, 255, 0.5),
+      rgba(191, 95, 255, 0.4),
+      rgba(0, 245, 255, 0.2)
+    ) 1;
+    box-shadow: 
+      0 12px 48px rgba(0, 245, 255, 0.15),
+      inset 0 1px 1px rgba(255, 255, 255, 0.15);
+  }
+}
+
+/* ===== PLAYER CONTENT ===== */
+
+.sticky-player-content {
+  display: flex;
+  align-items: center;
+  padding: 12px 14px;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Album Art */
+.player-album-art {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+  
+  background: linear-gradient(135deg, #bf5fff, #00f5ff);
+  box-shadow: 0 0 16px rgba(0, 245, 255, 0.3);
+}
+
+.player-album-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.album-art-playing-indicator {
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  border: 2px solid rgba(0, 245, 255, 0.6);
+  animation: playingPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes playingPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 2px rgba(0, 245, 255, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(0, 245, 255, 0.2);
+  }
+}
+
+/* Track Info */
+.player-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+}
+
+.player-title {
+  font-family: var(--font-head);
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -0.3px;
+}
+
+.player-artist {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Controls */
+.player-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.player-btn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  font-size: 18px;
+  padding: 6px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  min-height: 32px;
+}
+
+.player-btn:hover {
+  color: #ffffff;
+  background: rgba(0, 245, 255, 0.1);
+  transform: scale(1.1);
+}
+
+.player-btn:active {
+  transform: scale(0.95);
+}
+
+.play-btn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(0, 245, 255, 0.3);
+  border-radius: 8px;
+  font-size: 16px;
+  background: rgba(0, 245, 255, 0.05);
+  color: #00f5ff;
+}
+
+.play-btn.playing {
+  background: rgba(0, 245, 255, 0.15);
+  border-color: rgba(0, 245, 255, 0.5);
+  color: #00f5ff;
+  box-shadow: 0 0 12px rgba(0, 245, 255, 0.3);
+}
+
+.play-btn:hover {
+  background: rgba(0, 245, 255, 0.2);
+  border-color: rgba(0, 245, 255, 0.6);
+  box-shadow: 0 0 16px rgba(0, 245, 255, 0.4);
+}
+
+.close-btn {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.close-btn:hover {
+  color: #ff3366;
+  background: rgba(255, 51, 102, 0.1);
+}
+
+/* ===== PROGRESS BAR ===== */
+
+.player-progress-bar {
+  width: 100%;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.player-progress-bar:hover {
+  height: 4px;
+}
+
+.player-progress-fill {
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    #00f5ff,
+    #bf5fff
+  );
+  transition: width 0.05s linear;
+  box-shadow: 0 0 8px rgba(0, 245, 255, 0.5);
+}
+
+/* ===== TIME DISPLAY ===== */
+
+.player-time {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 14px;
+  font-family: var(--font-body);
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+/* ===== MOBILE RESPONSIVE ===== */
+
+@media (max-width: 480px) {
+  .sticky-audio-player {
+    width: calc(100% - 16px);
+    left: 8px;
+    transform: none;
+    bottom: 68px;
+  }
+
+  .sticky-player-content {
+    padding: 10px 12px;
+    gap: 10px;
+  }
+
+  .player-album-art {
+    width: 40px;
+    height: 40px;
+  }
+
+  .player-title {
+    font-size: 12px;
+  }
+
+  .player-artist {
+    font-size: 10px;
+  }
+
+  .play-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+
+  .player-controls {
+    gap: 6px;
+  }
+}
+
+@media (max-width: 360px) {
+  .sticky-player-content {
+    padding: 8px 10px;
+    gap: 8px;
+  }
+
+  .player-album-art {
+    width: 36px;
+    height: 36px;
+  }
+
+  .player-title {
+    font-size: 11px;
+  }
+
+  .player-artist {
+    font-size: 9px;
+  }
+
+  .play-btn {
+    width: 30px;
+    height: 30px;
+    font-size: 13px;
+  }
+
+  .close-btn {
+    font-size: 14px;
+  }
+}
+
+/* ===== ANIMATION ENTRANCE ===== */
+
+.sticky-audio-player {
+  animation: slideUpIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+/* Ensure it stacks properly with bottom nav */
+@supports (padding: max(0px)) {
+  .sticky-audio-player {
+    bottom: calc(64px + max(0px, env(safe-area-inset-bottom)));
+  }
+}

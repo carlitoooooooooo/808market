@@ -23,6 +23,7 @@ import AuthPrompt from "./AuthPrompt.jsx";
 import UserSearch from "./UserSearch.jsx";
 import AchievementPopup from "./AchievementPopup.jsx";
 import OnboardingModal from "./OnboardingModal.jsx";
+import StickyAudioPlayer from "./StickyAudioPlayer.jsx";
 import tracksData from "./tracks.js";
 import { supabase } from "./supabase.js";
 import { dbUpsert, dbSelect, dbUpdate, dbInsert } from "./dbHelper.js";
@@ -168,6 +169,11 @@ export default function App() {
     }
   });
   const [showOnboarding, setShowOnboarding] = useState(false); // Show onboarding modal
+  
+  // Global audio player state (for sticky player)
+  const [currentlyPlayingTrack, setCurrentlyPlayingTrack] = useState(null);
+  const [stickyPlayerIsPlaying, setStickyPlayerIsPlaying] = useState(false);
+  
   const onboardingCheckedRef = useRef(false); // Track if we've checked onboarding status
   const toastTimer = useRef(null);
   const notifTimer = useRef(null);
@@ -1046,6 +1052,11 @@ export default function App() {
                 onVote={(dir, track) => { handleVoteFromModal(dir, track); setBrowseTrack(null); }}
                 userVotes={userVotes}
                 onViewUser={setViewingUser}
+                onGlobalPlay={(track) => {
+                  setCurrentlyPlayingTrack(track);
+                  setStickyPlayerIsPlaying(true);
+                }}
+                onGlobalPause={() => setStickyPlayerIsPlaying(false)}
               />
             )}
 
@@ -1146,7 +1157,11 @@ export default function App() {
                     isTop={idx === 0}
                     stackIndex={idx}
                     onSwipe={handleSwipe}
-
+                    onGlobalPlay={(track) => {
+                      setCurrentlyPlayingTrack(track);
+                      setStickyPlayerIsPlaying(true);
+                    }}
+                    onGlobalPause={() => setStickyPlayerIsPlaying(false)}
                   />
                 ))}
               </div>
@@ -1297,6 +1312,11 @@ export default function App() {
           onVote={handleVoteFromModal}
           userVotes={userVotes}
           onViewUser={(username) => { setDeepLinkTrack(null); setViewingUser(username); }}
+          onGlobalPlay={(track) => {
+            setCurrentlyPlayingTrack(track);
+            setStickyPlayerIsPlaying(true);
+          }}
+          onGlobalPause={() => setStickyPlayerIsPlaying(false)}
         />
       )}
 
@@ -1406,6 +1426,17 @@ export default function App() {
           </div>
         </div>
       )}
+
+      {/* Sticky Audio Player */}
+      <StickyAudioPlayer
+        currentTrack={currentlyPlayingTrack}
+        isPlaying={stickyPlayerIsPlaying}
+        onPlayPause={setStickyPlayerIsPlaying}
+        onClose={() => {
+          setCurrentlyPlayingTrack(null);
+          setStickyPlayerIsPlaying(false);
+        }}
+      />
     </div>
   );
 }

@@ -4357,6 +4357,254 @@ html.party-mode .auth-submit {
   font-weight: 900;
 }
 
+/* ===== VAPORWAVE THEME ===== */
+[data-theme="vaporwave"] {
+  --bg: #ffc0cb;
+  --text: #ff006e;
+  --cyan: #ff006e;
+  --purple: #f0f;
+}
+
+[data-theme="vaporwave"] body {
+  background: linear-gradient(135deg, #ffc0cb 0%, #ffb3d9 25%, #e0aaff 50%, #b0e0e6 75%, #ffc0cb 100%) !important;
+  background-size: 400% 400%;
+  animation: vaporwaveGradient 15s ease infinite !important;
+  color: #ff006e !important;
+  font-style: italic !important;
+  font-family: Georgia, serif !important;
+  filter: blur(0.3px) !important;
+}
+
+[data-theme="vaporwave"] * {
+  font-style: italic !important;
+  color: #ff006e !important;
+  text-shadow: 2px 2px 4px rgba(240, 15, 255, 0.3) !important;
+}
+
+[data-theme="vaporwave"] .auth-card {
+  background: rgba(255, 192, 203, 0.7) !important;
+  border: 3px solid #ff006e !important;
+  box-shadow: 0 8px 32px rgba(240, 15, 255, 0.2) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+[data-theme="vaporwave"] button {
+  background: linear-gradient(135deg, #ff006e, #f0f) !important;
+  color: #fff !important;
+  border: 2px solid #ff006e !important;
+  border-radius: 30px !important;
+  font-style: italic !important;
+  box-shadow: 0 4px 15px rgba(240, 15, 255, 0.3) !important;
+}
+
+[data-theme="vaporwave"] input,
+[data-theme="vaporwave"] textarea,
+[data-theme="vaporwave"] select {
+  background: rgba(255, 255, 255, 0.8) !important;
+  color: #ff006e !important;
+  border: 2px solid #ff006e !important;
+  border-radius: 10px !important;
+  font-style: italic !important;
+}
+
+[data-theme="vaporwave"] .auth-logo-text {
+  color: #ff006e !important;
+  font-style: italic !important;
+  text-shadow: 0 4px 20px rgba(240, 15, 255, 0.5) !important;
+  animation: vaporwaveFloat 3s ease-in-out infinite !important;
+}
+
+@keyframes vaporwaveGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes vaporwaveFloat {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+/* ===== GLITCH THEME ===== */
+[data-theme="glitch"] {
+  --bg: #000;
+  --text: #ff00ff;
+  --cyan: #00ffff;
+  --purple: #ff00ff;
+}
+
+[data-theme="glitch"] body {
+  background: #000 !important;
+  color: #ff00ff !important;
+  animation: glitchBg 0.1s infinite !important;
+}
+
+[data-theme="glitch"] * {
+  animation: glitchText 0.1s infinite !important;
+  color: #ff00ff !important;
+}
+
+[data-theme="glitch"] .auth-card {
+  background: rgba(0, 0, 0, 0.9) !important;
+  border: 3px solid #ff00ff !important;
+  box-shadow: 
+    -3px 0 10px #ff00ff,
+    3px 0 10px #00ffff,
+    0 0 20px rgba(255, 0, 255, 0.5) !important;
+}
+
+[data-theme="glitch"] button {
+  background: #1a001a !important;
+  color: #ff00ff !important;
+  border: 2px solid #ff00ff !important;
+  box-shadow: -2px 0 5px #ff00ff, 2px 0 5px #00ffff !important;
+  font-weight: bold !important;
+}
+
+[data-theme="glitch"] button:hover {
+  animation: glitchShake 0.1s infinite !important;
+}
+
+[data-theme="glitch"] input,
+[data-theme="glitch"] textarea,
+[data-theme="glitch"] select {
+  background: #1a001a !important;
+  color: #ff00ff !important;
+  border: 2px solid #ff00ff !important;
+  box-shadow: -1px 0 5px #00ffff, 1px 0 5px #ff00ff !important;
+  caret-color: #00ffff !important;
+}
+
+[data-theme="glitch"] .auth-logo-text {
+  color: #ff00ff !important;
+  text-shadow: -3px 0 #00ffff, 3px 0 #ff00ff, 0 0 20px #ff00ff !important;
+  animation: glitchShift 0.3s infinite !important;
+  letter-spacing: 3px !important;
+}
+
+@keyframes glitchText {
+  0%, 100% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); }
+  40% { transform: translate(-2px, -2px); }
+  60% { transform: translate(2px, 2px); }
+  80% { transform: translate(2px, -2px); }
+}
+
+@keyframes glitchShake {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(-3px); }
+}
+
+@keyframes glitchShift {
+  0%, 100% { text-shadow: -3px 0 #00ffff, 3px 0 #ff00ff, 0 0 20px #ff00ff; }
+  50% { text-shadow: -3px 0 #ff00ff, 3px 0 #00ffff, 0 0 20px #00ffff; }
+}
+
+@keyframes glitchBg {
+  0%, 100% { background: #000; }
+  50% { background: #0a0a0a; }
+}
+
+/* ===== ARCADE THEME ===== */
+[data-theme="arcade"] {
+  --bg: #ffff00;
+  --text: #0000ff;
+  --cyan: #00ffff;
+  --purple: #ff00ff;
+}
+
+[data-theme="arcade"] body {
+  background: linear-gradient(90deg, #ffff00, #ff0000, #0000ff, #ffff00) !important;
+  background-size: 400% 100%;
+  animation: arcadeGradient 6s linear infinite !important;
+  color: #0000ff !important;
+  font-family: 'Arial Black', sans-serif !important;
+  font-weight: 900 !important;
+  text-shadow: 3px 3px 0 #ff0000, 6px 6px 0 #0000ff !important;
+}
+
+[data-theme="arcade"] * {
+  font-family: 'Arial Black', sans-serif !important;
+  font-weight: 900 !important;
+  color: #0000ff !important;
+}
+
+[data-theme="arcade"] .auth-card {
+  background: #ffff00 !important;
+  border: 5px solid #0000ff !important;
+  box-shadow: 
+    0 8px 0 #ff0000,
+    0 16px 0 #0000ff,
+    0 0 20px rgba(255, 0, 0, 0.6) !important;
+  transform: skewY(-2deg) !important;
+}
+
+[data-theme="arcade"] .auth-card:hover {
+  transform: skewY(-2deg) translateY(-4px) !important;
+  box-shadow: 
+    0 12px 0 #ff0000,
+    0 20px 0 #0000ff,
+    0 0 30px rgba(255, 0, 0, 0.8) !important;
+}
+
+[data-theme="arcade"] button {
+  background: linear-gradient(45deg, #ff0000, #ffff00) !important;
+  color: #0000ff !important;
+  border: 4px solid #0000ff !important;
+  border-radius: 0 !important;
+  font-weight: 900 !important;
+  box-shadow: 4px 4px 0 #ff0000, 8px 8px 0 #0000ff !important;
+  text-transform: uppercase !important;
+  letter-spacing: 2px !important;
+  animation: arcadePulse 0.5s ease-in-out infinite !important;
+}
+
+[data-theme="arcade"] button:active {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 2px 2px 0 #ff0000, 4px 4px 0 #0000ff !important;
+}
+
+[data-theme="arcade"] input,
+[data-theme="arcade"] textarea,
+[data-theme="arcade"] select {
+  background: #ffffff !important;
+  color: #0000ff !important;
+  border: 3px solid #0000ff !important;
+  border-radius: 0 !important;
+  font-weight: 900 !important;
+  box-shadow: 3px 3px 0 #ff0000 !important;
+}
+
+[data-theme="arcade"] .auth-logo-text {
+  color: #0000ff !important;
+  text-shadow: 4px 4px 0 #ff0000, 8px 8px 0 #ffff00, 0 0 20px #ff0000 !important;
+  font-weight: 900 !important;
+  letter-spacing: 4px !important;
+  animation: arcadeFlash 0.4s ease-in-out infinite !important;
+  font-size: 4em !important;
+}
+
+@keyframes arcadeGradient {
+  0% { background-position: 0% center; }
+  100% { background-position: 400% center; }
+}
+
+@keyframes arcadePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes arcadeFlash {
+  0%, 100% { 
+    text-shadow: 4px 4px 0 #ff0000, 8px 8px 0 #ffff00, 0 0 20px #ff0000;
+    color: #0000ff;
+  }
+  50% { 
+    text-shadow: 4px 4px 0 #ffff00, 8px 8px 0 #ff0000, 0 0 30px #ffff00;
+    color: #ff0000;
+  }
+}
+
 /* ===== NEOCITIES THEME (OVER THE TOP!) ===== */
 [data-theme="neocities"] {
   --bg: #ff00ff;

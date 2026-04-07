@@ -1427,8 +1427,7 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
                                 <button key={c.value} type="button" onClick={() => setProfileExtra(prev => ({ ...prev, profile_badge_color: c.value }))}
                                   style={{ 
                                     padding: '4px 12px', 
-                                    background: c.animated ? undefined : c.bg,
-                                    backgroundImage: c.value === 'pulse-rainbow' ? 'linear-gradient(90deg,#ff3366,#ff9900,#ffff00,#00ff88,#00f5ff,#bf5fff)' : undefined,
+                                    background: c.value === 'pulse-rainbow' ? 'linear-gradient(90deg,#ff3366,#ff9900,#ffff00,#00ff88,#00f5ff,#bf5fff)' : (c.value === 'neon-flicker' ? 'linear-gradient(90deg, #00f5ff, #bf5fff)' : (c.value === 'glow-shift' ? 'linear-gradient(90deg, #00ff88, #00f5ff, #bf5fff)' : c.bg)),
                                     backgroundSize: c.value === 'pulse-rainbow' ? '200% 100%' : undefined,
                                     animation: c.value === 'pulse-rainbow' ? 'gradient-shift 3s ease infinite' : (c.value === 'neon-flicker' ? 'neon-pulse 1.5s ease-in-out infinite' : (c.value === 'glow-shift' ? 'glow-cycle 2s ease-in-out infinite' : 'none')),
                                     color: c.color, 

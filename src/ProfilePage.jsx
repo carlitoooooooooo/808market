@@ -1478,12 +1478,12 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
                         {[
                           { value: 'admin-inferno', label: '🔥 Inferno', style: { background: 'linear-gradient(135deg, #ff0000, #ff6600, #ffff00)', color: '#000', textShadow: '0 0 20px #ff3300, 0 0 10px #ff0000', fontWeight: 900 } },
                           { value: 'admin-quantum', label: '⚛️ Quantum', style: { background: 'linear-gradient(135deg, #00ff00, #0088ff, #ff00ff)', color: '#fff', textShadow: '0 0 20px #00ff00, 0 0 15px #ff00ff', fontWeight: 900 } },
-                          { value: 'admin-void-star', label: '✨ Void Star', style: { background: 'linear-gradient(135deg, #1a0033, #4d0099, #ff0099)', color: '#ff00ff', textShadow: '0 0 30px #ff00ff, 0 0 20px #4d0099', fontWeight: 900 } },
+                          { value: 'admin-void-star', label: '✨ Void Star', style: { background: 'linear-gradient(135deg, #ff0099, #4d0099, #1a0033)', color: '#fff', textShadow: '0 0 30px #ff00ff, 0 0 20px #ff0099', fontWeight: 900 } },
                           { value: 'admin-chaos', label: '💥 Chaos', style: { background: 'linear-gradient(135deg, #ff3366, #ff9900, #00ff88, #bf5fff, #ff3366)', color: '#fff', textShadow: '0 0 25px rgba(255, 51, 102, 0.8), 0 0 15px rgba(191, 95, 255, 0.6)', fontWeight: 900, backgroundSize: '200% 200%', animation: 'gradient-shift 2s ease infinite' } },
                           { value: 'admin-supernova', label: '⭐ Supernova', style: { background: 'radial-gradient(circle, #ffff00, #ff8800, #ff0000)', color: '#000', textShadow: '0 0 30px #ffff00, 0 0 20px #ff6600, 0 0 10px #ff0000', fontWeight: 900 } },
                           { value: 'admin-hyperdrive', label: '🚀 Hyperdrive', style: { background: 'linear-gradient(90deg, #00ffff, #0088ff, #ff00ff, #00ffff)', color: '#000', textShadow: '0 0 25px #00ffff, 0 0 15px #ff00ff', fontWeight: 900, backgroundSize: '200% 100%', animation: 'gradient-shift 1.5s ease infinite' } },
-                          { value: 'admin-eclipse', label: '🌑 Eclipse', style: { background: 'radial-gradient(ellipse at center, #ff006e, #000000, #ff006e)', color: '#ff006e', textShadow: '0 0 35px #ff006e, 0 0 20px #ff0066', fontWeight: 900 } },
-                          { value: 'admin-starfield', label: '🌌 Starfield', style: { background: 'linear-gradient(135deg, #000033, #0000cc, #330066, #000033)', color: '#00ffff', textShadow: '0 0 30px #00ffff, 0 0 15px #0088ff', fontWeight: 900 } },
+                          { value: 'admin-eclipse', label: '🌑 Eclipse', style: { background: 'linear-gradient(135deg, #ff006e, #ff3399, #ff0066)', color: '#fff', textShadow: '0 0 35px #ff006e, 0 0 20px #ff0099', fontWeight: 900 } },
+                          { value: 'admin-starfield', label: '🌌 Starfield', style: { background: 'linear-gradient(135deg, #0088ff, #0044ff, #003366)', color: '#00ffff', textShadow: '0 0 30px #00ffff, 0 0 15px #0088ff', fontWeight: 900 } },
                         ].map(g => (
                           <button key={g.value} type="button"
                             onClick={() => setProfileExtra(prev => ({ ...prev, name_glow: g.value }))}

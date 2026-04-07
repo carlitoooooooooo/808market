@@ -120,15 +120,33 @@ function BeatCard({ beat, accent, onBuy, cardStyle }) {
 
         const startTime = beat.snippet_start || beat.snippetStart || 0;
         
-        // Seek and play
+        // Load metadata first (required for mobile), then seek and play
+        audio.load(); // Load the audio resource to ensure metadata is available
+        
         if (audio.readyState >= 2 && isFinite(audio.duration)) {
           audio.currentTime = startTime;
-          audio.play().catch(err => console.error('Play error:', err));
+          try {
+            audio.play().catch(err => {
+              console.warn('Play deferred:', err);
+              // Mobile may require user gesture - wait for canplay
+              const onCanPlay = () => {
+                audio.removeEventListener("canplay", onCanPlay);
+                audio.play().catch(e => console.error('Final play error:', e));
+              };
+              audio.addEventListener("canplay", onCanPlay, { once: true });
+            });
+          } catch (err) {
+            console.error('Play error:', err);
+          }
         } else {
           const onCanPlay = () => {
             audio.removeEventListener("canplay", onCanPlay);
             audio.currentTime = startTime;
-            audio.play().catch(err => console.error('Play error:', err));
+            try {
+              audio.play().catch(err => console.error('Play error:', err));
+            } catch (err) {
+              console.error('Play error:', err);
+            }
           };
           audio.addEventListener("canplay", onCanPlay, { once: true });
         }
@@ -238,15 +256,33 @@ function ListingCard({ listing, accent, onBuy, onDelete, isOwner }) {
           currentUrlRef.current = signedUrl;
         }
 
-        // Seek and play
+        // Load metadata first (required for mobile), then seek and play
+        audio.load(); // Load the audio resource to ensure metadata is available
+        
         if (audio.readyState >= 2 && isFinite(audio.duration)) {
           audio.currentTime = 0;
-          audio.play().catch(err => console.error('Play error:', err));
+          try {
+            audio.play().catch(err => {
+              console.warn('Play deferred:', err);
+              // Mobile may require user gesture - wait for canplay
+              const onCanPlay = () => {
+                audio.removeEventListener("canplay", onCanPlay);
+                audio.play().catch(e => console.error('Final play error:', e));
+              };
+              audio.addEventListener("canplay", onCanPlay, { once: true });
+            });
+          } catch (err) {
+            console.error('Play error:', err);
+          }
         } else {
           const onCanPlay = () => {
             audio.removeEventListener("canplay", onCanPlay);
             audio.currentTime = 0;
-            audio.play().catch(err => console.error('Play error:', err));
+            try {
+              audio.play().catch(err => console.error('Play error:', err));
+            } catch (err) {
+              console.error('Play error:', err);
+            }
           };
           audio.addEventListener("canplay", onCanPlay, { once: true });
         }
@@ -351,6 +387,21 @@ const CARD_STYLES = [
   { value: 'glass', label: 'Glass' },
   { value: 'minimal', label: 'Minimal' },
   { value: 'bordered', label: 'Bordered' },
+  { value: 'elevated', label: 'Elevated' },
+  { value: 'solid', label: 'Solid' },
+];
+
+const BADGE_FRAMES = [
+  { value: 'rounded', label: 'Rounded' },
+  { value: 'square', label: 'Square' },
+  { value: 'pill', label: 'Pill' },
+  { value: 'outlined', label: 'Outlined' },
+];
+
+const TEXT_ALIGNMENTS = [
+  { value: 'left', label: 'Left', icon: '◄' },
+  { value: 'center', label: 'Center', icon: '■' },
+  { value: 'right', label: 'Right', icon: '►' },
 ];
 
 const FONT_STYLES = [
@@ -358,6 +409,8 @@ const FONT_STYLES = [
   { value: 'mono', label: 'Mono', family: "'Space Mono', monospace" },
   { value: 'serif', label: 'Serif', family: 'Georgia, serif' },
   { value: 'rounded', label: 'Rounded', family: "'Nunito', 'Space Grotesk', sans-serif" },
+  { value: 'geometric', label: 'Geometric', family: "'Montserrat', sans-serif" },
+  { value: 'sans-bold', label: 'Bold Sans', family: "'Arial Black', sans-serif" },
 ];
 
 const SECTION_LABELS = { beats: '🎵 Beats', open_verses: '🎤 Open Verses', features: '⭐ Features', drumkits: '🥁 Drum Kits' };
@@ -401,13 +454,24 @@ function StorefrontEditor({ storefront, username, beats, onSave, onClose }) {
   const [bg, setBg] = useState(storefront?.bg_color || '#0a0a0a');
   // ensure bg is always a valid option value
   const [cardStyle, setCardStyle] = useState(storefront?.card_style || 'default');
+  const [badgeFrame, setBadgeFrame] = useState(storefront?.badge_frame || 'rounded');
   const [fontStyle, setFontStyle] = useState(storefront?.font_style || 'default');
+  const [textAlign, setTextAlign] = useState(storefront?.text_align || 'left');
   const [showStats, setShowStats] = useState(storefront?.show_stats !== false);
   const [gridLayout, setGridLayout] = useState(storefront?.grid_layout !== false);
   const [sectionOrder, setSectionOrder] = useState(() => {
     try { return JSON.parse(storefront?.section_order || '["beats","open_verses","features","drumkits"]'); }
     catch { return ['beats', 'open_verses', 'features', 'drumkits']; }
   });
+  const [sectionVisibility, setSectionVisibility] = useState(() => {
+    try { return JSON.parse(storefront?.section_visibility || '{"beats":true,"open_verses":true,"features":true,"drumkits":true}'); }
+    catch { return { beats: true, open_verses: true, features: true, drumkits: true }; }
+  });
+  const [customSectionTitles, setCustomSectionTitles] = useState(() => {
+    try { return JSON.parse(storefront?.custom_section_titles || '{}'); }
+    catch { return {}; }
+  });
+  const [ctaButtonText, setCtaButtonText] = useState(storefront?.cta_button_text || 'Explore');
   const [featuredBeatId, setFeaturedBeatId] = useState(storefront?.featured_beat_id || '');
   const [instagram, setInstagram] = useState(storefront?.instagram || '');
   const [twitter, setTwitter] = useState(storefront?.twitter || '');
@@ -444,9 +508,12 @@ function StorefrontEditor({ storefront, username, beats, onSave, onClose }) {
     const payload = {
       username, display_name: displayName, tagline, about_bio: aboutBio,
       accent_color: accent, bg_color: bg, banner_url, is_public: true,
-      card_style: cardStyle, font_style: fontStyle,
-      show_stats: showStats, grid_layout: gridLayout,
+      card_style: cardStyle, badge_frame: badgeFrame, font_style: fontStyle,
+      text_align: textAlign, show_stats: showStats, grid_layout: gridLayout,
       section_order: JSON.stringify(sectionOrder),
+      section_visibility: JSON.stringify(sectionVisibility),
+      custom_section_titles: JSON.stringify(customSectionTitles),
+      cta_button_text: ctaButtonText,
       featured_beat_id: featuredBeatId || null,
       instagram, twitter, soundcloud, youtube, bio_link: bioLink, bio_link_label: bioLinkLabel,
     };
@@ -530,6 +597,59 @@ function StorefrontEditor({ storefront, username, beats, onSave, onClose }) {
                 style={{ padding: '7px 14px', borderRadius: '20px', border: `2px solid ${fontStyle === f.value ? accent : 'rgba(255,255,255,0.15)'}`, background: fontStyle === f.value ? `${accent}20` : 'transparent', color: fontStyle === f.value ? accent : 'rgba(255,255,255,0.5)', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: f.family }}>
                 {f.label}
               </button>
+            ))}
+          </div>
+        </EditorField>
+
+        {/* Badge Frame Style */}
+        <EditorField label="Badge Style">
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            {BADGE_FRAMES.map(b => (
+              <button key={b.value} type="button" onClick={() => setBadgeFrame(b.value)}
+                style={{ padding: '7px 14px', borderRadius: '20px', border: `2px solid ${badgeFrame === b.value ? accent : 'rgba(255,255,255,0.15)'}`, background: badgeFrame === b.value ? `${accent}20` : 'transparent', color: badgeFrame === b.value ? accent : 'rgba(255,255,255,0.5)', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-head)' }}>
+                {b.label}
+              </button>
+            ))}
+          </div>
+        </EditorField>
+
+        {/* Text Alignment */}
+        <EditorField label="Text Alignment">
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            {TEXT_ALIGNMENTS.map(t => (
+              <button key={t.value} type="button" onClick={() => setTextAlign(t.value)}
+                style={{ padding: '7px 14px', borderRadius: '20px', border: `2px solid ${textAlign === t.value ? accent : 'rgba(255,255,255,0.15)'}`, background: textAlign === t.value ? `${accent}20` : 'transparent', color: textAlign === t.value ? accent : 'rgba(255,255,255,0.5)', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-head)' }}>
+                {t.icon} {t.label}
+              </button>
+            ))}
+          </div>
+        </EditorField>
+
+        {/* CTA Button Text */}
+        <EditorField label="Call-to-Action Button Text">
+          <input className="auth-input" value={ctaButtonText} onChange={e => setCtaButtonText(e.target.value)} placeholder="Explore" maxLength={30} />
+        </EditorField>
+
+        {/* Section Visibility */}
+        <EditorField label="Section Visibility">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {Object.keys(sectionVisibility).map(section => (
+              <button key={section} type="button" onClick={() => setSectionVisibility(prev => ({ ...prev, [section]: !prev[section] }))}
+                style={{ padding: '8px 12px', background: sectionVisibility[section] ? `${accent}15` : 'rgba(255,255,255,0.03)', border: `1px solid ${sectionVisibility[section] ? `${accent}40` : 'rgba(255,255,255,0.1)'}`, borderRadius: '8px', color: sectionVisibility[section] ? accent : 'rgba(255,255,255,0.5)', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-head)', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '14px', color: sectionVisibility[section] ? accent : 'rgba(255,255,255,0.3)' }}>{sectionVisibility[section] ? '👁️' : '👁️‍🗨️'}</span>
+                {SECTION_LABELS[section] || section}
+              </button>
+            ))}
+          </div>
+        </EditorField>
+
+        {/* Custom Section Titles */}
+        <EditorField label="Custom Section Titles (Optional)">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {['beats', 'open_verses', 'features', 'drumkits'].map(section => (
+              <input key={section} className="auth-input" value={customSectionTitles[section] || ''} 
+                onChange={e => setCustomSectionTitles(prev => ({ ...prev, [section]: e.target.value }))}
+                placeholder={`Custom ${SECTION_LABELS[section] || section} title...`} maxLength={50} />
             ))}
           </div>
         </EditorField>

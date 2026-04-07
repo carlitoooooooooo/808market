@@ -337,6 +337,31 @@ body {
   margin-bottom: 36px;
 }
 .auth-logo .logo-text { font-size: clamp(28px, 8vw, 40px); }
+
+/* Auth page special logo font */
+.auth-logo-text {
+  font-size: clamp(32px, 10vw, 56px);
+  font-weight: 900;
+  font-family: 'Syne', 'Courier New', monospace;
+  letter-spacing: -2px;
+  color: #fff;
+  background: linear-gradient(135deg, #00f5ff 0%, #bf5fff 50%, #00f5ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 30px rgba(0, 245, 255, 0.3), 0 0 20px rgba(191, 95, 255, 0.2);
+  animation: authLogoGlow 3s ease-in-out infinite;
+}
+
+@keyframes authLogoGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 10px rgba(0, 245, 255, 0.4)) drop-shadow(0 0 5px rgba(191, 95, 255, 0.2));
+  }
+  50% {
+    filter: drop-shadow(0 0 20px rgba(0, 245, 255, 0.6)) drop-shadow(0 0 10px rgba(191, 95, 255, 0.4));
+  }
+}
+
 .logo-sub {
   font-family: var(--font-body);
   font-size: 14px;

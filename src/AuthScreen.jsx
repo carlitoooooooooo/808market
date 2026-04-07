@@ -117,7 +117,7 @@ export default function AuthScreen() {
       <div className="auth-bg-splatter" />
 
       <div className="auth-logo">
-        <Logo />
+        <div className="auth-logo-text">808market</div>
         <div className="logo-sub">🎵 Swipe, Discover, Sell 🛒</div>
       </div>
 

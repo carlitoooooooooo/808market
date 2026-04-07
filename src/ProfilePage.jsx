@@ -682,13 +682,24 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
                 'blue':        { bg: 'linear-gradient(135deg,#4080ff,#0040cc)', color: '#fff' },
                 'orange':      { bg: 'linear-gradient(135deg,#ff9900,#ff6600)', color: '#000' },
                 'pink':        { bg: 'linear-gradient(135deg,#ff64c8,#ff0099)', color: '#fff' },
+                'purple':      { bg: 'linear-gradient(135deg,#9b59b6,#6a0dad)', color: '#fff' },
+                'teal':        { bg: 'linear-gradient(135deg,#00ced1,#20b2aa)', color: '#fff' },
+                'crimson':     { bg: 'linear-gradient(135deg,#dc143c,#8b0000)', color: '#fff' },
+                'lime':        { bg: 'linear-gradient(135deg,#32cd32,#00ff00)', color: '#000' },
+                'cyan':        { bg: '#00f5ff', color: '#000' },
+                'sunset':      { bg: 'linear-gradient(135deg,#ff6b6b,#ffa500)', color: '#fff' },
+                'forest':      { bg: 'linear-gradient(135deg,#228b22,#00aa00)', color: '#fff' },
+                'ocean':       { bg: 'linear-gradient(135deg,#1e90ff,#006699)', color: '#fff' },
                 'white':       { bg: 'linear-gradient(135deg,#fff,#ccc)', color: '#000' },
                 'dark':        { bg: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)' },
+                'pulse-rainbow': { bg: 'linear-gradient(90deg,#ff3366,#ff9900,#ffff00,#00ff88,#00f5ff,#bf5fff)', color: '#fff', animation: 'gradient-shift 3s ease infinite' },
+                'neon-flicker': { bg: 'linear-gradient(90deg, #00f5ff, #bf5fff)', color: '#000', animation: 'neon-pulse 1.5s ease-in-out infinite' },
+                'glow-shift': { bg: 'linear-gradient(90deg, #00ff88, #00f5ff, #bf5fff)', color: '#000', animation: 'glow-cycle 2s ease-in-out infinite' },
               };
               const bc = BADGE_COLORS[profileExtra.profile_badge_color] || BADGE_COLORS['cyan-purple'];
               return (
                 <div style={{ marginTop: '4px', marginBottom: '2px' }}>
-                  <span style={{ background: bc.bg, color: bc.color, border: bc.border || 'none', fontSize: '10px', fontFamily: 'var(--font-head)', fontWeight: 700, padding: '2px 10px', borderRadius: '20px', letterSpacing: '0.5px' }}>
+                  <span style={{ background: bc.bg, backgroundSize: profileExtra.profile_badge_color === 'pulse-rainbow' ? '200% 100%' : undefined, color: bc.color, border: bc.border || 'none', fontSize: '10px', fontFamily: 'var(--font-head)', fontWeight: 700, padding: '2px 10px', borderRadius: '20px', letterSpacing: '0.5px', animation: bc.animation }}>
                     {profileExtra.profile_badge}
                   </span>
                 </div>

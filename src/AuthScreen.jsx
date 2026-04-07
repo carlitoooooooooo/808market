@@ -131,44 +131,7 @@ export default function AuthScreen() {
           </button>
         </div>
 
-        {/* Forgot Password Link - only in login mode */}
-        {mode === "login" && (
-          <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-            <button
-              type="button"
-              onClick={() => { setMode("forgot"); setError(""); setSuccess(""); }}
-              style={{
-                background: 'linear-gradient(135deg, rgba(0,245,255,0.1), rgba(191,95,255,0.1))',
-                border: '1px solid rgba(0,245,255,0.3)',
-                borderRadius: '8px',
-                padding: '8px 16px',
-                color: '#00f5ff',
-                fontSize: '12px',
-                fontWeight: '500',
-                cursor: 'pointer',
-                textDecoration: 'none',
-                fontFamily: 'var(--font-body)',
-                transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                letterSpacing: '0.5px',
-                textTransform: 'uppercase'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'linear-gradient(135deg, rgba(0,245,255,0.2), rgba(191,95,255,0.2))';
-                e.currentTarget.style.borderColor = 'rgba(0,245,255,0.5)';
-                e.currentTarget.style.boxShadow = '0 0 20px rgba(0,245,255,0.2)';
-                e.currentTarget.style.transform = 'translateY(-2px)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'linear-gradient(135deg, rgba(0,245,255,0.1), rgba(191,95,255,0.1))';
-                e.currentTarget.style.borderColor = 'rgba(0,245,255,0.3)';
-                e.currentTarget.style.boxShadow = 'none';
-                e.currentTarget.style.transform = 'translateY(0)';
-              }}
-            >
-              🔑 Forgot Password?
-            </button>
-          </div>
-        )}
+
 
         <form onSubmit={handleSubmit} className="auth-form">
           {mode === "forgot" ? (
@@ -276,6 +239,45 @@ export default function AuthScreen() {
           <button className="auth-submit btn-primary" type="submit" disabled={loading || (mode === 'signup' && !turnstileToken)}>
             {loading ? "..." : mode === "login" ? "Enter 808market →" : mode === "signup" ? "Create Account →" : "Send Reset Link →"}
           </button>
+
+          {/* Forgot Password Link - only in login mode */}
+          {mode === "login" && (
+            <div style={{ textAlign: 'center', marginTop: '16px' }}>
+              <button
+                type="button"
+                onClick={() => { setMode("forgot"); setError(""); setSuccess(""); }}
+                style={{
+                  background: 'linear-gradient(135deg, rgba(0,245,255,0.1), rgba(191,95,255,0.1))',
+                  border: '1px solid rgba(0,245,255,0.3)',
+                  borderRadius: '8px',
+                  padding: '8px 16px',
+                  color: '#00f5ff',
+                  fontSize: '12px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  textDecoration: 'none',
+                  fontFamily: 'var(--font-body)',
+                  transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                  letterSpacing: '0.5px',
+                  textTransform: 'uppercase'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, rgba(0,245,255,0.2), rgba(191,95,255,0.2))';
+                  e.currentTarget.style.borderColor = 'rgba(0,245,255,0.5)';
+                  e.currentTarget.style.boxShadow = '0 0 20px rgba(0,245,255,0.2)';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, rgba(0,245,255,0.1), rgba(191,95,255,0.1))';
+                  e.currentTarget.style.borderColor = 'rgba(0,245,255,0.3)';
+                  e.currentTarget.style.boxShadow = 'none';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+              >
+                🔑 Forgot Password?
+              </button>
+            </div>
+          )}
           
           {mode === "forgot" && (
             <button

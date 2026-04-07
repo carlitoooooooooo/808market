@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "./AuthContext.jsx";
 import BannerCropper from "./BannerCropper.jsx";
-// import StickyAudioPlayer from "./StickyAudioPlayer.jsx";
+import StickyAudioPlayer from "./StickyAudioPlayer.jsx";
 import { supabase } from "./supabase.js";
 
 const SUPABASE_URL = 'https://bkapxykeryzxbqpgjgab.supabase.co';
@@ -1334,8 +1334,8 @@ export default function StorefrontPage({ username, onBack }) {
         />
       )}
 
-      {/* Sticky Audio Player - disabled for now */}
-      {/* <StickyAudioPlayer
+      {/* Sticky Audio Player */}
+      <StickyAudioPlayer
         currentTrack={currentlyPlayingTrack}
         isPlaying={stickyPlayerIsPlaying}
         onPlayPause={setStickyPlayerIsPlaying}
@@ -1343,7 +1343,7 @@ export default function StorefrontPage({ username, onBack }) {
           setCurrentlyPlayingTrack(null);
           setStickyPlayerIsPlaying(false);
         }}
-      /> */}
+      />
     </div>
   );
 }

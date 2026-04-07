@@ -1,158 +1,127 @@
 import React, { useRef, useEffect, useState } from 'react';
 import './StickyAudioPlayer.css';
-import AudioPlayer from './AudioPlayer.js';
 
-/**
- * StickyAudioPlayer - Fixed bottom player for global audio playback
- * Shows/hides based on whether audio is playing
- * Syncs with global audio state from App.jsx
- */
 export default function StickyAudioPlayer({ 
   currentTrack, 
   isPlaying, 
   onPlayPause, 
   onClose 
 }) {
-  const playerRef = useRef(null);
+  const audioRef = useRef(null);
   const [progress, setProgress] = useState(0);
-  const [duration, setDuration] = useState(30); // 30 second snippets
+  const [duration, setDuration] = useState(30);
   const [currentTime, setCurrentTime] = useState(0);
-  const [isSeeking, setIsSeeking] = useState(false);
-  const audioInstanceRef = useRef(null);
 
-  // If no current track, don't render
   if (!currentTrack) {
     return null;
   }
 
-  // Initialize audio player when track changes
   useEffect(() => {
-    // Clean up old player
-    if (audioInstanceRef.current) {
-      audioInstanceRef.current.destroy();
-      audioInstanceRef.current = null;
-    }
+    const audio = new Audio();
+    audio.crossOrigin = 'anonymous';
+    audioRef.current = audio;
 
-    if (currentTrack && currentTrack.audioUrl) {
-      const player = new AudioPlayer(currentTrack.audioUrl, currentTrack.snippetStart);
-      
-      player.onTimeUpdate((prog) => {
-        setProgress(prog);
-        setCurrentTime(prog * duration);
-      });
-
-      player.onEnded(() => {
-        onPlayPause(false);
-      });
-
-      audioInstanceRef.current = player;
-
-      // Auto-play if isPlaying is true
-      if (isPlaying) {
-        player.play();
-      }
-    }
-
-    return () => {
-      if (audioInstanceRef.current) {
-        audioInstanceRef.current.destroy();
-        audioInstanceRef.current = null;
+    const handleTimeUpdate = () => {
+      if (audio.duration) {
+        setProgress(audio.currentTime / audio.duration);
+        setCurrentTime(audio.currentTime);
+        setDuration(audio.duration);
       }
     };
-  }, [currentTrack?.id]);
 
-  // Handle play/pause state changes
-  useEffect(() => {
-    if (!audioInstanceRef.current) return;
+    const handleEnded = () => {
+      onPlayPause(false);
+    };
 
-    if (isPlaying) {
-      audioInstanceRef.current.play();
-    } else {
-      audioInstanceRef.current.pause();
-    }
-  }, [isPlaying]);
+    audio.addEventListener('timeupdate', handleTimeUpdate);
+    audio.addEventListener('ended', handleEnded);
+
+    return () => {
+      audio.removeEventListener('timeupdate', handleTimeUpdate);
+      audio.removeEventListener('ended', handleEnded);
+      audio.pause();
+    };
+  }, [currentTrack, onPlayPause]);
 
   const handlePlayPause = () => {
-    onPlayPause(!isPlaying);
+    if (!audioRef.current || !currentTrack) return;
+    
+    if (isPlaying) {
+      audioRef.current.pause();
+      onPlayPause(false);
+    } else {
+      // Get signed URL and load
+      const audioUrl = currentTrack.audio_url || currentTrack.audioUrl;
+      if (audioUrl) {
+        audioRef.current.src = audioUrl;
+        audioRef.current.currentTime = currentTrack.snippet_start || 0;
+        audioRef.current.play().catch(e => console.error('Play error:', e));
+        onPlayPause(true);
+      }
+    }
   };
 
-  const handleProgressClick = (e) => {
-    if (!audioInstanceRef.current) return;
-    
+  const handleSeek = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const percentage = Math.max(0, Math.min(1, x / rect.width));
-    
-    // We can't actually seek in AudioPlayer as implemented, 
-    // but we can track intent for future enhancement
-    setProgress(percentage);
-    setCurrentTime(percentage * duration);
+    const percent = (e.clientX - rect.left) / rect.width;
+    if (audioRef.current && audioRef.current.duration) {
+      audioRef.current.currentTime = percent * audioRef.current.duration;
+    }
   };
 
   const formatTime = (seconds) => {
+    if (!seconds || !isFinite(seconds)) return '0:00';
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
-  const coverUrl = currentTrack.coverUrl || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Crect fill="%23bf5fff" width="100" height="100"/%3E%3Ctext x="50" y="50" text-anchor="middle" dy=".3em" fill="white" font-size="30"%3E♪%3C/text%3E%3C/svg%3E';
-
   return (
-    <div className="sticky-audio-player">
-      <div className="sticky-player-content">
-        {/* Album Art */}
-        <div className="player-album-art">
-          <img 
-            src={coverUrl} 
-            alt={currentTrack.title}
-            onError={(e) => {
-              e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Crect fill="%23bf5fff" width="100" height="100"/%3E%3Ctext x="50" y="50" text-anchor="middle" dy=".3em" fill="white" font-size="30"%3E♪%3C/text%3E%3C/svg%3E';
-            }}
+    <div className="sticky-player">
+      <audio ref={audioRef} />
+      
+      <div className="sticky-player__content">
+        <div className="sticky-player__info">
+          <div 
+            className="sticky-player__cover"
+            style={{ backgroundImage: `url(${currentTrack.cover_url || currentTrack.coverUrl})` }}
           />
-          {isPlaying && <div className="album-art-playing-indicator" />}
+          <div className="sticky-player__track-info">
+            <div className="sticky-player__title">{currentTrack.title || 'Unknown Track'}</div>
+            <div className="sticky-player__artist">{currentTrack.artist || 'Unknown Artist'}</div>
+          </div>
         </div>
 
-        {/* Track Info */}
-        <div className="player-info">
-          <div className="player-title">{currentTrack.title}</div>
-          <div className="player-artist">{currentTrack.artist || 'Unknown Artist'}</div>
-        </div>
-
-        {/* Controls */}
-        <div className="player-controls">
+        <div className="sticky-player__controls">
           <button 
-            className={`player-btn play-btn ${isPlaying ? 'playing' : ''}`}
+            className="sticky-player__btn sticky-player__play-btn"
             onClick={handlePlayPause}
-            aria-label={isPlaying ? 'Pause' : 'Play'}
           >
             {isPlaying ? '⏸' : '▶'}
           </button>
           <button 
-            className="player-btn close-btn"
+            className="sticky-player__btn"
             onClick={onClose}
-            aria-label="Close player"
           >
             ✕
           </button>
         </div>
       </div>
 
-      {/* Progress Bar */}
-      <div 
-        className="player-progress-bar"
-        onClick={handleProgressClick}
-        style={{ cursor: 'pointer' }}
-      >
+      <div className="sticky-player__progress-wrapper">
         <div 
-          className="player-progress-fill"
-          style={{ width: `${progress * 100}%` }}
-        />
-      </div>
-
-      {/* Time Display */}
-      <div className="player-time">
-        <span>{formatTime(currentTime)}</span>
-        <span>{formatTime(duration)}</span>
+          className="sticky-player__progress"
+          onClick={handleSeek}
+          style={{ cursor: 'pointer' }}
+        >
+          <div 
+            className="sticky-player__progress-bar"
+            style={{ width: `${progress * 100}%` }}
+          />
+        </div>
+        <div className="sticky-player__time">
+          {formatTime(currentTime)} / {formatTime(duration)}
+        </div>
       </div>
     </div>
   );

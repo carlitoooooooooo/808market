@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "./AuthContext.jsx";
 import BannerCropper from "./BannerCropper.jsx";
+import StickyAudioPlayer from "./StickyAudioPlayer.jsx";
 import { supabase } from "./supabase.js";
 
 const SUPABASE_URL = 'https://bkapxykeryzxbqpgjgab.supabase.co';
@@ -46,7 +47,7 @@ function SectionHeader({ label, accent }) {
   );
 }
 
-function BeatCard({ beat, accent, onBuy, cardStyle }) {
+function BeatCard({ beat, accent, onBuy, cardStyle, onPlayTrack, onStopTrack }) {
   const isFree = !beat.price || beat.price === 0;
   const cardBg = cardStyle === 'glass' ? 'rgba(255,255,255,0.08)' : cardStyle === 'minimal' ? 'transparent' : cardStyle === 'bordered' ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.04)';
   const cardBorder = cardStyle === 'bordered' ? `2px solid ${accent}40` : cardStyle === 'minimal' ? 'none' : '1px solid rgba(255,255,255,0.08)';
@@ -87,7 +88,9 @@ function BeatCard({ beat, accent, onBuy, cardStyle }) {
     if (playing) {
       audioRef.current.pause();
       setPlaying(false);
+      if (onStopTrack) onStopTrack();
     } else {
+      if (onPlayTrack) onPlayTrack(beat);
       // Get signed URL
       const getSignedUrl = async () => {
         if (!audioUrl || audioUrl.includes('/sign/') || !audioUrl.includes('/object/public/')) {
@@ -483,6 +486,8 @@ function StorefrontEditor({ storefront, username, beats, onSave, onClose }) {
   const [bannerPreview, setBannerPreview] = useState(storefront?.banner_url || null);
   const [cropFile, setCropFile] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [currentlyPlayingTrack, setCurrentlyPlayingTrack] = useState(null);
+  const [stickyPlayerIsPlaying, setStickyPlayerIsPlaying] = useState(false);
   const bannerRef = useRef(null);
 
   const handleBannerChange = (e) => {
@@ -1238,7 +1243,7 @@ export default function StorefrontPage({ username, onBack }) {
           <div style={{ marginBottom: '32px' }}>
             <SectionHeader label="⭐ Featured Beat" accent={accent} />
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '12px', maxWidth: '340px' }}>
-              <BeatCard beat={featuredBeat} accent={accent} onBuy={handleBuy} cardStyle={storefront?.card_style} />
+              <BeatCard beat={featuredBeat} accent={accent} onBuy={handleBuy} cardStyle={storefront?.card_style} onPlayTrack={setCurrentlyPlayingTrack} onStopTrack={() => setCurrentlyPlayingTrack(null)} />
             </div>
           </div>
         )}
@@ -1256,7 +1261,7 @@ export default function StorefrontPage({ username, onBack }) {
             <div key="beats" style={{ marginBottom: '32px' }}>
               <SectionHeader label={`🎵 Beats (${beats.length})`} accent={accent} />
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '12px' }}>
-                {beats.map(b => <BeatCard key={b.id} beat={b} accent={accent} onBuy={handleBuy} cardStyle={storefront?.card_style} />)}
+                {beats.map(b => <BeatCard key={b.id} beat={b} accent={accent} onBuy={handleBuy} cardStyle={storefront?.card_style} onPlayTrack={setCurrentlyPlayingTrack} onStopTrack={() => setCurrentlyPlayingTrack(null)} />)}
               </div>
             </div>
           );
@@ -1328,6 +1333,17 @@ export default function StorefrontPage({ username, onBack }) {
           onAdded={(listing) => setListings(prev => [listing, ...prev])}
         />
       )}
+
+      {/* Sticky Audio Player */}
+      <StickyAudioPlayer
+        currentTrack={currentlyPlayingTrack}
+        isPlaying={stickyPlayerIsPlaying}
+        onPlayPause={setStickyPlayerIsPlaying}
+        onClose={() => {
+          setCurrentlyPlayingTrack(null);
+          setStickyPlayerIsPlaying(false);
+        }}
+      />
     </div>
   );
 }

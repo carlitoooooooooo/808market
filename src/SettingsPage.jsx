@@ -223,6 +223,7 @@ export default function SettingsPage({ onClose, onOpenAnalytics, onOpenStorefron
     { id: 'ocean', name: 'Ocean', emoji: '🌊', colors: ['#0077be', '#00d4ff', '#5fb3d5'] },
     { id: 'forest', name: 'Forest', emoji: '🌲', colors: ['#2d6a4f', '#40916c', '#95d5b2'] },
     { id: 'sunset', name: 'Sunset', emoji: '🌅', colors: ['#ff006e', '#fb5607', '#ffbe0b'] },
+    { id: 'neocities', name: '✨ NEOCITIES ✨', emoji: '🌈', colors: ['#ff00ff', '#00ffff', '#ffff00'] },
   ];
 
   function handleThemeChange(themeId) {

@@ -4357,4 +4357,107 @@ html.party-mode .auth-submit {
   font-weight: 900;
 }
 
+/* ===== NEOCITIES THEME (OVER THE TOP!) ===== */
+[data-theme="neocities"] {
+  --bg: #ff00ff;
+  --text: #ffff00;
+  --cyan: #00ffff;
+  --purple: #ff00ff;
+  --green: #00ff00;
+}
+
+[data-theme="neocities"] * {
+  font-family: 'Comic Sans MS', 'Comic Sans', cursive !important;
+  animation: neoCitiesRainbow 6s linear infinite !important;
+}
+
+[data-theme="neocities"] body {
+  background: linear-gradient(45deg, #ff00ff, #00ffff, #ffff00, #ff0080, #00ff00);
+  background-size: 400% 400%;
+  animation: neoBackground 8s ease infinite !important;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5), 0 0 10px rgba(255,0,255,0.8) !important;
+  color: #ffff00 !important;
+}
+
+[data-theme="neocities"] .btn-primary,
+[data-theme="neocities"] .auth-submit {
+  background: linear-gradient(90deg, #ff00ff, #00ffff, #ffff00, #ff00ff) !important;
+  background-size: 200% 100%;
+  color: #000 !important;
+  font-weight: 900 !important;
+  animation: neoButtonShine 2s ease infinite !important;
+  border: 3px solid #00ffff !important;
+  box-shadow: 0 0 20px #ff00ff, 0 0 10px #00ffff, inset 0 0 10px rgba(255,255,0,0.5) !important;
+}
+
+[data-theme="neocities"] input,
+[data-theme="neocities"] textarea,
+[data-theme="neocities"] select {
+  background: #ffff00 !important;
+  color: #ff00ff !important;
+  border: 3px solid #00ffff !important;
+  font-weight: bold !important;
+  box-shadow: 0 0 15px rgba(255,0,255,0.6) !important;
+}
+
+[data-theme="neocities"] .auth-card {
+  background: linear-gradient(135deg, #ff00ff33, #00ffff33) !important;
+  border: 4px dashed #ffff00 !important;
+  box-shadow: 0 0 30px #ff00ff, 0 0 20px #00ffff, inset 0 0 20px rgba(255,255,0,0.2) !important;
+  animation: neoBounce 1s ease-in-out infinite !important;
+}
+
+[data-theme="neocities"] .logo-text,
+[data-theme="neocities"] .auth-logo-text {
+  color: #ffff00 !important;
+  text-shadow: 0 0 20px #ff00ff, 0 0 10px #00ffff, 3px 3px 0 rgba(255,0,255,0.8) !important;
+  animation: neoGlitch 0.3s ease-in-out infinite !important;
+  font-size: 3em !important;
+}
+
+[data-theme="neocities"] button {
+  border: 2px solid #00ffff !important;
+  background: linear-gradient(45deg, #ff00ff, #ff0080, #ff00ff) !important;
+  color: #ffff00 !important;
+  font-weight: bold !important;
+  text-shadow: 1px 1px 0 #000 !important;
+  box-shadow: 3px 3px 0 #00ffff, 6px 6px 0 #ff00ff !important;
+}
+
+[data-theme="neocities"] button:hover {
+  transform: translate(-3px, -3px) !important;
+  box-shadow: 6px 6px 0 #00ffff, 9px 9px 0 #ff00ff !important;
+}
+
+@keyframes neoCitiesRainbow {
+  0% { color: #ff00ff; }
+  20% { color: #ff0080; }
+  40% { color: #ffff00; }
+  60% { color: #00ffff; }
+  80% { color: #00ff00; }
+  100% { color: #ff00ff; }
+}
+
+@keyframes neoBackground {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes neoButtonShine {
+  0%, 100% { background-position: 0% center; }
+  50% { background-position: 100% center; }
+}
+
+@keyframes neoBounce {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-5px) rotate(1deg); }
+  75% { transform: translateY(5px) rotate(-1deg); }
+}
+
+@keyframes neoGlitch {
+  0%, 100% { text-shadow: 0 0 20px #ff00ff, 0 0 10px #00ffff, 3px 3px 0 rgba(255,0,255,0.8); }
+  50% { text-shadow: -3px -3px 0 #00ffff, 3px 3px 0 #ff00ff, 0 0 15px #ffff00; }
+}
+
 

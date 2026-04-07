@@ -1,5 +1,5 @@
 /* ===== GOOGLE FONTS ===== */
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Archivo+Black&display=swap');
 
 /* ===== CSS VARIABLES ===== */
 :root {
@@ -342,8 +342,8 @@ body {
 .auth-logo-text {
   font-size: clamp(32px, 10vw, 56px);
   font-weight: 900;
-  font-family: 'Syne', 'Courier New', monospace;
-  letter-spacing: -2px;
+  font-family: 'Archivo Black', 'Arial Black', sans-serif;
+  letter-spacing: -1px;
   color: #fff;
   background: linear-gradient(90deg, 
     #00f5ff 0%,
@@ -357,6 +357,29 @@ body {
   background-clip: text;
   animation: authLogoShimmer 4s ease-in-out infinite, authLogoGlow 3s ease-in-out infinite;
   filter: drop-shadow(0 0 15px rgba(0, 245, 255, 0.5)) drop-shadow(0 0 10px rgba(191, 95, 255, 0.3));
+}
+
+.auth-logo-beta {
+  font-family: 'Archivo Black', 'Arial Black', sans-serif;
+  font-size: clamp(10px, 3vw, 14px);
+  font-weight: 900;
+  color: #ff3366;
+  background: rgba(255, 51, 102, 0.1);
+  border: 1px solid rgba(255, 51, 102, 0.4);
+  padding: 3px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  animation: authLogoBetaPulse 2s ease-in-out infinite;
+}
+
+@keyframes authLogoBetaPulse {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(255, 51, 102, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 16px rgba(255, 51, 102, 0.6);
+  }
 }
 
 @keyframes authLogoShimmer {

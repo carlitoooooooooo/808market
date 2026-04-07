@@ -23,7 +23,6 @@ import AuthPrompt from "./AuthPrompt.jsx";
 import UserSearch from "./UserSearch.jsx";
 import AchievementPopup from "./AchievementPopup.jsx";
 import OnboardingModal from "./OnboardingModal.jsx";
-import StickyAudioPlayer from "./StickyAudioPlayer.jsx";
 import tracksData from "./tracks.js";
 import { supabase } from "./supabase.js";
 import { dbUpsert, dbSelect, dbUpdate, dbInsert } from "./dbHelper.js";
@@ -1427,16 +1426,7 @@ export default function App() {
         </div>
       )}
 
-      {/* Sticky Audio Player */}
-      <StickyAudioPlayer
-        currentTrack={currentlyPlayingTrack}
-        isPlaying={stickyPlayerIsPlaying}
-        onPlayPause={setStickyPlayerIsPlaying}
-        onClose={() => {
-          setCurrentlyPlayingTrack(null);
-          setStickyPlayerIsPlaying(false);
-        }}
-      />
+
     </div>
   );
 }

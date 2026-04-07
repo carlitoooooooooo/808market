@@ -117,10 +117,8 @@ export default function AuthScreen() {
       <div className="auth-bg-splatter" />
 
       <div className="auth-logo">
-        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '8px' }}>
-          <div className="auth-logo-text">808market</div>
-          <span className="auth-logo-beta">beta 1.9</span>
-        </div>
+        <div className="auth-logo-text">808market</div>
+        <span className="auth-logo-beta">beta 1.9</span>
         <div className="logo-sub">🎵 Swipe, Discover, Sell 🛒</div>
       </div>
 

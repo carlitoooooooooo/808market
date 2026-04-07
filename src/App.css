@@ -2930,6 +2930,10 @@ body {
   flex-direction: column;
 }
 @media (max-width: 599px) {
+  .settings-overlay {
+    align-items: flex-start;
+    padding: 0;
+  }
   .settings-modal {
     max-width: 100%;
     border-radius: 0;
@@ -2938,14 +2942,14 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    padding-top: env(safe-area-inset-top, 20px);
+    padding-top: max(16px, env(safe-area-inset-top));
   }
   .settings-modal .settings-header {
     flex-shrink: 0;
     position: sticky;
     top: 0;
     z-index: 20;
-    padding: 16px 20px;
+    padding: 12px 16px;
   }
   .settings-modal .settings-tabs {
     flex-shrink: 0;

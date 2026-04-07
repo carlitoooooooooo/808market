@@ -1420,9 +1420,26 @@ export default function ProfilePage({ userVotes, tracks, onViewUser, onUpload, o
                                 { value: 'ocean', label: 'Ocean', bg: 'linear-gradient(135deg,#1e90ff,#006699)', color: '#fff' },
                                 { value: 'white', label: 'White', bg: 'linear-gradient(135deg,#fff,#ccc)', color: '#000' },
                                 { value: 'dark', label: 'Dark', bg: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)' },
+                                { value: 'pulse-rainbow', label: '🌈 Rainbow Pulse', animated: true, color: '#fff' },
+                                { value: 'neon-flicker', label: '⚡ Neon Flicker', animated: true, color: '#000' },
+                                { value: 'glow-shift', label: '✨ Glow Shift', animated: true, color: '#fff' },
                               ].map(c => (
                                 <button key={c.value} type="button" onClick={() => setProfileExtra(prev => ({ ...prev, profile_badge_color: c.value }))}
-                                  style={{ padding: '4px 12px', background: c.bg, color: c.color, border: profileExtra.profile_badge_color === c.value ? '2px solid #fff' : (c.border || '2px solid transparent'), borderRadius: '20px', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-head)' }}>
+                                  style={{ 
+                                    padding: '4px 12px', 
+                                    background: c.animated ? undefined : c.bg,
+                                    backgroundImage: c.value === 'pulse-rainbow' ? 'linear-gradient(90deg,#ff3366,#ff9900,#ffff00,#00ff88,#00f5ff,#bf5fff)' : undefined,
+                                    backgroundSize: c.value === 'pulse-rainbow' ? '200% 100%' : undefined,
+                                    animation: c.value === 'pulse-rainbow' ? 'gradient-shift 3s ease infinite' : (c.value === 'neon-flicker' ? 'neon-pulse 1.5s ease-in-out infinite' : (c.value === 'glow-shift' ? 'glow-cycle 2s ease-in-out infinite' : 'none')),
+                                    color: c.color, 
+                                    border: profileExtra.profile_badge_color === c.value ? '2px solid #fff' : (c.border || '2px solid transparent'), 
+                                    borderRadius: '20px', 
+                                    fontSize: '11px', 
+                                    fontWeight: 700, 
+                                    cursor: 'pointer', 
+                                    fontFamily: 'var(--font-head)',
+                                    boxShadow: c.animated && profileExtra.profile_badge_color === c.value ? '0 0 10px rgba(0,245,255,0.5)' : undefined
+                                  }}>
                                   {c.label}
                                 </button>
                               ))}

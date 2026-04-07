@@ -3974,6 +3974,44 @@ html.party-mode .auth-submit {
   }
 }
 
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% center;
+  }
+  50% {
+    background-position: 100% center;
+  }
+  100% {
+    background-position: 0% center;
+  }
+}
+
+@keyframes neon-pulse {
+  0%, 100% {
+    background: linear-gradient(135deg, #00f5ff, #bf5fff);
+    box-shadow: 0 0 10px rgba(0, 245, 255, 0.6), inset 0 0 10px rgba(191, 95, 255, 0.3);
+  }
+  50% {
+    background: linear-gradient(135deg, #bf5fff, #00f5ff);
+    box-shadow: 0 0 20px rgba(191, 95, 255, 0.8), inset 0 0 15px rgba(0, 245, 255, 0.5);
+  }
+}
+
+@keyframes glow-cycle {
+  0% {
+    background: linear-gradient(135deg, #00ff88, #00f5ff);
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.6);
+  }
+  50% {
+    background: linear-gradient(135deg, #00f5ff, #bf5fff);
+    box-shadow: 0 0 20px rgba(0, 245, 255, 0.8);
+  }
+  100% {
+    background: linear-gradient(135deg, #bf5fff, #00ff88);
+    box-shadow: 0 0 15px rgba(191, 95, 255, 0.6);
+  }
+}
+
 .profile-bg-animated-neon-grid {
   background: repeating-linear-gradient(0deg, rgba(0,245,255,0.1) 0px, rgba(0,245,255,0.1) 1px, transparent 1px, transparent 2px), repeating-linear-gradient(90deg, rgba(0,245,255,0.1) 0px, rgba(0,245,255,0.1) 1px, transparent 1px, transparent 2px) !important;
   animation: pulseGlow 3s ease-in-out infinite;

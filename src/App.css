@@ -4460,4 +4460,187 @@ html.party-mode .auth-submit {
   50% { text-shadow: -3px -3px 0 #00ffff, 3px 3px 0 #ff00ff, 0 0 15px #ffff00; }
 }
 
+/* ===== WINDOWS 98 THEME ===== */
+[data-theme="windows98"] {
+  --bg: #c0c0c0;
+  --text: #000000;
+  --cyan: #000080;
+  --purple: #808080;
+}
+
+[data-theme="windows98"] body {
+  background: #c0c0c0 !important;
+  color: #000 !important;
+  font-family: 'MS Sans Serif', 'Arial', sans-serif !important;
+}
+
+[data-theme="windows98"] * {
+  border-style: solid !important;
+  border-color: #dfdfdf #808080 #808080 #dfdfdf !important;
+  border-width: 1px !important;
+}
+
+[data-theme="windows98"] .auth-card,
+[data-theme="windows98"] button {
+  background: #c0c0c0 !important;
+  border: 2px solid !important;
+  border-color: #dfdfdf #808080 #808080 #dfdfdf !important;
+  border-radius: 0 !important;
+  font-family: 'MS Sans Serif', sans-serif !important;
+  font-size: 11px !important;
+}
+
+[data-theme="windows98"] button:active {
+  border-color: #808080 #dfdfdf #dfdfdf #808080 !important;
+  transform: translate(1px, 1px) !important;
+}
+
+[data-theme="windows98"] .btn-primary,
+[data-theme="windows98"] .auth-submit {
+  background: #c0c0c0 !important;
+  color: #000 !important;
+  border-width: 2px !important;
+  box-shadow: none !important;
+}
+
+[data-theme="windows98"] input,
+[data-theme="windows98"] textarea,
+[data-theme="windows98"] select {
+  background: #ffffff !important;
+  color: #000 !important;
+  border: 2px solid !important;
+  border-color: #808080 #dfdfdf #dfdfdf #808080 !important;
+  border-radius: 0 !important;
+  font-family: 'MS Sans Serif', sans-serif !important;
+  font-size: 11px !important;
+  padding: 4px !important;
+}
+
+[data-theme="windows98"] .auth-logo-text {
+  font-family: 'MS Sans Serif', sans-serif !important;
+  color: #000080 !important;
+  text-shadow: 1px 1px 0 #dfdfdf !important;
+  animation: none !important;
+}
+
+[data-theme="windows98"] .title-bar {
+  background: linear-gradient(to right, #000080, #1084d7) !important;
+  color: #fff !important;
+  padding: 2px !important;
+  border: 2px solid !important;
+  border-color: #dfdfdf #808080 #808080 #dfdfdf !important;
+}
+
+/* ===== MATRIX THEME ===== */
+[data-theme="matrix"] {
+  --bg: #000000;
+  --text: #00ff00;
+  --cyan: #00cc00;
+  --purple: #00ff00;
+}
+
+[data-theme="matrix"] body {
+  background: #000000 !important;
+  color: #00ff00 !important;
+  font-family: 'Courier New', monospace !important;
+  text-shadow: 0 0 5px #00ff00, 0 0 10px rgba(0, 255, 0, 0.5) !important;
+}
+
+[data-theme="matrix"] * {
+  font-family: 'Courier New', monospace !important;
+  color: #00ff00 !important;
+  text-shadow: 0 0 5px #00ff00 !important;
+  animation: matrixFlicker 0.15s infinite !important;
+}
+
+[data-theme="matrix"] .auth-card {
+  background: rgba(0, 0, 0, 0.8) !important;
+  border: 2px solid #00ff00 !important;
+  box-shadow: 0 0 20px #00ff00, inset 0 0 10px rgba(0, 255, 0, 0.2) !important;
+  border-radius: 0 !important;
+}
+
+[data-theme="matrix"] button {
+  background: #001a00 !important;
+  color: #00ff00 !important;
+  border: 2px solid #00ff00 !important;
+  border-radius: 0 !important;
+  box-shadow: 0 0 10px rgba(0, 255, 0, 0.5) !important;
+  font-family: 'Courier New', monospace !important;
+  font-weight: bold !important;
+}
+
+[data-theme="matrix"] button:hover {
+  box-shadow: 0 0 20px #00ff00, inset 0 0 5px rgba(0, 255, 0, 0.3) !important;
+  background: #003300 !important;
+}
+
+[data-theme="matrix"] .btn-primary,
+[data-theme="matrix"] .auth-submit {
+  background: #001a00 !important;
+  color: #00ff00 !important;
+  box-shadow: 0 0 15px #00ff00 !important;
+  border: 2px solid #00ff00 !important;
+}
+
+[data-theme="matrix"] input,
+[data-theme="matrix"] textarea,
+[data-theme="matrix"] select {
+  background: #001a00 !important;
+  color: #00ff00 !important;
+  border: 2px solid #00ff00 !important;
+  border-radius: 0 !important;
+  box-shadow: 0 0 10px rgba(0, 255, 0, 0.3), inset 0 0 5px rgba(0, 255, 0, 0.1) !important;
+  font-family: 'Courier New', monospace !important;
+  text-shadow: 0 0 5px #00ff00 !important;
+}
+
+[data-theme="matrix"] .auth-logo-text {
+  color: #00ff00 !important;
+  font-family: 'Courier New', monospace !important;
+  text-shadow: 0 0 20px #00ff00, 0 0 10px #00cc00 !important;
+  animation: matrixGlow 2s ease-in-out infinite !important;
+  letter-spacing: 3px !important;
+}
+
+[data-theme="matrix"]::before {
+  content: "" !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 255, 0, 0.1) 0px,
+    rgba(0, 255, 0, 0.1) 1px,
+    transparent 1px,
+    transparent 2px
+  ) !important;
+  pointer-events: none !important;
+  z-index: -1 !important;
+  animation: matrixScanlines 0.2s linear infinite !important;
+}
+
+@keyframes matrixFlicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.95; }
+}
+
+@keyframes matrixGlow {
+  0%, 100% { 
+    text-shadow: 0 0 20px #00ff00, 0 0 10px #00cc00;
+    color: #00ff00;
+  }
+  50% { 
+    text-shadow: 0 0 30px #00ff00, 0 0 20px #00cc00, 0 0 40px rgba(0, 255, 0, 0.5);
+    color: #00ffcc;
+  }
+}
+
+@keyframes matrixScanlines {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 10px; }
+}
+
 

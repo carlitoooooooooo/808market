@@ -224,6 +224,8 @@ export default function SettingsPage({ onClose, onOpenAnalytics, onOpenStorefron
     { id: 'forest', name: 'Forest', emoji: '🌲', colors: ['#2d6a4f', '#40916c', '#95d5b2'] },
     { id: 'sunset', name: 'Sunset', emoji: '🌅', colors: ['#ff006e', '#fb5607', '#ffbe0b'] },
     { id: 'neocities', name: '✨ NEOCITIES ✨', emoji: '🌈', colors: ['#ff00ff', '#00ffff', '#ffff00'] },
+    { id: 'windows98', name: '💻 WINDOWS 98', emoji: '🪟', colors: ['#000080', '#c0c0c0', '#dfdfdf'] },
+    { id: 'matrix', name: '🟢 THE MATRIX', emoji: '💚', colors: ['#00ff00', '#000000', '#00cc00'] },
   ];
 
   function handleThemeChange(themeId) {

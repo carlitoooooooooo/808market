@@ -221,7 +221,7 @@ export default function SettingsPage({ onClose, onOpenAnalytics, onOpenStorefron
     { id: 'hologram', name: '✨ HOLOGRAM', emoji: '🌈', colors: ['#ff1493', '#00ffff', '#ff00ff'] },
     { id: 'dracula', name: '🦇 DRACULA', emoji: '🩸', colors: ['#8b1538', '#ff0040', '#4a0e4e'] },
     { id: 'vaporwave', name: '💗 VAPORWAVE', emoji: '🌴', colors: ['#ff006e', '#f0f', '#ffc0cb'] },
-    { id: 'glitch', name: '🔴 GLITCH', emoji: '⚡', colors: ['#ff0000', '#00ffff', '#ff00ff'] },
+    { id: 'tron', name: '⚡ TRON', emoji: '💻', colors: ['#00ffff', '#000033', '#ff0099'] },
     { id: 'arcade', name: '🎮 ARCADE', emoji: '👾', colors: ['#ffff00', '#ff0000', '#0000ff'] },
     { id: 'neocities', name: '✨ NEOCITIES ✨', emoji: '🌈', colors: ['#ff00ff', '#00ffff', '#ffff00'] },
     { id: 'windows98', name: '💻 WINDOWS 98', emoji: '🪟', colors: ['#000080', '#c0c0c0', '#dfdfdf'] },

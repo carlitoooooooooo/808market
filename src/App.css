@@ -4611,84 +4611,104 @@ html.party-mode .auth-submit {
   50% { transform: translateY(-10px); }
 }
 
-/* ===== GLITCH THEME ===== */
-[data-theme="glitch"] {
-  --bg: #000;
-  --text: #ff00ff;
+/* ===== TRON THEME ===== */
+[data-theme="tron"] {
+  --bg: #000033;
+  --text: #00ffff;
   --cyan: #00ffff;
-  --purple: #ff00ff;
+  --purple: #ff0099;
 }
 
-[data-theme="glitch"] body {
-  background: #000 !important;
-  color: #ff00ff !important;
-  animation: glitchBg 0.1s infinite !important;
+[data-theme="tron"] body {
+  background: linear-gradient(45deg, #000033, #000050, #000033) !important;
+  background-size: 400% 400%;
+  animation: tronBg 8s ease infinite !important;
+  color: #00ffff !important;
+  font-family: 'Courier New', monospace !important;
 }
 
-[data-theme="glitch"] * {
-  animation: glitchText 0.1s infinite !important;
-  color: #ff00ff !important;
+[data-theme="tron"] * {
+  color: #00ffff !important;
+  font-family: 'Courier New', monospace !important;
 }
 
-[data-theme="glitch"] .auth-card {
-  background: rgba(0, 0, 0, 0.9) !important;
-  border: 3px solid #ff00ff !important;
+[data-theme="tron"] .auth-card {
+  background: rgba(0, 0, 51, 0.5) !important;
+  border: 2px solid #00ffff !important;
   box-shadow: 
-    -3px 0 10px #ff00ff,
-    3px 0 10px #00ffff,
-    0 0 20px rgba(255, 0, 255, 0.5) !important;
+    0 0 20px #00ffff,
+    0 0 40px rgba(0, 255, 255, 0.3),
+    inset 0 0 20px rgba(0, 255, 255, 0.1) !important;
+  backdrop-filter: blur(10px) !important;
+  position: relative !important;
 }
 
-[data-theme="glitch"] button {
-  background: #1a001a !important;
-  color: #ff00ff !important;
-  border: 2px solid #ff00ff !important;
-  box-shadow: -2px 0 5px #ff00ff, 2px 0 5px #00ffff !important;
+[data-theme="tron"] .auth-card::before {
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background: 
+    linear-gradient(90deg, transparent 0%, rgba(0, 255, 255, 0.05) 50%, transparent 100%),
+    repeating-linear-gradient(0deg, rgba(0, 255, 255, 0.02) 0px, rgba(0, 255, 255, 0.02) 1px, transparent 1px, transparent 2px) !important;
+  pointer-events: none !important;
+  border-radius: 0 !important;
+}
+
+[data-theme="tron"] button {
+  background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(255, 0, 153, 0.05)) !important;
+  color: #00ffff !important;
+  border: 2px solid #00ffff !important;
+  border-radius: 0 !important;
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.4) !important;
+  font-weight: bold !important;
+  font-family: 'Courier New', monospace !important;
+  letter-spacing: 1px !important;
+}
+
+[data-theme="tron"] button:hover {
+  border-color: #ff0099 !important;
+  box-shadow: 0 0 20px #00ffff, 0 0 30px #ff0099 !important;
+  background: linear-gradient(135deg, rgba(0, 255, 255, 0.2), rgba(255, 0, 153, 0.1)) !important;
+}
+
+[data-theme="tron"] input,
+[data-theme="tron"] textarea,
+[data-theme="tron"] select {
+  background: rgba(0, 0, 51, 0.8) !important;
+  color: #00ffff !important;
+  border: 2px solid #00ffff !important;
+  border-radius: 0 !important;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.3) !important;
+  font-family: 'Courier New', monospace !important;
+  caret-color: #ff0099 !important;
+}
+
+[data-theme="tron"] .auth-logo-text {
+  color: #00ffff !important;
+  font-family: 'Courier New', monospace !important;
+  text-shadow: 0 0 20px #00ffff, 0 0 40px rgba(0, 255, 255, 0.5) !important;
+  animation: tronGlow 2s ease-in-out infinite !important;
+  letter-spacing: 4px !important;
   font-weight: bold !important;
 }
 
-[data-theme="glitch"] button:hover {
-  animation: glitchShake 0.1s infinite !important;
+@keyframes tronBg {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
 }
 
-[data-theme="glitch"] input,
-[data-theme="glitch"] textarea,
-[data-theme="glitch"] select {
-  background: #1a001a !important;
-  color: #ff00ff !important;
-  border: 2px solid #ff00ff !important;
-  box-shadow: -1px 0 5px #00ffff, 1px 0 5px #ff00ff !important;
-  caret-color: #00ffff !important;
-}
-
-[data-theme="glitch"] .auth-logo-text {
-  color: #ff00ff !important;
-  text-shadow: -3px 0 #00ffff, 3px 0 #ff00ff, 0 0 20px #ff00ff !important;
-  animation: glitchShift 0.3s infinite !important;
-  letter-spacing: 3px !important;
-}
-
-@keyframes glitchText {
-  0%, 100% { transform: translate(0); }
-  20% { transform: translate(-2px, 2px); }
-  40% { transform: translate(-2px, -2px); }
-  60% { transform: translate(2px, 2px); }
-  80% { transform: translate(2px, -2px); }
-}
-
-@keyframes glitchShake {
-  0%, 100% { transform: translateX(0); }
-  50% { transform: translateX(-3px); }
-}
-
-@keyframes glitchShift {
-  0%, 100% { text-shadow: -3px 0 #00ffff, 3px 0 #ff00ff, 0 0 20px #ff00ff; }
-  50% { text-shadow: -3px 0 #ff00ff, 3px 0 #00ffff, 0 0 20px #00ffff; }
-}
-
-@keyframes glitchBg {
-  0%, 100% { background: #000; }
-  50% { background: #0a0a0a; }
+@keyframes tronGlow {
+  0%, 100% { 
+    text-shadow: 0 0 20px #00ffff, 0 0 40px rgba(0, 255, 255, 0.5);
+    color: #00ffff;
+  }
+  50% { 
+    text-shadow: 0 0 30px #00ffff, 0 0 50px rgba(0, 255, 255, 0.7), 0 0 20px #ff0099;
+    color: #00ffff;
+  }
 }
 
 /* ===== ARCADE THEME ===== */
